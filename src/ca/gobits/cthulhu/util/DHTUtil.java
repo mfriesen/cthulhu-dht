@@ -9,6 +9,9 @@ import java.security.NoSuchAlgorithmException;
  */
 public final class DHTUtil {
 
+    /** length of node_id. */
+    public static final int NODE_ID_LENGTH = 160;
+
     /**
      * private constructor.
      */

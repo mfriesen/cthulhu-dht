@@ -83,4 +83,11 @@ public class DHTBucket {
     public final void setRight(final DHTBucket bucket) {
         this.right = bucket;
     }
+
+    /**
+     * @return Collection<DHTNode>
+     */
+    public final Collection<DHTNode> getNodes() {
+        return nodes;
+    }
 }

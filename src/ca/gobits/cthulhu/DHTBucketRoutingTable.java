@@ -1,7 +1,10 @@
 package ca.gobits.cthulhu;
 
+import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.Collection;
+
+import ca.gobits.cthulhu.util.DHTUtil;
 
 /**
  * Implementation of DHT Bucket Routing Table.
@@ -18,7 +21,9 @@ public class DHTBucketRoutingTable implements DHTRoutingTable {
      * constructor.
      */
     public DHTBucketRoutingTable() {
-        this.root = new DHTBucket(new BigInteger("0"), new BigInteger("0"));
+        BigInteger max = new BigDecimal(Math.pow(2, DHTUtil.NODE_ID_LENGTH))
+            .toBigInteger();
+        this.root = new DHTBucket(BigInteger.ZERO, max);
     }
 
     @Override
@@ -29,5 +34,12 @@ public class DHTBucketRoutingTable implements DHTRoutingTable {
     @Override
     public final Collection<DHTNode> findClosestNodes(final BigInteger nodeId) {
         return null;
+    }
+
+    /**
+     * @return DHTBucket
+     */
+    public final DHTBucket getRoot() {
+        return root;
     }
 }
