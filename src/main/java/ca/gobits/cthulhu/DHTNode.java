@@ -18,17 +18,21 @@ package ca.gobits.cthulhu;
 
 import java.math.BigInteger;
 
+import org.apache.commons.lang3.builder.EqualsBuilder;
+import org.apache.commons.lang3.builder.HashCodeBuilder;
+import org.apache.commons.lang3.builder.ToStringBuilder;
+
 /**
  * DHTNode - holder for information about a DHT Node.
  */
 public class DHTNode {
 
     /** Node identifier. */
-    private BigInteger id;
+    private final BigInteger id;
     /** Node IP address. */
-    private String host;
+    private final String host;
     /** Node listening port. */
-    private int port;
+    private final int port;
 
     /**
      * constructor.
@@ -62,5 +66,45 @@ public class DHTNode {
      */
     public final int getPort() {
         return port;
+    }
+
+    @Override
+    public final String toString() {
+        ToStringBuilder builder = new ToStringBuilder(this);
+        builder.append("id", id);
+        builder.append("host", host);
+        builder.append("port", port);
+        return builder.toString();
+    }
+
+    @Override
+    public final int hashCode() {
+        return new HashCodeBuilder()
+            .append(id)
+            .append(host)
+            .append(port)
+            .toHashCode();
+    }
+
+    @Override
+    public final boolean equals(final Object obj) {
+        if (obj == null) {
+            return false;
+        }
+
+        if (obj == this) {
+            return true;
+        }
+
+        if (!(obj instanceof DHTNode)) {
+            return false;
+        }
+
+        DHTNode rhs = (DHTNode) obj;
+        return new EqualsBuilder()
+            .append(id, rhs.id)
+            .append(host, rhs.host)
+            .append(port, rhs.port)
+            .isEquals();
     }
 }

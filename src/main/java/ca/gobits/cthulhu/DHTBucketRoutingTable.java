@@ -19,6 +19,8 @@ package ca.gobits.cthulhu;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.Collection;
+import java.util.Collections;
+import java.util.HashSet;
 
 import ca.gobits.cthulhu.util.DHTUtil;
 
@@ -31,7 +33,13 @@ import ca.gobits.cthulhu.util.DHTUtil;
 public class DHTBucketRoutingTable implements DHTRoutingTable {
 
     /** root node of the routing table. */
-    private DHTBucket root;
+    private final DHTBucket root;
+
+    /** Maximum number of nodes Routing Table holds. */
+    public static final int MAX_NUMBER_OF_NODES = 10000000;
+
+    /** Total number of nodes. */
+    private int nodeCount = 0;
 
     /**
      * constructor.
@@ -43,13 +51,123 @@ public class DHTBucketRoutingTable implements DHTRoutingTable {
     }
 
     @Override
-    public final void addNode(final DHTNode node) {
-        this.root.addNode(node);
+    public final synchronized void addNode(final DHTNode node) {
+
+        if (nodeCount <= MAX_NUMBER_OF_NODES) {
+
+            DHTBucket bucket = findBucket(this.root, node);
+
+            if (bucket.addNode(node)) {
+                nodeCount++;
+
+                if (bucket.isFull()) {
+                    splitBucket(bucket);
+                }
+            }
+        }
+    }
+
+    /**
+     * Splits a bucket into left/right bucket.
+     * @param bucket - bucket to be split
+     */
+    private void splitBucket(final DHTBucket bucket) {
+
+        if (bucket.isFull()) {
+
+            BigInteger half = bucket.getMax().subtract(bucket.getMin())
+                    .divide(new BigInteger("2"));
+
+            DHTBucket left = new DHTBucket(bucket.getMin(),
+                    bucket.getMin().add(half));
+
+            DHTBucket right = new DHTBucket(
+                    left.getMax().add(new BigInteger("1"))
+                    , bucket.getMax());
+
+            for (DHTNode node : bucket.getNodes()) {
+
+                if (left.isWithinBucket(node)) {
+                    left.addNode(node);
+                } else {
+                    right.addNode(node);
+                }
+            }
+
+            if (!left.isEmpty() && !right.isEmpty()) {
+                bucket.setLeft(left);
+                bucket.setRight(right);
+                bucket.setNodes(null);
+
+                splitBucket(left);
+                splitBucket(right);
+            } else {
+                // TODO keep the closest nodes
+            }
+        }
+    }
+
+    /**
+     * Traverses Routing Tree and find bucket to add node to.
+     * @param bucket - starting bucket
+     * @param node - node to add
+     * @return DHTBucket
+     */
+    private DHTBucket findBucket(final DHTBucket bucket, final DHTNode node) {
+
+        DHTBucket retBucket = null;
+
+        if (bucket != null && bucket.isWithinBucket(node)) {
+
+            if (bucket.getLeft() == null && bucket.getRight() == null) {
+                retBucket = bucket;
+            } else {
+                DHTBucket leftBucket = findBucket(bucket.getLeft(), node);
+                DHTBucket rightBucket = findBucket(bucket.getRight(), node);
+
+                retBucket = leftBucket != null ? leftBucket : rightBucket;
+            }
+        }
+
+        return retBucket;
     }
 
     @Override
     public final Collection<DHTNode> findClosestNodes(final BigInteger nodeId) {
-        return null;
+        return findClosestNodes(this.root, nodeId);
+    }
+
+    /**
+     * Find the closest node.
+     * @param bucket - bucket to search
+     * @param nodeId - node id to find
+     * @return Collection<DHTNode>
+     */
+    private Collection<DHTNode> findClosestNodes(final DHTBucket bucket,
+            final BigInteger nodeId) {
+
+        Collection<DHTNode> nodes = Collections.emptySet();
+
+        if (bucket != null && bucket.isWithinBucket(nodeId)) {
+
+            if (bucket.getLeft() == null && bucket.getRight() == null) {
+                nodes = new HashSet<DHTNode>(bucket.getNodes());
+            } else {
+
+                nodes = findClosestNodes(bucket.getLeft(), nodeId);
+
+                Collection<DHTNode> rightNodes = findClosestNodes(
+                        bucket.getRight(), nodeId);
+
+                if (nodes.size() < DHTBucket.BUCKET_MAX) {
+                    nodes.addAll(rightNodes);
+                }
+
+                // TODO truncate list to closest DHTBucket.BUCKET_MAX
+            }
+        }
+
+        return nodes;
     }
 
     /**
@@ -57,5 +175,12 @@ public class DHTBucketRoutingTable implements DHTRoutingTable {
      */
     public final DHTBucket getRoot() {
         return root;
+    }
+
+    /**
+     * @return int
+     */
+    public final int getNodeCount() {
+        return nodeCount;
     }
 }

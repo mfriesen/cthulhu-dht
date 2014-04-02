@@ -30,7 +30,7 @@ import ca.gobits.cthulhu.util.DHTUtil;
 public class DHTUtilTest {
 
     /**
-     * testSha101.
+     * testSha101().
      * @throws Exception -
      */
     @Test
@@ -44,6 +44,23 @@ public class DHTUtilTest {
         // then
         assertEquals(new BigInteger(
                 "206627792091191212784374861007573277743147468436"), result);
+    }
+
+    /**
+     * testSha102().
+     * @throws Exception -
+     */
+    @Test
+    public final void testSha102() throws Exception {
+        // given
+        String s = "10";
+
+        // when
+        BigInteger result = DHTUtil.sha1(s);
+
+        // then
+        assertEquals(new BigInteger(
+                "1015251884445938691528948434323377243417585813477"), result);
     }
 
     /**

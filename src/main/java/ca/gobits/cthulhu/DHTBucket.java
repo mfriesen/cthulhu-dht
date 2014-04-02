@@ -25,10 +25,13 @@ import java.util.HashSet;
  */
 public class DHTBucket {
 
+    /** Maximum number of items allowed in the bucket. */
+    public static final int BUCKET_MAX = 8;
+
     /** minimum value of bucket. */
-    private BigInteger min;
+    private final BigInteger min;
     /** maximum value of bucket. */
-    private BigInteger max;
+    private final BigInteger max;
     /** bucket of lower values. */
     private DHTBucket left = null;
     /** bucket of higher values. */
@@ -49,11 +52,37 @@ public class DHTBucket {
     }
 
     /**
-     * @param node
-     *            to be added
+     * @return boolean
      */
-    public final void addNode(final DHTNode node) {
-        this.nodes.add(node);
+    public final boolean isFull() {
+        return this.nodes.size() > BUCKET_MAX;
+    }
+
+    /**
+     * Determines whether a node is between the min/max values of the bucket.
+     * @param node -
+     * @return boolean
+     */
+    public final boolean isWithinBucket(final DHTNode node) {
+        return isWithinBucket(node.getId());
+    }
+
+    /**
+     * Determines whether a node is between the min/max values of the bucket.
+     * @param nodeId - NodeId to compare
+     * @return boolean
+     */
+    public final boolean isWithinBucket(final BigInteger nodeId) {
+        return getMin().compareTo(nodeId) <= 0
+                && getMax().compareTo(nodeId) >= 0;
+    }
+
+    /**
+     * @param node to be added
+     * @return boolean
+     */
+    public final boolean addNode(final DHTNode node) {
+        return this.nodes.add(node);
     }
 
     /**
@@ -105,5 +134,19 @@ public class DHTBucket {
      */
     public final Collection<DHTNode> getNodes() {
         return nodes;
+    }
+
+    /**
+     * @param list - list of nodes
+     */
+    public final void setNodes(final Collection<DHTNode> list) {
+        this.nodes = list;
+    }
+
+    /**
+     * @return boolean
+     */
+    public final boolean isEmpty() {
+        return this.nodes.isEmpty();
     }
 }

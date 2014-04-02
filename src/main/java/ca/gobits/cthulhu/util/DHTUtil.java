@@ -49,15 +49,17 @@ public final class DHTUtil {
     /**
      * Calculates the node_id.
      *
-     * @param salt -
+     * @param salt - SHA1 salt string
      * @return BigInteger
-     * @throws NoSuchAlgorithmException -
      */
-    public static BigInteger sha1(final String salt)
-            throws NoSuchAlgorithmException {
+    public static BigInteger sha1(final String salt) {
 
-        MessageDigest md = MessageDigest.getInstance("SHA-1");
-        byte[] bytes = md.digest(salt.getBytes());
-        return new BigInteger(bytes);
+        try {
+            MessageDigest md = MessageDigest.getInstance("SHA-1");
+            byte[] bytes = md.digest(salt.getBytes());
+            return new BigInteger(1, bytes);
+        } catch (NoSuchAlgorithmException e) {
+            throw new RuntimeException(e);
+        }
     }
 }
