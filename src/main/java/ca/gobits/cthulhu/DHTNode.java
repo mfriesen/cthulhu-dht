@@ -33,6 +33,8 @@ public class DHTNode {
     private final String host;
     /** Node listening port. */
     private final int port;
+    /** cached hashCode value. */
+    private final int hashCode;
 
     /**
      * constructor.
@@ -45,6 +47,12 @@ public class DHTNode {
         this.id = nodeId;
         this.host = nodeHost;
         this.port = nodePort;
+
+        this.hashCode = new HashCodeBuilder()
+        .append(id)
+        .append(host)
+        .append(port)
+        .toHashCode();
     }
 
     /**
@@ -79,11 +87,7 @@ public class DHTNode {
 
     @Override
     public final int hashCode() {
-        return new HashCodeBuilder()
-            .append(id)
-            .append(host)
-            .append(port)
-            .toHashCode();
+        return this.hashCode;
     }
 
     @Override

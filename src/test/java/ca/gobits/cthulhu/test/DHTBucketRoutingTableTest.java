@@ -47,7 +47,7 @@ public class DHTBucketRoutingTableTest {
         DHTBucket result = routingTable.getRoot();
 
         // then
-        assertEquals(0, result.getNodes().size());
+        assertEquals(0, result.getNodeCount());
         assertEquals(BigInteger.ZERO, result.getMin());
         assertEquals(new BigInteger(
                 "1461501637330902918203684832716283019655932542976"),
@@ -71,8 +71,8 @@ public class DHTBucketRoutingTableTest {
         // then
         assertEquals(1, routingTable.getNodeCount());
         DHTBucket root = routingTable.getRoot();
-        assertEquals(1, root.getNodes().size());
-        assertEquals(node, root.getNodes().iterator().next());
+        assertEquals(1, root.getNodeCount());
+        assertEquals(node, root.getNodes()[0]);
         assertNull(root.getLeft());
         assertNull(root.getRight());
     }
@@ -85,9 +85,9 @@ public class DHTBucketRoutingTableTest {
 //        // given
 //        int nodeCount = DHTBucketRoutingTable.MAX_NUMBER_OF_NODES + 1;
 //        DHTBucketRoutingTable routingTable = new DHTBucketRoutingTable();
-//
+//System.out.println ("BLEH " + nodeCount);
 //        // when
-//        for (int i = 0; i < nodeCount; i++) {
+//        for (int i = 1; i < nodeCount; i++) {
 //            DHTNode node = new DHTNode(new BigInteger("" + i), null, 0);
 //            routingTable.addNode(node);
 //            if (i % 1000 == 0) {
@@ -116,8 +116,8 @@ public class DHTBucketRoutingTableTest {
         // then
         assertEquals(1, routingTable.getNodeCount());
         DHTBucket root = routingTable.getRoot();
-        assertEquals(1, root.getNodes().size());
-        assertEquals(node, root.getNodes().iterator().next());
+        assertEquals(1, root.getNodeCount());
+        assertEquals(node, root.getNodes()[0]);
         assertNull(root.getLeft());
         assertNull(root.getRight());
     }
@@ -133,13 +133,13 @@ public class DHTBucketRoutingTableTest {
         DHTNode node = new DHTNode(DHTUtil.sha1("10"), null, 0);
 
         // when
-        for (int i = 0; i <= DHTBucket.BUCKET_MAX; i++) {
+        for (int i = 0; i < DHTBucket.BUCKET_MAX; i++) {
             node = new DHTNode(DHTUtil.sha1("" + (nodeStartId + i)), null, 0);
             routingTable.addNode(node);
         }
 
         // then
-        assertEquals(9, routingTable.getNodeCount());
+        assertEquals(8, routingTable.getNodeCount());
         DHTBucket root = routingTable.getRoot();
         assertNotNull(root.getLeft());
         assertNotNull(root.getRight());
@@ -150,13 +150,13 @@ public class DHTBucketRoutingTableTest {
                 root.getMax().toString());
 
         DHTBucket left = root.getLeft();
-        assertEquals(2, left.getNodes().size());
+        assertEquals(1, left.getNodeCount());
         assertEquals("0", left.getMin().toString());
         assertEquals("730750818665451459101842416358141509827966271488",
                 left.getMax().toString());
 
         DHTBucket right = root.getRight();
-        assertEquals(7, right.getNodes().size());
+        assertEquals(7, right.getNodeCount());
         assertEquals("730750818665451459101842416358141509827966271489",
                 right.getMin().toString());
         assertEquals("1461501637330902918203684832716283019655932542976",

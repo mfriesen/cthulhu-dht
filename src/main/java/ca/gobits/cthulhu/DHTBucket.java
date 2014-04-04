@@ -17,8 +17,7 @@
 package ca.gobits.cthulhu;
 
 import java.math.BigInteger;
-import java.util.Collection;
-import java.util.HashSet;
+import java.util.Arrays;
 
 /**
  * DHTBucket: holder of DHTNodes.
@@ -32,12 +31,14 @@ public class DHTBucket {
     private final BigInteger min;
     /** maximum value of bucket. */
     private final BigInteger max;
+    /** number of nodes in bucket. */
+    private int nodeCount = 0;
     /** bucket of lower values. */
     private DHTBucket left = null;
     /** bucket of higher values. */
     private DHTBucket right = null;
     /** list of nodes. */
-    private Collection<DHTNode> nodes;
+    private DHTNode[] nodes;
 
     /**
      * constructor.
@@ -48,14 +49,16 @@ public class DHTBucket {
     public DHTBucket(final BigInteger minValue, final BigInteger maxValue) {
         this.min = minValue;
         this.max = maxValue;
-        this.nodes = new HashSet<DHTNode>();
+
+        this.nodes = new DHTNode[BUCKET_MAX];
+        Arrays.fill(this.nodes, 0, BUCKET_MAX, null);
     }
 
     /**
      * @return boolean
      */
     public final boolean isFull() {
-        return this.nodes.size() > BUCKET_MAX;
+        return this.nodeCount >= BUCKET_MAX;
     }
 
     /**
@@ -73,16 +76,142 @@ public class DHTBucket {
      * @return boolean
      */
     public final boolean isWithinBucket(final BigInteger nodeId) {
-        return getMin().compareTo(nodeId) <= 0
-                && getMax().compareTo(nodeId) >= 0;
+        return min.compareTo(nodeId) <= 0 && max.compareTo(nodeId) >= 0;
     }
 
     /**
+     * Add node to bucket.
      * @param node to be added
      * @return boolean
      */
-    public final boolean addNode(final DHTNode node) {
-        return this.nodes.add(node);
+    public final synchronized boolean addNode(final DHTNode node) {
+
+        boolean result = insertionSort(node);
+        if (result) {
+            this.nodeCount++;
+        }
+        return result;
+    }
+
+    /**
+     * Delete node from bucket.
+     * @param node to be deleted
+     */
+    public final synchronized void deleteNode(final DHTNode node) {
+
+        int nodePosition = findNode(node);
+
+        if (nodePosition > -1) {
+            System.arraycopy(nodes, nodePosition + 1, nodes,
+                    nodePosition, BUCKET_MAX - nodePosition - 1);
+            this.nodeCount--;
+        }
+    }
+
+    /**
+     * Finds node in bucket.
+     * @param node - node to find
+     * @return int - position of node, -1 if not found
+     */
+    private int findNode(final DHTNode node) {
+        return findNode(node.getId());
+    }
+
+    /**
+     * Find node by id.
+     * @param nodeId to find
+     * @return int
+     */
+    private int findNode(final BigInteger nodeId) {
+        int imin = 0;
+        int imax = this.nodeCount - 1;
+        // continue searching while [imin,imax] is not empty
+        while (imax >= imin) {
+            // calculate the midpoint for roughly equal partition
+            int imid = imin + ((imax - imin) / 2);
+
+            int c = nodes[imid].getId().compareTo(nodeId);
+            if (c == 0) {
+                // key found at index imid
+                return imid;
+                // determine which subarray to search
+            } else if (c < 0) {
+                // change min index to search upper subarray
+                imin = imid + 1;
+            } else {
+                // change max index to search lower subarray
+                imax = imid - 1;
+            }
+        }
+
+        return -1;
+    }
+
+    /**
+     * Finds the maximum value less than max.
+     * @param value - maximum value
+     * @return int
+     */
+    public final int findClosestToMax(final BigInteger value) {
+
+        int imin = 0;
+        int imax = this.nodeCount - 1;
+
+        // continually narrow search until just one element remains
+        while (imin < imax) {
+
+            int imid = imin + ((imax - imin) / 2);
+
+            // code must guarantee the interval is reduced at each iteration
+            assert (imid < imax);
+            // note: 0 <= imin < imax implies imid will always be less than imax
+
+            int c = nodes[imid].getId().compareTo(value);
+
+            if (c < 0) {
+                imin = imid + 1;
+            } else {
+                imax = imid;
+            }
+        }
+
+        return imax == imin ? imin : -1;
+    }
+
+    /**
+     * Performs an insertion sort.
+     * @param node - node to insert
+     * @return boolean insertion was successful
+     */
+    private boolean insertionSort(final DHTNode node) {
+
+        boolean inserted = false;
+
+        for (int i = 0; i < BUCKET_MAX; i++) {
+
+            DHTNode n = nodes[i];
+
+            if (n == null) {
+                nodes[i] = node;
+                inserted = true;
+                break;
+            }
+
+            int c = node.getId().compareTo(n.getId());
+            if (c <= 0) {
+
+                if (c < 0) {
+                    System.arraycopy(nodes, i, nodes,
+                            i + 1, BUCKET_MAX - i - 1);
+                    nodes[i] = node;
+                    inserted = true;
+                }
+
+                break;
+            }
+        }
+
+        return inserted;
     }
 
     /**
@@ -130,16 +259,16 @@ public class DHTBucket {
     }
 
     /**
-     * @return Collection<DHTNode>
+     * @return DHTNode[]
      */
-    public final Collection<DHTNode> getNodes() {
+    public final DHTNode[] getNodes() {
         return nodes;
     }
 
     /**
      * @param list - list of nodes
      */
-    public final void setNodes(final Collection<DHTNode> list) {
+    public final void setNodes(final DHTNode[] list) {
         this.nodes = list;
     }
 
@@ -147,6 +276,20 @@ public class DHTBucket {
      * @return boolean
      */
     public final boolean isEmpty() {
-        return this.nodes.isEmpty();
+        return this.nodeCount == 0;
+    }
+
+    /**
+     * @return int - number of nodes
+     */
+    public final int getNodeCount() {
+        return nodeCount;
+    }
+
+    /**
+     * @param count - set number of nodes
+     */
+    public final void setNodeCount(final int count) {
+        this.nodeCount = count;
     }
 }

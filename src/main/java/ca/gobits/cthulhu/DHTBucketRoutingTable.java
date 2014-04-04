@@ -20,7 +20,6 @@ import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.HashSet;
 
 import ca.gobits.cthulhu.util.DHTUtil;
 
@@ -36,7 +35,7 @@ public class DHTBucketRoutingTable implements DHTRoutingTable {
     private final DHTBucket root;
 
     /** Maximum number of nodes Routing Table holds. */
-    public static final int MAX_NUMBER_OF_NODES = 10000000;
+    public static final int MAX_NUMBER_OF_NODES = 1000000;
 
     /** Total number of nodes. */
     private int nodeCount = 0;
@@ -78,6 +77,17 @@ public class DHTBucketRoutingTable implements DHTRoutingTable {
             BigInteger half = bucket.getMax().subtract(bucket.getMin())
                     .divide(new BigInteger("2"));
 
+            int position = bucket.findClosestToMax(half);
+
+            DHTNode[] nodes = bucket.getNodes();
+
+            DHTNode[] leftNodes = new DHTNode[DHTBucket.BUCKET_MAX];
+            System.arraycopy(nodes, 0, leftNodes, 0, position);
+
+            DHTNode[] rightNodes = new DHTNode[DHTBucket.BUCKET_MAX];
+            System.arraycopy(nodes, position,
+                    rightNodes, 0, DHTBucket.BUCKET_MAX - position);
+
             DHTBucket left = new DHTBucket(bucket.getMin(),
                     bucket.getMin().add(half));
 
@@ -85,25 +95,11 @@ public class DHTBucketRoutingTable implements DHTRoutingTable {
                     left.getMax().add(new BigInteger("1"))
                     , bucket.getMax());
 
-            for (DHTNode node : bucket.getNodes()) {
-
-                if (left.isWithinBucket(node)) {
-                    left.addNode(node);
-                } else {
-                    right.addNode(node);
-                }
-            }
-
-            if (!left.isEmpty() && !right.isEmpty()) {
-                bucket.setLeft(left);
-                bucket.setRight(right);
-                bucket.setNodes(null);
-
-                splitBucket(left);
-                splitBucket(right);
-            } else {
-                // TODO keep the closest nodes
-            }
+            bucket.setLeft(left);
+            left.setNodeCount(position);
+            bucket.setRight(right);
+            right.setNodeCount(DHTBucket.BUCKET_MAX - position);
+            bucket.setNodes(null);
         }
     }
 
@@ -148,24 +144,24 @@ public class DHTBucketRoutingTable implements DHTRoutingTable {
 
         Collection<DHTNode> nodes = Collections.emptySet();
 
-        if (bucket != null && bucket.isWithinBucket(nodeId)) {
+//        if (bucket != null && bucket.isWithinBucket(nodeId)) {
 
-            if (bucket.getLeft() == null && bucket.getRight() == null) {
-                nodes = new HashSet<DHTNode>(bucket.getNodes());
-            } else {
-
-                nodes = findClosestNodes(bucket.getLeft(), nodeId);
-
-                Collection<DHTNode> rightNodes = findClosestNodes(
-                        bucket.getRight(), nodeId);
-
-                if (nodes.size() < DHTBucket.BUCKET_MAX) {
-                    nodes.addAll(rightNodes);
-                }
-
-                // TODO truncate list to closest DHTBucket.BUCKET_MAX
-            }
-        }
+//            if (bucket.getLeft() == null && bucket.getRight() == null) {
+//                nodes = new HashSet<DHTNode>(bucket.getNodes());
+//            } else {
+//
+//                nodes = findClosestNodes(bucket.getLeft(), nodeId);
+//
+//                Collection<DHTNode> rightNodes = findClosestNodes(
+//                        bucket.getRight(), nodeId);
+//
+//                if (nodes.size() < DHTBucket.BUCKET_MAX) {
+//                    nodes.addAll(rightNodes);
+//                }
+//
+//                // TODO truncate list to closest DHTBucket.BUCKET_MAX
+//            }
+//        }
 
         return nodes;
     }
