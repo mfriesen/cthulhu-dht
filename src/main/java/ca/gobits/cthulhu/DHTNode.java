@@ -25,7 +25,7 @@ import org.apache.commons.lang3.builder.ToStringBuilder;
 /**
  * DHTNode - holder for information about a DHT Node.
  */
-public class DHTNode {
+public final class DHTNode implements Comparable<DHTNode> {
 
     /** Node identifier. */
     private final BigInteger id;
@@ -58,26 +58,26 @@ public class DHTNode {
     /**
      * @return BigInteger
      */
-    public final BigInteger getId() {
+    public BigInteger getId() {
         return id;
     }
 
     /**
      * @return String
      */
-    public final String getHost() {
+    public String getHost() {
         return host;
     }
 
     /**
      * @return int
      */
-    public final int getPort() {
+    public int getPort() {
         return port;
     }
 
     @Override
-    public final String toString() {
+    public String toString() {
         ToStringBuilder builder = new ToStringBuilder(this);
         builder.append("id", id);
         builder.append("host", host);
@@ -86,12 +86,12 @@ public class DHTNode {
     }
 
     @Override
-    public final int hashCode() {
+    public int hashCode() {
         return this.hashCode;
     }
 
     @Override
-    public final boolean equals(final Object obj) {
+    public boolean equals(final Object obj) {
         if (obj == null) {
             return false;
         }
@@ -110,5 +110,10 @@ public class DHTNode {
             .append(host, rhs.host)
             .append(port, rhs.port)
             .isEquals();
+    }
+
+    @Override
+    public int compareTo(final DHTNode o) {
+        return getId().compareTo(o.getId());
     }
 }

@@ -17,50 +17,41 @@
 package ca.gobits.cthulhu.test;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
 
-import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.util.List;
 
 import org.junit.Test;
 
-import ca.gobits.cthulhu.DHTBucket;
 import ca.gobits.cthulhu.DHTBucketRoutingTable;
 import ca.gobits.cthulhu.DHTNode;
-import ca.gobits.cthulhu.util.DHTUtil;
+import ca.gobits.cthulhu.util.SortedList;
 
 /**
  * DHTBucketRoutingTableTest.
  */
-public class DHTBucketRoutingTableTest {
+public final class DHTBucketRoutingTableTest {
 
     /**
      * testConstructor01().
      */
     @Test
-    public final void testConstructor01() {
+    public void testConstructor01() {
         // given
         DHTBucketRoutingTable routingTable = new DHTBucketRoutingTable();
 
         // when
-        DHTBucket result = routingTable.getRoot();
+        SortedList<DHTNode> result = routingTable.getNodes();
 
         // then
-        assertEquals(0, result.getNodeCount());
-        assertEquals(BigInteger.ZERO, result.getMin());
-        assertEquals(new BigInteger(
-                "1461501637330902918203684832716283019655932542976"),
-                result.getMax());
-        assertNull(result.getLeft());
-        assertNull(result.getRight());
+        assertEquals(0, result.size());
     }
 
     /**
      * testAddNode01() - test add nodes to bucket.
      */
     @Test
-    public final void testAddNode01() {
+    public void testAddNode01() {
         // given
         DHTBucketRoutingTable routingTable = new DHTBucketRoutingTable();
         DHTNode node = new DHTNode(new BigInteger("1"), null, 0);
@@ -69,42 +60,37 @@ public class DHTBucketRoutingTableTest {
         routingTable.addNode(node);
 
         // then
-        assertEquals(1, routingTable.getNodeCount());
-        DHTBucket root = routingTable.getRoot();
-        assertEquals(1, root.getNodeCount());
-        assertEquals(node, root.getNodes()[0]);
-        assertNull(root.getLeft());
-        assertNull(root.getRight());
+        assertEquals(1, routingTable.getTotalNodeCount());
+        SortedList<DHTNode> root = routingTable.getNodes();
+        assertEquals(1, root.size());
+        assertEquals(node, root.get(0));
     }
 
-//    /**
-//     * testAddNode02() - test Max Number of nodes.
-//     */
-//    @Test
-//    public final void testAddNode02() {
-//        // given
-//        int nodeCount = DHTBucketRoutingTable.MAX_NUMBER_OF_NODES + 1;
-//        DHTBucketRoutingTable routingTable = new DHTBucketRoutingTable();
-//System.out.println ("BLEH " + nodeCount);
-//        // when
-//        for (int i = 1; i < nodeCount; i++) {
-//            DHTNode node = new DHTNode(new BigInteger("" + i), null, 0);
-//            routingTable.addNode(node);
-//            if (i % 1000 == 0) {
-//                System.out.println("I : " + i);
-//            }
-//        }
-//
-//        // then
-//        assertEquals(DHTBucketRoutingTable.MAX_NUMBER_OF_NODES,
-//                routingTable.getNodeCount());
-//    }
+    /**
+     * testAddNode02() - test Max Number of nodes.
+     */
+    @Test
+    public void testAddNode02() {
+        // given
+        int nodeCount = DHTBucketRoutingTable.MAX_NUMBER_OF_NODES + 1;
+        DHTBucketRoutingTable routingTable = new DHTBucketRoutingTable();
+
+        // when
+        for (int i = 0; i < nodeCount; i++) {
+            DHTNode node = new DHTNode(new BigInteger("" + i), null, 0);
+            routingTable.addNode(node);
+        }
+
+        // then
+        assertEquals(DHTBucketRoutingTable.MAX_NUMBER_OF_NODES,
+                routingTable.getTotalNodeCount());
+    }
 
     /**
      * testAddNode03() - test adding duplicate nodes.
      */
     @Test
-    public final void testAddNode03() {
+    public void testAddNode03() {
         // given
         DHTBucketRoutingTable routingTable = new DHTBucketRoutingTable();
         DHTNode node = new DHTNode(new BigInteger("1"), null, 0);
@@ -114,77 +100,127 @@ public class DHTBucketRoutingTableTest {
         routingTable.addNode(node);
 
         // then
-        assertEquals(1, routingTable.getNodeCount());
-        DHTBucket root = routingTable.getRoot();
-        assertEquals(1, root.getNodeCount());
-        assertEquals(node, root.getNodes()[0]);
-        assertNull(root.getLeft());
-        assertNull(root.getRight());
+        assertEquals(1, routingTable.getTotalNodeCount());
+        SortedList<DHTNode> root = routingTable.getNodes();
+        assertEquals(1, root.size());
+        assertEquals(node, root.get(0));
     }
 
     /**
-     * testAddNode04() - test spliting buckets.
+     * testFindClosestNodes01() - find the closests 8 nodes.
      */
     @Test
-    public final void testAddNode04() {
+    public void testFindClosestNodes01() {
         // given
-        int nodeStartId = 50;
-        DHTBucketRoutingTable routingTable = new DHTBucketRoutingTable();
-        DHTNode node = new DHTNode(DHTUtil.sha1("10"), null, 0);
+        DHTNode n = new DHTNode(new BigInteger("11"), null, 0);
+        DHTBucketRoutingTable rt = new DHTBucketRoutingTable();
 
-        // when
-        for (int i = 0; i < DHTBucket.BUCKET_MAX; i++) {
-            node = new DHTNode(DHTUtil.sha1("" + (nodeStartId + i)), null, 0);
-            routingTable.addNode(node);
+        for (int i = 0; i < 40; i = i + 2) {
+            DHTNode node = new DHTNode(new BigInteger("" + i), null, 0);
+            rt.addNode(node);
         }
 
+        // when
+        List<DHTNode> results = rt.findClosestNodes(n);
+
         // then
-        assertEquals(8, routingTable.getNodeCount());
-        DHTBucket root = routingTable.getRoot();
-        assertNotNull(root.getLeft());
-        assertNotNull(root.getRight());
-
-        assertNull(root.getNodes());
-        assertEquals("0", root.getMin().toString());
-        assertEquals("1461501637330902918203684832716283019655932542976",
-                root.getMax().toString());
-
-        DHTBucket left = root.getLeft();
-        assertEquals(1, left.getNodeCount());
-        assertEquals("0", left.getMin().toString());
-        assertEquals("730750818665451459101842416358141509827966271488",
-                left.getMax().toString());
-
-        DHTBucket right = root.getRight();
-        assertEquals(7, right.getNodeCount());
-        assertEquals("730750818665451459101842416358141509827966271489",
-                right.getMin().toString());
-        assertEquals("1461501637330902918203684832716283019655932542976",
-                right.getMax().toString());
+        assertEquals(8, results.size());
+        assertEquals("4", results.get(0).getId().toString());
+        assertEquals("6", results.get(1).getId().toString());
+        assertEquals("8", results.get(2).getId().toString());
+        assertEquals("10", results.get(3).getId().toString());
+        assertEquals("12", results.get(4).getId().toString());
+        assertEquals("14", results.get(5).getId().toString());
+        assertEquals("16", results.get(6).getId().toString());
+        assertEquals("18", results.get(7).getId().toString());
     }
 
     /**
-     * testAddNode04() - test if split is all on one side, don't split.
+     * testFindClosestNodes02() - find the closests 8 nodes at beginning
+     * of list.
      */
     @Test
-    public final void testAddNode05() {
+    public void testFindClosestNodes02() {
         // given
-        BigInteger max = new BigDecimal(Math.pow(2, DHTUtil.NODE_ID_LENGTH))
-            .toBigInteger();
+        DHTNode n = new DHTNode(new BigInteger("1"), null, 0);
+        DHTBucketRoutingTable rt = new DHTBucketRoutingTable();
 
-        DHTBucketRoutingTable routingTable = new DHTBucketRoutingTable();
-
-        // when
-        for (int i = 0; i <= DHTBucket.BUCKET_MAX; i++) {
-            BigInteger id = max.subtract(new BigInteger("" + i));
-            DHTNode node = new DHTNode(id, null, 0);
-            routingTable.addNode(node);
+        for (int i = 0; i < 40; i = i + 2) {
+            DHTNode node = new DHTNode(new BigInteger("" + i), null, 0);
+            rt.addNode(node);
         }
 
+        // when
+        List<DHTNode> results = rt.findClosestNodes(n);
+
         // then
-        assertEquals(DHTBucket.BUCKET_MAX, routingTable.getNodeCount());
-        DHTBucket root = routingTable.getRoot();
-        assertNull(root.getLeft());
-        assertNull(root.getRight());
+        assertEquals(8, results.size());
+        assertEquals("0", results.get(0).getId().toString());
+        assertEquals("2", results.get(1).getId().toString());
+        assertEquals("4", results.get(2).getId().toString());
+        assertEquals("6", results.get(3).getId().toString());
+        assertEquals("8", results.get(4).getId().toString());
+        assertEquals("10", results.get(5).getId().toString());
+        assertEquals("12", results.get(6).getId().toString());
+        assertEquals("14", results.get(7).getId().toString());
+    }
+
+    /**
+     * testFindClosestNodes03() - find the closests 8 nodes at end
+     * of list.
+     */
+    @Test
+    public void testFindClosestNodes03() {
+        // given
+        DHTNode n = new DHTNode(new BigInteger("41"), null, 0);
+        DHTBucketRoutingTable rt = new DHTBucketRoutingTable();
+
+        for (int i = 0; i < 40; i = i + 2) {
+            DHTNode node = new DHTNode(new BigInteger("" + i), null, 0);
+            rt.addNode(node);
+        }
+
+        // when
+        List<DHTNode> results = rt.findClosestNodes(n);
+
+        // then
+        assertEquals(8, results.size());
+        assertEquals("24", results.get(0).getId().toString());
+        assertEquals("26", results.get(1).getId().toString());
+        assertEquals("28", results.get(2).getId().toString());
+        assertEquals("30", results.get(3).getId().toString());
+        assertEquals("32", results.get(4).getId().toString());
+        assertEquals("34", results.get(5).getId().toString());
+        assertEquals("36", results.get(6).getId().toString());
+        assertEquals("38", results.get(7).getId().toString());
+    }
+
+    /**
+     * testFindClosestNodes04() - find the exact match node.
+     */
+    @Test
+    public void testFindClosestNodes04() {
+        // given
+        DHTNode n = new DHTNode(new BigInteger("22"), null, 0);
+        DHTBucketRoutingTable rt = new DHTBucketRoutingTable();
+
+        for (int i = 0; i < 40; i = i + 2) {
+            DHTNode node = new DHTNode(new BigInteger("" + i), null, 0);
+            rt.addNode(node);
+        }
+
+        // when
+        List<DHTNode> results = rt.findClosestNodes(n);
+
+        // then
+        assertEquals(8, results.size());
+        assertEquals("14", results.get(0).getId().toString());
+        assertEquals("16", results.get(1).getId().toString());
+        assertEquals("18", results.get(2).getId().toString());
+        assertEquals("20", results.get(3).getId().toString());
+        assertEquals("22", results.get(4).getId().toString());
+        assertEquals("24", results.get(5).getId().toString());
+        assertEquals("26", results.get(6).getId().toString());
+        assertEquals("28", results.get(7).getId().toString());
     }
 }

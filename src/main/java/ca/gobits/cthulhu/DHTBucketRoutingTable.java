@@ -16,12 +16,9 @@
 
 package ca.gobits.cthulhu;
 
-import java.math.BigDecimal;
-import java.math.BigInteger;
-import java.util.Collection;
-import java.util.Collections;
+import java.util.List;
 
-import ca.gobits.cthulhu.util.DHTUtil;
+import ca.gobits.cthulhu.util.SortedList;
 
 /**
  * Implementation of DHT Bucket Routing Table.
@@ -29,154 +26,67 @@ import ca.gobits.cthulhu.util.DHTUtil;
  * http://www.bittorrent.org/beps/bep_0005.html
  *
  */
-public class DHTBucketRoutingTable implements DHTRoutingTable {
+public final class DHTBucketRoutingTable implements DHTRoutingTable {
 
     /** root node of the routing table. */
-    private final DHTBucket root;
+    private final SortedList<DHTNode> nodes;
 
     /** Maximum number of nodes Routing Table holds. */
     public static final int MAX_NUMBER_OF_NODES = 1000000;
-
-    /** Total number of nodes. */
-    private int nodeCount = 0;
 
     /**
      * constructor.
      */
     public DHTBucketRoutingTable() {
-        BigInteger max = new BigDecimal(Math.pow(2, DHTUtil.NODE_ID_LENGTH))
-            .toBigInteger();
-        this.root = new DHTBucket(BigInteger.ZERO, max);
+        this.nodes = new SortedList<DHTNode>(false);
     }
 
     @Override
-    public final synchronized void addNode(final DHTNode node) {
+    public synchronized void addNode(final DHTNode node) {
 
-        if (nodeCount <= MAX_NUMBER_OF_NODES) {
+        if (nodes.size() < MAX_NUMBER_OF_NODES) {
+            nodes.add(node);
+        }
+    }
 
-            DHTBucket bucket = findBucket(this.root, node);
+    @Override
+    public List<DHTNode> findClosestNodes(final DHTNode node) {
 
-            if (bucket.addNode(node)) {
-                nodeCount++;
+        int index = nodes.indexOf(node);
 
-                if (bucket.isFull()) {
-                    splitBucket(bucket);
-                }
+        int fromIndex = index > 0 ? index - 1 : 0;
+        int toIndex = index < getTotalNodeCount() ? index + 1
+                : getTotalNodeCount();
+        int count = toIndex - fromIndex;
+
+        while (count < MAX_NODE_SEARCH_COUNT) {
+
+            if (fromIndex > 0) {
+                fromIndex--;
+                count++;
+            }
+
+            if (count < MAX_NODE_SEARCH_COUNT
+                    && toIndex < getTotalNodeCount()) {
+                toIndex++;
+                count++;
             }
         }
+
+        return nodes.subList(fromIndex, toIndex);
     }
 
     /**
-     * Splits a bucket into left/right bucket.
-     * @param bucket - bucket to be split
-     */
-    private void splitBucket(final DHTBucket bucket) {
-
-        if (bucket.isFull()) {
-
-            BigInteger half = bucket.getMax().subtract(bucket.getMin())
-                    .divide(new BigInteger("2"));
-
-            int position = bucket.findClosestToMax(half);
-
-            DHTNode[] nodes = bucket.getNodes();
-
-            DHTNode[] leftNodes = new DHTNode[DHTBucket.BUCKET_MAX];
-            System.arraycopy(nodes, 0, leftNodes, 0, position);
-
-            DHTNode[] rightNodes = new DHTNode[DHTBucket.BUCKET_MAX];
-            System.arraycopy(nodes, position,
-                    rightNodes, 0, DHTBucket.BUCKET_MAX - position);
-
-            DHTBucket left = new DHTBucket(bucket.getMin(),
-                    bucket.getMin().add(half));
-
-            DHTBucket right = new DHTBucket(
-                    left.getMax().add(new BigInteger("1"))
-                    , bucket.getMax());
-
-            bucket.setLeft(left);
-            left.setNodeCount(position);
-            bucket.setRight(right);
-            right.setNodeCount(DHTBucket.BUCKET_MAX - position);
-            bucket.setNodes(null);
-        }
-    }
-
-    /**
-     * Traverses Routing Tree and find bucket to add node to.
-     * @param bucket - starting bucket
-     * @param node - node to add
      * @return DHTBucket
      */
-    private DHTBucket findBucket(final DHTBucket bucket, final DHTNode node) {
-
-        DHTBucket retBucket = null;
-
-        if (bucket != null && bucket.isWithinBucket(node)) {
-
-            if (bucket.getLeft() == null && bucket.getRight() == null) {
-                retBucket = bucket;
-            } else {
-                DHTBucket leftBucket = findBucket(bucket.getLeft(), node);
-                DHTBucket rightBucket = findBucket(bucket.getRight(), node);
-
-                retBucket = leftBucket != null ? leftBucket : rightBucket;
-            }
-        }
-
-        return retBucket;
-    }
-
-    @Override
-    public final Collection<DHTNode> findClosestNodes(final BigInteger nodeId) {
-        return findClosestNodes(this.root, nodeId);
-    }
-
-    /**
-     * Find the closest node.
-     * @param bucket - bucket to search
-     * @param nodeId - node id to find
-     * @return Collection<DHTNode>
-     */
-    private Collection<DHTNode> findClosestNodes(final DHTBucket bucket,
-            final BigInteger nodeId) {
-
-        Collection<DHTNode> nodes = Collections.emptySet();
-
-//        if (bucket != null && bucket.isWithinBucket(nodeId)) {
-
-//            if (bucket.getLeft() == null && bucket.getRight() == null) {
-//                nodes = new HashSet<DHTNode>(bucket.getNodes());
-//            } else {
-//
-//                nodes = findClosestNodes(bucket.getLeft(), nodeId);
-//
-//                Collection<DHTNode> rightNodes = findClosestNodes(
-//                        bucket.getRight(), nodeId);
-//
-//                if (nodes.size() < DHTBucket.BUCKET_MAX) {
-//                    nodes.addAll(rightNodes);
-//                }
-//
-//                // TODO truncate list to closest DHTBucket.BUCKET_MAX
-//            }
-//        }
-
+    public SortedList<DHTNode> getNodes() {
         return nodes;
-    }
-
-    /**
-     * @return DHTBucket
-     */
-    public final DHTBucket getRoot() {
-        return root;
     }
 
     /**
      * @return int
      */
-    public final int getNodeCount() {
-        return nodeCount;
+    public int getTotalNodeCount() {
+        return nodes.size();
     }
 }

@@ -16,14 +16,16 @@
 
 package ca.gobits.cthulhu;
 
-import java.math.BigInteger;
-import java.util.Collection;
+import java.util.List;
 
 /**
  * DHTRoutingTable interface.
  *
  */
 public interface DHTRoutingTable {
+
+    /** Max Number of nodes returned on search. */
+    int MAX_NODE_SEARCH_COUNT = 8;
 
     /**
      * Adds node to RoutingTable.
@@ -33,8 +35,8 @@ public interface DHTRoutingTable {
 
     /**
      * Find the closest X nodes to the nodeId.
-     * @param nodeId to find
-     * @return Collection<DHTNode>
+     * @param node to find closest nodes to.
+     * @return List<DHTNode>
      */
-    Collection<DHTNode> findClosestNodes(BigInteger nodeId);
+    List<DHTNode> findClosestNodes(DHTNode node);
 }
