@@ -27,14 +27,14 @@ import ca.gobits.cthulhu.util.DHTUtil;
 /**
  * DHTUtil Testcases.
  */
-public class DHTUtilTest {
+public final class DHTUtilTest {
 
     /**
      * testSha101().
      * @throws Exception -
      */
     @Test
-    public final void testSha101() throws Exception {
+    public void testSha101() throws Exception {
         // given
         String s = "sample string";
 
@@ -51,7 +51,7 @@ public class DHTUtilTest {
      * @throws Exception -
      */
     @Test
-    public final void testSha102() throws Exception {
+    public void testSha102() throws Exception {
         // given
         String s = "10";
 
@@ -67,7 +67,7 @@ public class DHTUtilTest {
      * testDistance01.
      */
     @Test
-    public final void testDistance01() {
+    public void testDistance01() {
         // given
         BigInteger id0 = new BigInteger("102"); // 1010
         BigInteger id1 = new BigInteger("183"); // 0010
@@ -85,7 +85,7 @@ public class DHTUtilTest {
      * @throws Exception -
      */
     @Test
-    public final void testDistance02() throws Exception {
+    public void testDistance02() throws Exception {
         // given
         BigInteger id0 = DHTUtil.sha1("salt");
         BigInteger id1 = DHTUtil.sha1("salt");
@@ -103,7 +103,7 @@ public class DHTUtilTest {
      * @throws Exception -
      */
     @Test
-    public final void testDistance03() throws Exception {
+    public void testDistance03() throws Exception {
         // given
         BigInteger id0 = new BigInteger("10");
         BigInteger id1 = new BigInteger("51");
