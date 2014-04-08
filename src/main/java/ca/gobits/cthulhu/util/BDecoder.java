@@ -1,3 +1,19 @@
+//
+// Copyright 2013 Mike Friesen
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+// http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+//
+
 package ca.gobits.cthulhu.util;
 
 import java.util.ArrayList;
@@ -40,66 +56,101 @@ public class BDecoder {
      */
     public final Object decode(final char[] chars) {
 
+        Object obj = null;
         char type = chars[position];
 
-        // i , d, l
-        // map
+        if (type == 'd') { // map
 
-        if (type == 'd') {
+            obj = buildMap(chars);
 
-            position++;
+        } else if (type == 'l') { // list
 
-            Map<Object, Object> map = new HashMap<Object, Object>();
+            obj = buildList(chars);
 
-            while (chars[position] != 'e') {
+        } else if (type == 'i') {  // long
 
-                int len = getInt(chars);
-                position++; // throw away ':'
+            obj = buildLong(chars);
 
-                String key = getString(chars, len);
+        } else {  // string
 
-                map.put(key, decode(chars));
-            }
+            obj = buildString(chars);
+        }
 
-            position++;
+        return obj;
+    }
 
-            return map;
+    /**
+     * Builds String.
+     * @param chars character array
+     * @return String
+     */
+    private String buildString(final char[] chars) {
+        int len = getInt(chars);
+        position++; // throw away ':'
+        return getString(chars, len);
+    }
 
-        } else if (type == 'l') {
+    /**
+     * Builds List<Object> Object.
+     * @param chars character array
+     * @return List<Object>
+     */
+    private List<Object> buildList(final char[] chars) {
+        position++;
+        List<Object> list = new ArrayList<Object>();
 
-            position++;
-            List<Object> list = new ArrayList<Object>();
+        while (chars[position] != 'e') {
+            list.add(decode(chars));
+        }
 
-            while (chars[position] != 'e') {
-                list.add(decode(chars));
-//                position++;
-            }
+        position++;
 
-            position++;
+        return list;
+    }
 
-            return list;
+    /**
+     * Builds Map<Object, Object> Object.
+     * @param chars character array
+     * @return Map<Object, Object>
+     */
+    private Map<Object, Object> buildMap(final char[] chars) {
 
-        } else if (type == 'i') {
+        position++;
 
-            position++;
-            StringBuilder sb = new StringBuilder();
+        Map<Object, Object> map = new HashMap<Object, Object>();
 
-            while (chars[position] != 'e') {
-                sb.append(chars[position]);
-                position++;
-            }
+        while (chars[position] != 'e') {
 
-            position++;
-
-            return Long.valueOf(sb.toString());
-
-        } else {
             int len = getInt(chars);
             position++; // throw away ':'
 
             String key = getString(chars, len);
-            return key;
+
+            map.put(key, decode(chars));
         }
+
+        position++;
+
+        return map;
+    }
+
+    /**
+     * Builds Long Object.
+     * @param chars character array
+     * @return Long
+     */
+    private Long buildLong(final char[] chars) {
+        position++;
+        StringBuilder sb = new StringBuilder();
+
+        while (chars[position] != 'e') {
+            sb.append(chars[position]);
+            position++;
+        }
+
+        position++;
+
+        return Long.valueOf(sb.toString());
     }
 
     /**
