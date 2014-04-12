@@ -16,6 +16,7 @@ import io.netty.handler.logging.LoggingHandler;
 import io.netty.util.CharsetUtil;
 
 import java.io.PrintWriter;
+import java.math.BigInteger;
 
 import org.apache.commons.cli.BasicParser;
 import org.apache.commons.cli.CommandLine;
@@ -25,6 +26,8 @@ import org.apache.commons.cli.MissingArgumentException;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.UnrecognizedOptionException;
 import org.apache.log4j.Logger;
+
+import ca.gobits.dht.DHTIdentifier;
 
 /**
  * DHTServer implementation.
@@ -41,13 +44,17 @@ public class DHTServer {
     private static final Logger LOGGER = Logger.getLogger(DHTServer.class);
 
     /** Default Port. */
-    private static final int DEFAULT_PORT = 8080;
+    public static final int DEFAULT_PORT = 8080;
 
     /** SO_BACKLOG. */
     private static final int SO_BACKLOG = 100;
 
     /** Port to run server on. */
     private final int port;
+
+    /** DHT Node Id. */
+    static final BigInteger NODE_ID = DHTIdentifier.sha1(DHTServer.class
+            .getName());
 
     /** Main Event Loop. */
     private final EventLoopGroup bossGroup = new NioEventLoopGroup(1);

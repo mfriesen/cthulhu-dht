@@ -6,9 +6,7 @@ import static org.junit.Assert.assertTrue;
 import java.io.ByteArrayOutputStream;
 import java.net.Socket;
 
-import org.easymock.EasyMockRunner;
 import org.junit.Test;
-import org.junit.runner.RunWith;
 import org.springframework.test.util.ReflectionTestUtils;
 
 import ca.gobits.cthulhu.DHTServer;
@@ -17,7 +15,6 @@ import ca.gobits.cthulhu.DHTServer;
  * DHTServer UnitTests.
  *
  */
-@RunWith(EasyMockRunner.class)
 public final class DHTServerUnitTest {
 
     /**

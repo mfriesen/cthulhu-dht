@@ -1,0 +1,72 @@
+package ca.gobits.cthulhu.integration.test;
+
+import static org.junit.Assert.assertEquals;
+
+import java.io.BufferedReader;
+import java.io.DataOutputStream;
+import java.io.InputStreamReader;
+import java.net.Socket;
+
+import org.junit.BeforeClass;
+import org.junit.Test;
+
+import ca.gobits.cthulhu.DHTServer;
+
+/**
+ * DHTServer UnitTests.
+ *
+ */
+public final class DHTServerIntegrationTest {
+
+    /**
+     *beforeClass().
+     * @throws Exception  Exception
+     */
+    @BeforeClass
+    public static void beforeClass() throws Exception {
+        Thread thread = runDHTServerInNewThread(new String[]{});
+        thread.start();
+        Thread.sleep(1000);
+    }
+
+    /**
+     * testPing01().
+     * @throws Exception  Exception
+     */
+    @Test
+    public void testPing01() throws Exception {
+
+        // given
+        String dat = "d1:ad2:id20:abcdefghij0123456789e1:q4:ping1:t2:aa1:y1:qe";
+
+        // when
+        Socket client = new Socket("127.0.0.1", DHTServer.DEFAULT_PORT);
+
+        DataOutputStream out = new DataOutputStream(client.getOutputStream());
+        BufferedReader in = new BufferedReader(
+                new InputStreamReader(client.getInputStream()));
+
+        out.writeBytes(dat + '\n');
+        String res = in.readLine();
+
+        // then
+        assertEquals(
+             "d1:rd2:idi310621511824886381757839297574719857423974415617ee1"
+             + ":t2:aa1:y1:re", res);
+        client.close();
+    }
+
+    /**
+     * Runs DHT Server in new thread.
+     * @param args argument parameters.
+     * @return Runnable
+     */
+    private static Thread runDHTServerInNewThread(final String[] args) {
+        return new Thread(new Runnable() {
+            @Override
+            public void run() {
+                DHTServer.main(args);
+            }
+        });
+    }
+}
