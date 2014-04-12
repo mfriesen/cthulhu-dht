@@ -14,7 +14,7 @@
 // limitations under the License.
 //
 
-package ca.gobits.cthulhu.util;
+package ca.gobits.dht;
 
 import java.util.ArrayList;
 import java.util.HashMap;

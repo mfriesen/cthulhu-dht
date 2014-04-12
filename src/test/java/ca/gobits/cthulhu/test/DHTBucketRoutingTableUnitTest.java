@@ -25,12 +25,12 @@ import org.junit.Test;
 
 import ca.gobits.cthulhu.DHTBucketRoutingTable;
 import ca.gobits.cthulhu.DHTNode;
-import ca.gobits.cthulhu.util.SortedList;
+import ca.gobits.cthulhu.SortedList;
 
 /**
  * DHTBucketRoutingTableTest.
  */
-public final class DHTBucketRoutingTableTest {
+public final class DHTBucketRoutingTableUnitTest {
 
     /**
      * testConstructor01().

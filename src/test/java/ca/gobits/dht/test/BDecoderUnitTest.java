@@ -14,7 +14,7 @@
 // limitations under the License.
 //
 
-package ca.gobits.cthulhu.util.test;
+package ca.gobits.dht.test;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
@@ -24,13 +24,13 @@ import java.util.Map;
 
 import org.junit.Test;
 
-import ca.gobits.cthulhu.util.BDecoder;
+import ca.gobits.dht.BDecoder;
 
 
 /**
  * Unit Test cases for BEncoder.
  */
-public final class BDecoderTest {
+public final class BDecoderUnitTest {
 
     /**
      * testDecoder01() test decoding a map.

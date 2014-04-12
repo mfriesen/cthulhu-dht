@@ -13,7 +13,7 @@ import ca.gobits.cthulhu.DHTNode;
 /**
  * Unit Test for DHTNode.
  */
-public final class DHTNodeTest {
+public final class DHTNodeUnitTest {
 
     /**
      * testConstructor01().

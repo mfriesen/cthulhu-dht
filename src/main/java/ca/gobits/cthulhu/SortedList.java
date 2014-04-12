@@ -1,4 +1,4 @@
-package ca.gobits.cthulhu.util;
+package ca.gobits.cthulhu;
 
 import java.util.ArrayList;
 import java.util.Collection;

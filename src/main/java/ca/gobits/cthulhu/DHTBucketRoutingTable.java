@@ -18,8 +18,6 @@ package ca.gobits.cthulhu;
 
 import java.util.List;
 
-import ca.gobits.cthulhu.util.SortedList;
-
 /**
  * Implementation of DHT Bucket Routing Table.
  *

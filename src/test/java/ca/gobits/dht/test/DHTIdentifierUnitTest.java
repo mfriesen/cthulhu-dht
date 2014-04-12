@@ -14,7 +14,7 @@
 // limitations under the License.
 //
 
-package ca.gobits.cthulhu.util.test;
+package ca.gobits.dht.test;
 
 import static org.junit.Assert.assertEquals;
 
@@ -22,12 +22,13 @@ import java.math.BigInteger;
 
 import org.junit.Test;
 
-import ca.gobits.cthulhu.util.DHTUtil;
+import ca.gobits.dht.DHTDistance;
+import ca.gobits.dht.DHTIdentifier;
 
 /**
  * DHTUtil Testcases.
  */
-public final class DHTUtilTest {
+public final class DHTIdentifierUnitTest {
 
     /**
      * testSha101().
@@ -39,7 +40,7 @@ public final class DHTUtilTest {
         String s = "sample string";
 
         // when
-        BigInteger result = DHTUtil.sha1(s);
+        BigInteger result = DHTIdentifier.sha1(s);
 
         // then
         assertEquals(new BigInteger(
@@ -56,7 +57,7 @@ public final class DHTUtilTest {
         String s = "10";
 
         // when
-        BigInteger result = DHTUtil.sha1(s);
+        BigInteger result = DHTIdentifier.sha1(s);
 
         // then
         assertEquals(new BigInteger(
@@ -74,7 +75,7 @@ public final class DHTUtilTest {
         BigInteger expect = new BigInteger("209"); // 1000
 
         // when
-        BigInteger result = DHTUtil.distance(id0, id1);
+        BigInteger result = DHTDistance.xor(id0, id1);
 
         // then
         assertEquals(expect, result);
@@ -87,12 +88,12 @@ public final class DHTUtilTest {
     @Test
     public void testDistance02() throws Exception {
         // given
-        BigInteger id0 = DHTUtil.sha1("salt");
-        BigInteger id1 = DHTUtil.sha1("salt");
+        BigInteger id0 = DHTIdentifier.sha1("salt");
+        BigInteger id1 = DHTIdentifier.sha1("salt");
         BigInteger expect = new BigInteger("0");
 
         // when
-        BigInteger result = DHTUtil.distance(id0, id1);
+        BigInteger result = DHTDistance.xor(id0, id1);
 
         // then
         assertEquals(expect, result);
@@ -110,7 +111,7 @@ public final class DHTUtilTest {
         BigInteger expect = new BigInteger("57");
 
         // when
-        BigInteger result = DHTUtil.distance(id0, id1);
+        BigInteger result = DHTDistance.xor(id0, id1);
 
         // then
         assertEquals(expect, result);

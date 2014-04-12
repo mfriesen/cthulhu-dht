@@ -1,4 +1,4 @@
-package ca.gobits.cthulhu.util.test;
+package ca.gobits.cthulhu.test;
 
 import static org.junit.Assert.assertEquals;
 
@@ -8,12 +8,12 @@ import java.util.List;
 
 import org.junit.Test;
 
-import ca.gobits.cthulhu.util.SortedList;
+import ca.gobits.cthulhu.SortedList;
 
 /**
  * Unit test for SortedList.class.
  */
-public final class SortedListTest {
+public final class SortedListUnitTest {
 
     /**
      * testConstructor01().
