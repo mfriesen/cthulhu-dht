@@ -57,6 +57,81 @@ public final class DHTServerIntegrationTest {
     }
 
     /**
+     * testUnknownMethod01().
+     * @throws Exception  Exception
+     */
+    @Test
+    public void testUnknownMethod01() throws Exception {
+
+        // given
+        String dat = "d1:ad2:id20:abcdefghij0123456789e1:q4:pink1:t2:aa1:y1:qe";
+
+        // when
+        Socket client = new Socket("127.0.0.1", DHTServer.DEFAULT_PORT);
+
+        DataOutputStream out = new DataOutputStream(client.getOutputStream());
+        BufferedReader in = new BufferedReader(
+                new InputStreamReader(client.getInputStream()));
+
+        out.writeBytes(dat + '\n');
+        String res = in.readLine();
+
+        // then
+        assertEquals("d1:rd3:20414:Method Unknowne1:t2:aa1:y1:ee", res);
+        client.close();
+    }
+
+    /**
+     * testServerError01().
+     * @throws Exception  Exception
+     */
+    @Test
+    public void testServerError01() throws Exception {
+
+        // given
+        String dat = "adsadadsa";
+
+        // when
+        Socket client = new Socket("127.0.0.1", DHTServer.DEFAULT_PORT);
+
+        DataOutputStream out = new DataOutputStream(client.getOutputStream());
+        BufferedReader in = new BufferedReader(
+                new InputStreamReader(client.getInputStream()));
+
+        out.writeBytes(dat + '\n');
+        String res = in.readLine();
+
+        // then
+        assertEquals("d1:rd3:20212:Server Errore1:y1:ee", res);
+        client.close();
+    }
+
+    /**
+     * testMissingQParameter01().
+     * @throws Exception  Exception
+     */
+    @Test
+    public void testMissingQParameter01() throws Exception {
+
+        // given
+        String dat = "d1:ad2:id20:abcdefghij0123456789e1:t2:aa1:y1:qe";
+
+        // when
+        Socket client = new Socket("127.0.0.1", DHTServer.DEFAULT_PORT);
+
+        DataOutputStream out = new DataOutputStream(client.getOutputStream());
+        BufferedReader in = new BufferedReader(
+                new InputStreamReader(client.getInputStream()));
+
+        out.writeBytes(dat + '\n');
+        String res = in.readLine();
+
+        // then
+        assertEquals("d1:rd3:20212:Server Errore1:t2:aa1:y1:ee", res);
+        client.close();
+    }
+
+    /**
      * Runs DHT Server in new thread.
      * @param args argument parameters.
      * @return Runnable
