@@ -18,11 +18,9 @@ package ca.gobits.dht.test;
 
 import static org.junit.Assert.assertEquals;
 
-import java.math.BigInteger;
-
+import org.apache.commons.codec.binary.Hex;
 import org.junit.Test;
 
-import ca.gobits.dht.DHTDistance;
 import ca.gobits.dht.DHTIdentifier;
 
 /**
@@ -32,7 +30,9 @@ public final class DHTIdentifierUnitTest {
 
     /**
      * testSha101().
-     * @throws Exception -
+     *
+     * @throws Exception
+     *             Exception
      */
     @Test
     public void testSha101() throws Exception {
@@ -40,16 +40,18 @@ public final class DHTIdentifierUnitTest {
         String s = "sample string";
 
         // when
-        BigInteger result = DHTIdentifier.sha1(s);
+        byte[] result = DHTIdentifier.sha1(s);
 
         // then
-        assertEquals(new BigInteger(
-                "206627792091191212784374861007573277743147468436"), result);
+        assertEquals("243182b9d0b085c06005bf773212854bf7cd4694",
+                Hex.encodeHexString(result));
     }
 
     /**
      * testSha102().
-     * @throws Exception -
+     *
+     * @throws Exception
+     *             Exception
      */
     @Test
     public void testSha102() throws Exception {
@@ -57,63 +59,10 @@ public final class DHTIdentifierUnitTest {
         String s = "10";
 
         // when
-        BigInteger result = DHTIdentifier.sha1(s);
+        byte[] result = DHTIdentifier.sha1(s);
 
         // then
-        assertEquals(new BigInteger(
-                "1015251884445938691528948434323377243417585813477"), result);
-    }
-
-    /**
-     * testDistance01.
-     */
-    @Test
-    public void testDistance01() {
-        // given
-        BigInteger id0 = new BigInteger("102"); // 1010
-        BigInteger id1 = new BigInteger("183"); // 0010
-        BigInteger expect = new BigInteger("209"); // 1000
-
-        // when
-        BigInteger result = DHTDistance.xor(id0, id1);
-
-        // then
-        assertEquals(expect, result);
-    }
-
-    /**
-     * testDistance02.
-     * @throws Exception -
-     */
-    @Test
-    public void testDistance02() throws Exception {
-        // given
-        BigInteger id0 = DHTIdentifier.sha1("salt");
-        BigInteger id1 = DHTIdentifier.sha1("salt");
-        BigInteger expect = new BigInteger("0");
-
-        // when
-        BigInteger result = DHTDistance.xor(id0, id1);
-
-        // then
-        assertEquals(expect, result);
-    }
-
-    /**
-     * testDistance03.
-     * @throws Exception -
-     */
-    @Test
-    public void testDistance03() throws Exception {
-        // given
-        BigInteger id0 = new BigInteger("10");
-        BigInteger id1 = new BigInteger("51");
-        BigInteger expect = new BigInteger("57");
-
-        // when
-        BigInteger result = DHTDistance.xor(id0, id1);
-
-        // then
-        assertEquals(expect, result);
+        assertEquals("b1d5781111d84f7b3fe45a0852e59758cd7a87e5",
+                Hex.encodeHexString(result));
     }
 }

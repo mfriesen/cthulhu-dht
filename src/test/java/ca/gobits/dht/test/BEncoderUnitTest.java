@@ -18,6 +18,7 @@ package ca.gobits.dht.test;
 
 import static org.junit.Assert.assertEquals;
 
+import java.io.ByteArrayOutputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -35,9 +36,10 @@ public final class BEncoderUnitTest {
 
     /**
      * testBencoding01() test encoding a map.
+     * @throws Exception   Exception
      */
     @Test
-    public void testBencoding01() {
+    public void testBencoding01() throws Exception {
         // given
         Map<Object, Object> map = new HashMap<Object, Object>();
         map.put("t", "aa");
@@ -48,19 +50,21 @@ public final class BEncoderUnitTest {
         map.put("a", map2);
 
         // when
-        String result = BEncoder.bencoding(map);
+        ByteArrayOutputStream result = BEncoder.bencoding(map);
 
         // then
         assertEquals(
                 "d1:ad2:id20:abcdefghij0123456789e1:q4:ping1:t2:aa1:y1:qe",
-                result);
+                result.toString());
+        result.close();
     }
 
     /**
      * testBencoding02() test encoding a map / numbers.
+     * @throws Exception   Exception
      */
     @Test
-    public void testBencoding02() {
+    public void testBencoding02() throws Exception {
         // given
         Map<Object, Object> map = new HashMap<Object, Object>();
         map.put("t", "aa");
@@ -74,37 +78,43 @@ public final class BEncoderUnitTest {
         map2.put("token", "aoeusnth");
 
         // when
-        String result = BEncoder.bencoding(map);
+        ByteArrayOutputStream result = BEncoder.bencoding(map);
 
         // then
         assertEquals(
           "d1:ad2:id20:abcdefghij01234567899:info_hash20:mnopqrstuvwxyz1234564:"
           + "porti6881e5:token8:aoeusnthe1:q13:announce_peer1:t2:aa1:y1:qe",
-          result);
+          result.toString());
+
+        result.close();
     }
 
     /**
      * testBencoding03() test encoding a Collection.
+     * @throws Exception   Exception
      */
     @Test
-    public void testBencoding03() {
+    public void testBencoding03() throws Exception {
         // given
         List<Object> list = new ArrayList<>();
         list.add("s");
         list.add(Long.valueOf(12));
 
         // when
-        String result = BEncoder.bencoding(list);
+        ByteArrayOutputStream result = BEncoder.bencoding(list);
 
         // then
-        assertEquals("l1:si12ee", result);
+        assertEquals("l1:si12ee", result.toString());
+
+        result.close();
     }
 
     /**
      * testBencoding04() test encoding a Collection inside a map.
+     * @throws Exception   Exception
      */
     @Test
-    public void testBencoding04() {
+    public void testBencoding04() throws Exception {
         // given
         Map<Object, Object> map = new HashMap<Object, Object>();
         List<Object> list = new ArrayList<>();
@@ -113,10 +123,11 @@ public final class BEncoderUnitTest {
         map.put("t", list);
 
         // when
-        String result = BEncoder.bencoding(map);
+        ByteArrayOutputStream result = BEncoder.bencoding(map);
 
         // then
-        assertEquals("d1:tl1:si12eee", result);
+        assertEquals("d1:tl1:si12eee", new String(result.toByteArray()));
+        result.close();
     }
 
     /**
@@ -131,6 +142,31 @@ public final class BEncoderUnitTest {
         BEncoder.bencoding(st);
 
         // then
+    }
 
+    /**
+     * Test encoding byte array.
+     * @throws Exception  Exception
+     */
+    @Test
+    public void testBencoding06() throws Exception {
+        // given
+        byte[] bytes = new byte[] {-15, 14, 40, 33, -69,
+              -66, -91, 39, -22, 2, 32, 3, 82, 49, 59, -64, 89, 68, 81, -112 };
+
+        // when
+        ByteArrayOutputStream result = BEncoder.bencoding(bytes);
+        byte[] resultBytes = result.toByteArray();
+
+        // then
+        assertEquals(3 + bytes.length, resultBytes.length);
+        assertEquals('2', resultBytes[0]);
+        assertEquals('0', resultBytes[1]);
+        assertEquals(':', resultBytes[2]);
+        assertEquals(bytes[0], resultBytes[3]);
+        assertEquals(bytes[1], resultBytes[4]);
+        assertEquals(bytes[2], resultBytes[5]);
+
+        result.close();
     }
 }

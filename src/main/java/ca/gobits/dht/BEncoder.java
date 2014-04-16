@@ -16,6 +16,7 @@
 
 package ca.gobits.dht;
 
+import java.io.ByteArrayOutputStream;
 import java.util.Collection;
 import java.util.Map;
 import java.util.SortedMap;
@@ -39,76 +40,110 @@ public final class BEncoder {
      * @param ob  object to encode
      * @return String
      */
-    @SuppressWarnings("unchecked")
-    public static String bencoding(final Object ob) {
+    public static ByteArrayOutputStream bencoding(final Object ob) {
 
-        String s;
-        if (ob instanceof Map) {
-            s = bencoding((Map<Object, Object>) ob);
+        ByteArrayOutputStream os = new ByteArrayOutputStream();
+        bencoding(ob, os);
+        return os;
+    }
+
+    /**
+     * Encodes an object.
+     * @param ob object to encode
+     * @param os ByteArrayOutputStream to append to
+     */
+    @SuppressWarnings("unchecked")
+    private static void bencoding(final Object ob,
+            final ByteArrayOutputStream os) {
+
+        if (ob instanceof byte[]) {
+            bencoding((byte[]) ob, os);
+
+        } else if (ob instanceof Map) {
+            bencoding((Map<Object, Object>) ob, os);
         } else if (ob instanceof Collection) {
-            s = bencoding((Collection<Object>) ob);
+            bencoding((Collection<Object>) ob, os);
         } else if (ob instanceof Number) {
-            s = bencoding((Number) ob);
+            bencoding((Number) ob, os);
         } else if (ob instanceof String) {
-            s = bencoding((String) ob);
+            bencoding((String) ob, os);
         } else {
             throw new IllegalArgumentException("Unsupported Object: "
                     + ob.getClass().getName());
         }
-
-        return s;
     }
 
     /**
      * B encode an object.
      * @param c  collection of object to encode
-     * @return String
+     * @param os ByteArrayOutputStream to append to
      */
-    public static String bencoding(final Collection<Object> c) {
-        StringBuilder sb = new StringBuilder();
-        sb.append("l");
-        for (Object elem : c) {
-            sb.append(bencoding(elem));
-        }
-        sb.append("e");
+    private static void bencoding(final Collection<Object> c,
+            final ByteArrayOutputStream os) {
 
-        return sb.toString();
+        os.write('l');
+        for (Object elem : c) {
+            bencoding(elem, os);
+        }
+        os.write('e');
     }
 
     /**
      * B encode an object.
      * @param map  map of object to encode
-     * @return String
+     * @param os ByteArrayOutputStream to append to
      */
-    public static String bencoding(final Map<Object, Object> map) {
-        StringBuilder sb = new StringBuilder();
-        sb.append("d");
+    private static void bencoding(final Map<Object, Object> map,
+            final ByteArrayOutputStream os) {
+        os.write('d');
+
         SortedMap<Object, Object> smap = new TreeMap<Object, Object>();
         smap.putAll(map);
 
         for (Map.Entry<Object, Object> e : smap.entrySet()) {
-            sb.append(bencoding(e.getKey()) + bencoding(e.getValue()));
+            bencoding(e.getKey(), os);
+            bencoding(e.getValue(), os);
         }
-        sb.append("e");
-
-        return sb.toString();
+        os.write('e');
     }
 
     /**
      * B encode an object.
      * @param string  string to encode
-     * @return String
+     * @param os ByteArrayOutputStream to append to
      */
-    public static String bencoding(final String string) {
-        return string.length() + ":" + string;
+    private static void bencoding(final String string,
+            final ByteArrayOutputStream os) {
+        bencoding(string.getBytes(), os);
+    }
+
+    /**
+     * Encode a array of bytes.
+     * @param bytes  bytes to encode
+     * @param os ByteArrayOutputStream to append to
+     */
+    private static void bencoding(final byte[] bytes,
+            final ByteArrayOutputStream os) {
+        byte[] len = String.valueOf(bytes.length).getBytes();
+
+        os.write(len, 0, len.length);
+        os.write(':');
+        for (byte b : bytes) {
+            int i = b & Arrays.BYTE_TO_INT;
+            os.write(i);
+        }
     }
 
     /**
      * B encode an object.
      * @param n  Number to encode
-     * @return String
+     * @param os ByteArrayOutputStream to append to
      */
-    public static String bencoding(final Number n) {
-        return "i" + n.toString() + "e";
+    private static void bencoding(final Number n,
+            final ByteArrayOutputStream os) {
+        byte[] bytes = n.toString().getBytes();
+        os.write('i');
+        os.write(bytes, 0, bytes.length);
+        os.write('e');
     }
 }

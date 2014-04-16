@@ -1,6 +1,5 @@
 package ca.gobits.dht;
 
-import java.math.BigInteger;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 
@@ -19,16 +18,18 @@ public final class DHTIdentifier {
      * Calculates the node_id.
      *
      * @param salt  SHA1 salt string
-     * @return BigInteger
+     * @return int[]
      */
-    public static BigInteger sha1(final String salt) {
+    public static byte[] sha1(final String salt) {
 
         try {
             MessageDigest md = MessageDigest.getInstance("SHA-1");
             byte[] bytes = md.digest(salt.getBytes());
-            return new BigInteger(1, bytes);
+            return bytes;
         } catch (NoSuchAlgorithmException e) {
             throw new RuntimeException(e);
         }
     }
+
+
 }

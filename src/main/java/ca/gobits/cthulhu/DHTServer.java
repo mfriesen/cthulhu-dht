@@ -8,15 +8,10 @@ import io.netty.channel.EventLoopGroup;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
-import io.netty.handler.codec.LineBasedFrameDecoder;
-import io.netty.handler.codec.string.StringDecoder;
-import io.netty.handler.codec.string.StringEncoder;
 import io.netty.handler.logging.LogLevel;
 import io.netty.handler.logging.LoggingHandler;
-import io.netty.util.CharsetUtil;
 
 import java.io.PrintWriter;
-import java.math.BigInteger;
 
 import org.apache.commons.cli.BasicParser;
 import org.apache.commons.cli.CommandLine;
@@ -37,23 +32,23 @@ public class DHTServer {
     /** Reference to DHTServer. */
     private static DHTServer server = null;
 
-    /** the maximum length of the decoded frame. */
-    private static final int LINE_BASED_MAX_LENGTH = 8192;
-
     /** DHT Server Logger. */
     private static final Logger LOGGER = Logger.getLogger(DHTServer.class);
 
     /** Default Port. */
     public static final int DEFAULT_PORT = 8080;
 
+    /** SO_KEEPALIVE. */
+    private static final Boolean SO_KEEPALIVE = Boolean.valueOf(true);
+
     /** SO_BACKLOG. */
-    private static final int SO_BACKLOG = 100;
+    private static final int SO_BACKLOG = 128;
 
     /** Port to run server on. */
     private final int port;
 
     /** DHT Node Id. */
-    static final BigInteger NODE_ID = DHTIdentifier.sha1(DHTServer.class
+    static final byte[] NODE_ID = DHTIdentifier.sha1(DHTServer.class
             .getName());
 
     /** Main Event Loop. */
@@ -81,15 +76,18 @@ public class DHTServer {
             b.group(bossGroup, workerGroup)
              .channel(NioServerSocketChannel.class)
              .option(ChannelOption.SO_BACKLOG, Integer.valueOf(SO_BACKLOG))
+             .childOption(ChannelOption.SO_KEEPALIVE, SO_KEEPALIVE)
              .handler(new LoggingHandler(LogLevel.WARN))
              .childHandler(new ChannelInitializer<SocketChannel>() {
                  @Override
                  public void initChannel(final SocketChannel ch)
                          throws Exception {
                      ch.pipeline().addLast(
-                             new StringEncoder(CharsetUtil.UTF_8),
-                             new LineBasedFrameDecoder(LINE_BASED_MAX_LENGTH),
-                             new StringDecoder(CharsetUtil.UTF_8),
+////                             new StringEncoder(CharsetUtil.US_ASCII),
+////                             new ByteArrayEncoder(),
+//                             new LineBasedFrameDecoder(LINE_BASED_MAX_LENGTH),
+//                             new StringDecoder(CharsetUtil.US_ASCII),
+//                             new ByteArrayDecoder(),
                              new DHTProtocolHandler());
                  }
              });

@@ -1,10 +1,13 @@
 package ca.gobits.cthulhu;
 
+import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelFutureListener;
 import io.netty.channel.ChannelHandlerContext;
-import io.netty.channel.SimpleChannelInboundHandler;
+import io.netty.channel.ChannelInboundHandlerAdapter;
+import io.netty.util.ReferenceCountUtil;
 
+import java.io.ByteArrayOutputStream;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -17,23 +20,24 @@ import ca.gobits.dht.BEncoder;
  * DHTProtocolHandler  implementation of the BitTorrent protocol.
  * http://www.bittorrent.org/beps/bep_0005.html
  */
-public class DHTProtocolHandler extends SimpleChannelInboundHandler<String> {
+public final class DHTProtocolHandler extends ChannelInboundHandlerAdapter {
 
     /** DHTProtocolHandler Logger. */
     private static final Logger LOGGER = Logger
             .getLogger(DHTProtocolHandler.class);
 
-    @SuppressWarnings("unchecked")
     @Override
-    public final void channelRead0(final ChannelHandlerContext ctx,
-            final String msg) throws Exception {
+    public void channelRead(final ChannelHandlerContext ctx, final Object msg)
+            throws Exception {
 
         Map<String, Object> response = new HashMap<String, Object>();
 
-        Map<String, Object> map = (Map<String, Object>)
-            new BDecoder().decode(msg);
-
         try {
+            ByteArrayOutputStream os = extractBytes((ByteBuf) msg);
+
+            Map<String, Object> map = extractMap(os);
+            os.close();
+
             String action = (String) map.get("q");
 
             response.put("y", "r");
@@ -46,17 +50,27 @@ public class DHTProtocolHandler extends SimpleChannelInboundHandler<String> {
                 response.put("r", map("204", "Method Unknown"));
             }
 
-        } catch (Exception e) {
-            addServerError(response);
-        }
+          } catch (Exception e) {
+              addServerError(response);
 
-        ChannelFuture cf = ctx.writeAndFlush(BEncoder.bencoding(response));
-        cf.addListener(ChannelFutureListener.CLOSE);
-        ctx.close();
+        } finally {
+
+            ByteArrayOutputStream os = BEncoder.bencoding(response);
+            byte[] bytes = os.toByteArray();
+
+            final ByteBuf time = ctx.alloc().buffer(1024);
+            time.writeBytes(bytes);
+
+            final ChannelFuture f = ctx.writeAndFlush(time);
+            f.addListener(ChannelFutureListener.CLOSE);
+
+            os.close();
+            ReferenceCountUtil.release(msg);
+        }
     }
 
     @Override
-    public final void exceptionCaught(final ChannelHandlerContext ctx,
+    public void exceptionCaught(final ChannelHandlerContext ctx,
             final Throwable cause) throws Exception {
 
         LOGGER.fatal(cause, cause);
@@ -67,6 +81,21 @@ public class DHTProtocolHandler extends SimpleChannelInboundHandler<String> {
         ChannelFuture cf = ctx.writeAndFlush(BEncoder.bencoding(response));
         cf.addListener(ChannelFutureListener.CLOSE);
         ctx.close();
+    }
+
+    /**
+     * Extract bytes from ByteBuf.
+     * @param msg  ByteBuf
+     * @return ByteArrayOutputStream
+     */
+    private ByteArrayOutputStream extractBytes(final ByteBuf msg) {
+        ByteArrayOutputStream os = new ByteArrayOutputStream();
+        ByteBuf in = msg;
+        while (in.isReadable()) {
+            byte b = in.readByte();
+            os.write(b);
+        }
+        return os;
     }
 
     /**
@@ -88,5 +117,18 @@ public class DHTProtocolHandler extends SimpleChannelInboundHandler<String> {
     private void addServerError(final Map<String, Object> map) {
         map.put("y", "e");
         map.put("r", map("202", "Server Error"));
+    }
+
+    /**
+     * Extract Byte Array using BDecoder.
+     *
+     * @param os  ByteArrayOutputStream
+     * @return Map<String, Object>
+     */
+    @SuppressWarnings("unchecked")
+    private Map<String, Object> extractMap(final ByteArrayOutputStream os) {
+        Map<String, Object> map = (Map<String, Object>) new BDecoder()
+                .decode(new String(os.toByteArray()));
+        return map;
     }
 }

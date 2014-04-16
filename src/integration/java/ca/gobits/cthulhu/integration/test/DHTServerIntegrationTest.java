@@ -1,6 +1,7 @@
 package ca.gobits.cthulhu.integration.test;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 import java.io.BufferedReader;
 import java.io.DataOutputStream;
@@ -47,12 +48,12 @@ public final class DHTServerIntegrationTest {
                 new InputStreamReader(client.getInputStream()));
 
         out.writeBytes(dat + '\n');
+
         String res = in.readLine();
 
         // then
-        assertEquals(
-             "d1:rd2:idi310621511824886381757839297574719857423974415617ee1"
-             + ":t2:aa1:y1:re", res);
+        assertTrue(res.startsWith("d1:rd2:id20:6h"));
+        assertTrue(res.endsWith("e1:t2:aa1:y1:re"));
         client.close();
     }
 

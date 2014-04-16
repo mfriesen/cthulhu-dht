@@ -59,6 +59,12 @@
         <artifactId>log4j</artifactId>
         <version>${log4j.version}</version>
     </dependency>    
+<dependency>
+    <groupId>commons-codec</groupId>
+    <artifactId>commons-codec</artifactId>
+    <version>1.9</version>
+</dependency>
+                
     <!-- test-scoped dependencies -->
     <dependency>
       <groupId>junit</groupId>

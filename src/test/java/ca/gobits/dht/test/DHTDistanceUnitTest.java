@@ -18,12 +18,13 @@ package ca.gobits.dht.test;
 
 import static org.junit.Assert.assertEquals;
 
+import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.util.Arrays;
 
 import org.junit.Test;
 
 import ca.gobits.dht.DHTDistance;
-import ca.gobits.dht.DHTIdentifier;
 
 /**
  * DHTDistance UnitTest.
@@ -36,33 +37,35 @@ public final class DHTDistanceUnitTest {
     @Test
     public void testXor01() {
         // given
-        BigInteger id0 = new BigInteger("102"); // 1010
-        BigInteger id1 = new BigInteger("183"); // 0010
-        BigInteger expect = new BigInteger("209"); // 1000
+        BigInteger id0 = new BigInteger("10"); // 1010
+        BigInteger id1 = new BigInteger("2"); // 0010
 
         // when
-        BigInteger result = DHTDistance.xor(id0, id1);
+        BigInteger result = DHTDistance.xor(id0.toByteArray(),
+                id1.toByteArray());
 
         // then
-        assertEquals(expect, result);
+        assertEquals(8, result.intValue());
     }
 
     /**
      * testXor02().
-     * @throws Exception Exception
      */
     @Test
-    public void testXor02() throws Exception {
+    public void testXor02() {
         // given
-        BigInteger id0 = DHTIdentifier.sha1("salt");
-        BigInteger id1 = DHTIdentifier.sha1("salt");
-        BigInteger expect = new BigInteger("0");
+        byte[] id0 = new byte[21];
+        Arrays.fill(id0, 0, 21, (byte) 0);
+        BigDecimal bd = new BigDecimal(Math.pow(2, 160));
+        BigInteger id1 = bd.toBigInteger();
 
         // when
-        BigInteger result = DHTDistance.xor(id0, id1);
+        BigInteger result = DHTDistance.xor(id0,
+                id1.toByteArray());
 
         // then
-        assertEquals(expect, result);
+        assertEquals("1461501637330902918203684832716283019655932542976",
+                result.toString());
     }
 
     /**
@@ -77,7 +80,8 @@ public final class DHTDistanceUnitTest {
         BigInteger expect = new BigInteger("57");
 
         // when
-        BigInteger result = DHTDistance.xor(id0, id1);
+        BigInteger result = DHTDistance.xor(id0.toByteArray(),
+                id1.toByteArray());
 
         // then
         assertEquals(expect, result);
