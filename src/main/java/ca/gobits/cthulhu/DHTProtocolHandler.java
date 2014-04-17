@@ -1,13 +1,13 @@
 package ca.gobits.cthulhu;
 
 import io.netty.buffer.ByteBuf;
-import io.netty.channel.ChannelFuture;
-import io.netty.channel.ChannelFutureListener;
+import io.netty.buffer.Unpooled;
 import io.netty.channel.ChannelHandlerContext;
-import io.netty.channel.ChannelInboundHandlerAdapter;
-import io.netty.util.ReferenceCountUtil;
+import io.netty.channel.SimpleChannelInboundHandler;
+import io.netty.channel.socket.DatagramPacket;
 
 import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -20,23 +20,23 @@ import ca.gobits.dht.BEncoder;
  * DHTProtocolHandler  implementation of the BitTorrent protocol.
  * http://www.bittorrent.org/beps/bep_0005.html
  */
-public final class DHTProtocolHandler extends ChannelInboundHandlerAdapter {
+public final class DHTProtocolHandler extends
+        SimpleChannelInboundHandler<DatagramPacket> {
 
     /** DHTProtocolHandler Logger. */
     private static final Logger LOGGER = Logger
             .getLogger(DHTProtocolHandler.class);
 
     @Override
-    public void channelRead(final ChannelHandlerContext ctx, final Object msg)
+    public void channelRead0(final ChannelHandlerContext ctx,
+            final DatagramPacket packet)
             throws Exception {
 
         Map<String, Object> response = new HashMap<String, Object>();
 
         try {
-            ByteArrayOutputStream os = extractBytes((ByteBuf) msg);
 
-            Map<String, Object> map = extractMap(os);
-            os.close();
+            Map<String, Object> map = bdecode(packet.content());
 
             String action = (String) map.get("q");
 
@@ -50,37 +50,26 @@ public final class DHTProtocolHandler extends ChannelInboundHandlerAdapter {
                 response.put("r", map("204", "Method Unknown"));
             }
 
-          } catch (Exception e) {
-              addServerError(response);
+        } catch (Exception e) {
+
+            LOGGER.fatal(e, e);
+            addServerError(response);
 
         } finally {
 
             ByteArrayOutputStream os = BEncoder.bencoding(response);
             byte[] bytes = os.toByteArray();
-
-            final ByteBuf time = ctx.alloc().buffer(1024);
-            time.writeBytes(bytes);
-
-            final ChannelFuture f = ctx.writeAndFlush(time);
-            f.addListener(ChannelFutureListener.CLOSE);
-
             os.close();
-            ReferenceCountUtil.release(msg);
+
+            ctx.write(new DatagramPacket(
+                    Unpooled.copiedBuffer(bytes), packet.sender()));
         }
     }
 
     @Override
-    public void exceptionCaught(final ChannelHandlerContext ctx,
-            final Throwable cause) throws Exception {
-
-        LOGGER.fatal(cause, cause);
-
-        Map<String, Object> response = new HashMap<String, Object>();
-        addServerError(response);
-
-        ChannelFuture cf = ctx.writeAndFlush(BEncoder.bencoding(response));
-        cf.addListener(ChannelFutureListener.CLOSE);
-        ctx.close();
+    public void channelReadComplete(final ChannelHandlerContext ctx)
+            throws Exception {
+        ctx.flush();
     }
 
     /**
@@ -122,13 +111,18 @@ public final class DHTProtocolHandler extends ChannelInboundHandlerAdapter {
     /**
      * Extract Byte Array using BDecoder.
      *
-     * @param os  ByteArrayOutputStream
+     * @param byteBuf  ByteBuf
      * @return Map<String, Object>
+     * @throws IOException  IOException
      */
     @SuppressWarnings("unchecked")
-    private Map<String, Object> extractMap(final ByteArrayOutputStream os) {
+    private Map<String, Object> bdecode(final ByteBuf byteBuf)
+            throws IOException {
+
+        ByteArrayOutputStream os = extractBytes(byteBuf);
         Map<String, Object> map = (Map<String, Object>) new BDecoder()
                 .decode(new String(os.toByteArray()));
+        os.close();
         return map;
     }
 }

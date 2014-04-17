@@ -4,7 +4,10 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 import java.io.ByteArrayOutputStream;
-import java.net.Socket;
+import java.io.IOException;
+import java.net.DatagramPacket;
+import java.net.DatagramSocket;
+import java.net.InetAddress;
 
 import org.junit.Test;
 import org.springframework.test.util.ReflectionTestUtils;
@@ -16,6 +19,9 @@ import ca.gobits.cthulhu.DHTServer;
  *
  */
 public final class DHTServerUnitTest {
+
+    /** DATA PACKET LENGTH. */
+    private static final int DATA_PACKET_LENGTH = 1024;
 
     /**
      * testMain01() unknown parameter.
@@ -83,9 +89,7 @@ public final class DHTServerUnitTest {
         // then
         Thread.sleep(1000);
 
-        Socket client = new Socket("127.0.0.1", port);
-        assertTrue(client.isConnected());
-        client.close();
+        assertConnectedToServer(port);
 
         DHTServer.shutdown();
     }
@@ -107,11 +111,35 @@ public final class DHTServerUnitTest {
         // then
         Thread.sleep(1000);
 
-        Socket client = new Socket("127.0.0.1", port);
-        assertTrue(client.isConnected());
-        client.close();
+        assertConnectedToServer(port);
 
         DHTServer.shutdown();
+    }
+
+    /**
+     * Assert can connect to server.
+     * @param port Port to Send to
+     * @throws IOException  IOException
+     */
+    private void assertConnectedToServer(final int port) throws IOException {
+
+        byte[] sendData = new byte[DATA_PACKET_LENGTH];
+        byte[] receiveData = new byte[DATA_PACKET_LENGTH];
+
+        sendData = "test msg".getBytes();
+        InetAddress ipAddress = InetAddress.getByName("localhost");
+
+        DatagramSocket clientSocket = new DatagramSocket();
+        DatagramPacket sendPacket = new DatagramPacket(sendData,
+                sendData.length, ipAddress, port);
+        clientSocket.send(sendPacket);
+        DatagramPacket receivePacket = new DatagramPacket(receiveData,
+                receiveData.length);
+        clientSocket.receive(receivePacket);
+
+        String response = new String(receivePacket.getData());
+        assertTrue(response.startsWith("d1:rd3:20212:Server Errore1:y1:ee"));
+        clientSocket.close();
     }
 
     /**

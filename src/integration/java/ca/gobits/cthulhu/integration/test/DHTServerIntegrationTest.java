@@ -3,10 +3,10 @@ package ca.gobits.cthulhu.integration.test;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
-import java.io.BufferedReader;
-import java.io.DataOutputStream;
-import java.io.InputStreamReader;
-import java.net.Socket;
+import java.io.IOException;
+import java.net.DatagramPacket;
+import java.net.DatagramSocket;
+import java.net.InetAddress;
 
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -18,6 +18,9 @@ import ca.gobits.cthulhu.DHTServer;
  *
  */
 public final class DHTServerIntegrationTest {
+
+    /** DATA PACKET LENGTH. */
+    private static final int DATA_PACKET_LENGTH = 1024;
 
     /**
      *beforeClass().
@@ -41,20 +44,12 @@ public final class DHTServerIntegrationTest {
         String dat = "d1:ad2:id20:abcdefghij0123456789e1:q4:ping1:t2:aa1:y1:qe";
 
         // when
-        Socket client = new Socket("127.0.0.1", DHTServer.DEFAULT_PORT);
-
-        DataOutputStream out = new DataOutputStream(client.getOutputStream());
-        BufferedReader in = new BufferedReader(
-                new InputStreamReader(client.getInputStream()));
-
-        out.writeBytes(dat + '\n');
-
-        String res = in.readLine();
+        String result = sendUDPPacket(dat);
 
         // then
-        assertTrue(res.startsWith("d1:rd2:id20:6h"));
-        assertTrue(res.endsWith("e1:t2:aa1:y1:re"));
-        client.close();
+        assertTrue(result.startsWith("d1:rd2:id20:6h"));
+        assertTrue(result.contains("e1:t2:aa1:y1:re"));
+        assertEquals(DATA_PACKET_LENGTH, result.length());
     }
 
     /**
@@ -68,18 +63,12 @@ public final class DHTServerIntegrationTest {
         String dat = "d1:ad2:id20:abcdefghij0123456789e1:q4:pink1:t2:aa1:y1:qe";
 
         // when
-        Socket client = new Socket("127.0.0.1", DHTServer.DEFAULT_PORT);
-
-        DataOutputStream out = new DataOutputStream(client.getOutputStream());
-        BufferedReader in = new BufferedReader(
-                new InputStreamReader(client.getInputStream()));
-
-        out.writeBytes(dat + '\n');
-        String res = in.readLine();
+        String result = sendUDPPacket(dat);
 
         // then
-        assertEquals("d1:rd3:20414:Method Unknowne1:t2:aa1:y1:ee", res);
-        client.close();
+        assertTrue(result
+                .startsWith("d1:rd3:20414:Method Unknowne1:t2:aa1:y1:ee"));
+        assertEquals(DATA_PACKET_LENGTH, result.length());
     }
 
     /**
@@ -93,18 +82,11 @@ public final class DHTServerIntegrationTest {
         String dat = "adsadadsa";
 
         // when
-        Socket client = new Socket("127.0.0.1", DHTServer.DEFAULT_PORT);
-
-        DataOutputStream out = new DataOutputStream(client.getOutputStream());
-        BufferedReader in = new BufferedReader(
-                new InputStreamReader(client.getInputStream()));
-
-        out.writeBytes(dat + '\n');
-        String res = in.readLine();
+        String result = sendUDPPacket(dat);
 
         // then
-        assertEquals("d1:rd3:20212:Server Errore1:y1:ee", res);
-        client.close();
+        assertTrue(result.startsWith("d1:rd3:20212:Server Errore1:y1:ee"));
+        assertEquals(DATA_PACKET_LENGTH, result.length());
     }
 
     /**
@@ -118,18 +100,12 @@ public final class DHTServerIntegrationTest {
         String dat = "d1:ad2:id20:abcdefghij0123456789e1:t2:aa1:y1:qe";
 
         // when
-        Socket client = new Socket("127.0.0.1", DHTServer.DEFAULT_PORT);
-
-        DataOutputStream out = new DataOutputStream(client.getOutputStream());
-        BufferedReader in = new BufferedReader(
-                new InputStreamReader(client.getInputStream()));
-
-        out.writeBytes(dat + '\n');
-        String res = in.readLine();
+        String result = sendUDPPacket(dat);
 
         // then
-        assertEquals("d1:rd3:20212:Server Errore1:t2:aa1:y1:ee", res);
-        client.close();
+        assertTrue(
+                result.startsWith("d1:rd3:20212:Server Errore1:t2:aa1:y1:ee"));
+        assertEquals(DATA_PACKET_LENGTH, result.length());
     }
 
     /**
@@ -144,5 +120,32 @@ public final class DHTServerIntegrationTest {
                 DHTServer.main(args);
             }
         });
+    }
+
+    /**
+     * Sends UDP Packet to Server.
+     * @param msg  String
+     * @return String response
+     * @throws IOException  IOException
+     */
+    private String sendUDPPacket(final String msg) throws IOException {
+
+        byte[] sendData = new byte[DATA_PACKET_LENGTH];
+        byte[] receiveData = new byte[DATA_PACKET_LENGTH];
+
+        sendData = msg.getBytes();
+        InetAddress ipAddress = InetAddress.getByName("localhost");
+
+        DatagramSocket clientSocket = new DatagramSocket();
+        DatagramPacket sendPacket = new DatagramPacket(sendData,
+                sendData.length, ipAddress, DHTServer.DEFAULT_PORT);
+        clientSocket.send(sendPacket);
+        DatagramPacket receivePacket = new DatagramPacket(receiveData,
+                receiveData.length);
+        clientSocket.receive(receivePacket);
+
+        String response = new String(receivePacket.getData());
+        clientSocket.close();
+        return response;
     }
 }

@@ -2,7 +2,10 @@ package ca.gobits.dht.test;
 
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
+import java.lang.reflect.Constructor;
+import java.lang.reflect.Modifier;
 import java.security.MessageDigest;
 
 import org.junit.Test;
@@ -54,5 +57,18 @@ public final class ArraysUnitTest {
 
         // then
         assertArrayEquals(expectedBytes, result);
+    }
+
+    /**
+     * testConstructorIsPrivate().
+     * @throws Exception  Exception
+     */
+    @Test
+    public void testConstructorIsPrivate() throws Exception {
+        Constructor<Arrays> constructor = Arrays.class
+                .getDeclaredConstructor();
+        assertTrue(Modifier.isPrivate(constructor.getModifiers()));
+        constructor.setAccessible(true);
+        constructor.newInstance();
     }
 }

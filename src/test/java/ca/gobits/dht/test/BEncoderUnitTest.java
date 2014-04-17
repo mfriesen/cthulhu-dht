@@ -17,8 +17,11 @@
 package ca.gobits.dht.test;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 import java.io.ByteArrayOutputStream;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -168,5 +171,18 @@ public final class BEncoderUnitTest {
         assertEquals(bytes[2], resultBytes[5]);
 
         result.close();
+    }
+
+    /**
+     * testConstructorIsPrivate().
+     * @throws Exception  Exception
+     */
+    @Test
+    public void testConstructorIsPrivate() throws Exception {
+        Constructor<BEncoder> constructor = BEncoder.class
+                .getDeclaredConstructor();
+        assertTrue(Modifier.isPrivate(constructor.getModifiers()));
+        constructor.setAccessible(true);
+        constructor.newInstance();
     }
 }

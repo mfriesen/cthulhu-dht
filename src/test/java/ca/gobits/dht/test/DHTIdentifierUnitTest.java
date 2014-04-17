@@ -17,6 +17,10 @@
 package ca.gobits.dht.test;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+
+import java.lang.reflect.Constructor;
+import java.lang.reflect.Modifier;
 
 import org.apache.commons.codec.binary.Hex;
 import org.junit.Test;
@@ -31,8 +35,7 @@ public final class DHTIdentifierUnitTest {
     /**
      * testSha101().
      *
-     * @throws Exception
-     *             Exception
+     * @throws Exception  Exception
      */
     @Test
     public void testSha101() throws Exception {
@@ -50,8 +53,7 @@ public final class DHTIdentifierUnitTest {
     /**
      * testSha102().
      *
-     * @throws Exception
-     *             Exception
+     * @throws Exception  Exception
      */
     @Test
     public void testSha102() throws Exception {
@@ -64,5 +66,52 @@ public final class DHTIdentifierUnitTest {
         // then
         assertEquals("b1d5781111d84f7b3fe45a0852e59758cd7a87e5",
                 Hex.encodeHexString(result));
+    }
+
+    /**
+     * testAlgorithm01().
+     *
+     * @throws Exception  Exception
+     */
+    @Test
+    public void testAlgorithm01() throws Exception {
+        // given
+        String s = "10";
+
+        // when
+        byte[] result = DHTIdentifier.algorithm("SHA-1", s);
+
+        // then
+        assertEquals("b1d5781111d84f7b3fe45a0852e59758cd7a87e5",
+                Hex.encodeHexString(result));
+    }
+
+    /**
+     * testAlgorithm02() - unknown algorithm.
+     *
+     * @throws Exception  Exception
+     */
+    @Test(expected = RuntimeException.class)
+    public void testAlgorithm02() throws Exception {
+        // given
+        String s = "10";
+
+        // when
+        DHTIdentifier.algorithm("SHA-112", s);
+
+        // then
+    }
+
+    /**
+     * testConstructorIsPrivate().
+     * @throws Exception  Exception
+     */
+    @Test
+    public void testConstructorIsPrivate() throws Exception {
+        Constructor<DHTIdentifier> constructor = DHTIdentifier.class
+                .getDeclaredConstructor();
+        assertTrue(Modifier.isPrivate(constructor.getModifiers()));
+        constructor.setAccessible(true);
+        constructor.newInstance();
     }
 }

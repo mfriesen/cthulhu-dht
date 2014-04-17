@@ -17,7 +17,10 @@
 package ca.gobits.dht.test;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
+import java.lang.reflect.Constructor;
+import java.lang.reflect.Modifier;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.Arrays;
@@ -85,5 +88,35 @@ public final class DHTDistanceUnitTest {
 
         // then
         assertEquals(expect, result);
+    }
+
+    /**
+     * testXor04().
+     * @throws Exception Exception
+     */
+    @Test(expected = IllegalArgumentException.class)
+    public void testXor04() throws Exception {
+        // given
+        BigInteger id0 = new BigInteger("10123");
+        BigInteger id1 = new BigInteger("51");
+
+        // when
+        DHTDistance.xor(id0.toByteArray(),
+                id1.toByteArray());
+
+        // then
+    }
+
+    /**
+     * testConstructorIsPrivate().
+     * @throws Exception  Exception
+     */
+    @Test
+    public void testConstructorIsPrivate() throws Exception {
+        Constructor<DHTDistance> constructor = DHTDistance.class
+                .getDeclaredConstructor();
+        assertTrue(Modifier.isPrivate(constructor.getModifiers()));
+        constructor.setAccessible(true);
+        constructor.newInstance();
     }
 }

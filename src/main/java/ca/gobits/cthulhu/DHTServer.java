@@ -1,15 +1,10 @@
 package ca.gobits.cthulhu;
 
-import io.netty.bootstrap.ServerBootstrap;
-import io.netty.channel.ChannelFuture;
-import io.netty.channel.ChannelInitializer;
+import io.netty.bootstrap.Bootstrap;
 import io.netty.channel.ChannelOption;
 import io.netty.channel.EventLoopGroup;
 import io.netty.channel.nio.NioEventLoopGroup;
-import io.netty.channel.socket.SocketChannel;
-import io.netty.channel.socket.nio.NioServerSocketChannel;
-import io.netty.handler.logging.LogLevel;
-import io.netty.handler.logging.LoggingHandler;
+import io.netty.channel.socket.nio.NioDatagramChannel;
 
 import java.io.PrintWriter;
 
@@ -38,11 +33,8 @@ public class DHTServer {
     /** Default Port. */
     public static final int DEFAULT_PORT = 8080;
 
-    /** SO_KEEPALIVE. */
-    private static final Boolean SO_KEEPALIVE = Boolean.valueOf(true);
-
-    /** SO_BACKLOG. */
-    private static final int SO_BACKLOG = 128;
+    /** SO_BROADCAST. */
+    private static final Boolean SO_BROADCAST = Boolean.valueOf(true);
 
     /** Port to run server on. */
     private final int port;
@@ -52,10 +44,7 @@ public class DHTServer {
             .getName());
 
     /** Main Event Loop. */
-    private final EventLoopGroup bossGroup = new NioEventLoopGroup(1);
-
-    /** Worker Event Loop. */
-    private final EventLoopGroup workerGroup = new NioEventLoopGroup();
+    private final EventLoopGroup group = new NioEventLoopGroup();
 
     /**
      * Constructor.
@@ -71,35 +60,18 @@ public class DHTServer {
      */
     public final void run() throws Exception {
 
+        LOGGER.info("starting cthulhu on " + this.port);
+
         try {
-            ServerBootstrap b = new ServerBootstrap();
-            b.group(bossGroup, workerGroup)
-             .channel(NioServerSocketChannel.class)
-             .option(ChannelOption.SO_BACKLOG, Integer.valueOf(SO_BACKLOG))
-             .childOption(ChannelOption.SO_KEEPALIVE, SO_KEEPALIVE)
-             .handler(new LoggingHandler(LogLevel.WARN))
-             .childHandler(new ChannelInitializer<SocketChannel>() {
-                 @Override
-                 public void initChannel(final SocketChannel ch)
-                         throws Exception {
-                     ch.pipeline().addLast(
-////                             new StringEncoder(CharsetUtil.US_ASCII),
-////                             new ByteArrayEncoder(),
-//                             new LineBasedFrameDecoder(LINE_BASED_MAX_LENGTH),
-//                             new StringDecoder(CharsetUtil.US_ASCII),
-//                             new ByteArrayDecoder(),
-                             new DHTProtocolHandler());
-                 }
-             });
+            Bootstrap b = new Bootstrap();
+            b.group(group)
+             .channel(NioDatagramChannel.class)
+             .option(ChannelOption.SO_BROADCAST, SO_BROADCAST)
+             .handler(new DHTProtocolHandler());
 
-            // Start the server.
-            ChannelFuture f = b.bind(port).sync();
-
-            // Wait until the server socket is closed.
-            f.channel().closeFuture().sync();
-
+            b.bind(port).sync().channel().closeFuture().await();
         } finally {
-            shutdownGracefully();
+            group.shutdownGracefully();
         }
     }
 
@@ -107,8 +79,7 @@ public class DHTServer {
      * Shut down all event loops to terminate all threads.
      */
     public final void shutdownGracefully() {
-        bossGroup.shutdownGracefully();
-        workerGroup.shutdownGracefully();
+        group.shutdownGracefully();
     }
 
     /**
