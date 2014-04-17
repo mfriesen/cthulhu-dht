@@ -55,15 +55,14 @@ public final class DHTProtocolHandler extends
             LOGGER.fatal(e, e);
             addServerError(response);
 
-        } finally {
-
-            ByteArrayOutputStream os = BEncoder.bencoding(response);
-            byte[] bytes = os.toByteArray();
-            os.close();
-
-            ctx.write(new DatagramPacket(
-                    Unpooled.copiedBuffer(bytes), packet.sender()));
         }
+
+        ByteArrayOutputStream os = BEncoder.bencoding(response);
+        byte[] bytes = os.toByteArray();
+        os.close();
+
+        ctx.write(new DatagramPacket(
+                Unpooled.copiedBuffer(bytes), packet.sender()));
     }
 
     @Override
