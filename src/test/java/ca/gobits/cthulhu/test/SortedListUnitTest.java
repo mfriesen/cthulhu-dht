@@ -1,10 +1,14 @@
 package ca.gobits.cthulhu.test;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
+import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Random;
 
 import org.junit.Test;
 
@@ -198,6 +202,34 @@ public final class SortedListUnitTest {
         assertEquals(d1, list.get(1));
         assertEquals(d2, list.get(2));
         assertEquals(d3, list.get(3));
+    }
+
+    /**
+     * testAddNode08() - insert a random million entries and verify order is
+     * correct.
+     */
+    @Test
+    public void testAdd08() {
+        // given
+        int len = 10000;
+        boolean duplicates = false;
+        SortedList<BigInteger> list = new SortedList<BigInteger>(duplicates);
+        Random rnd = new Random(System.currentTimeMillis());
+
+        // when
+        for (int i = 0; i < len; i++) {
+            BigInteger bi = new BigInteger(160, rnd);
+            list.add(bi);
+        }
+
+        // then
+        Iterator<BigInteger> itr = list.iterator();
+        BigInteger last = itr.next();
+        while (itr.hasNext()) {
+            BigInteger curr = itr.next();
+            assertTrue(curr.compareTo(last) > 0);
+            last = curr;
+        }
     }
 
     /**
