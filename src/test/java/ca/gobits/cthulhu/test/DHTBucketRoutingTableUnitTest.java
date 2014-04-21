@@ -107,6 +107,36 @@ public final class DHTBucketRoutingTableUnitTest {
     }
 
     /**
+     * testAddNode04() - test adding nodes and checking order.
+     */
+    @Test
+    public void testAddNode04() {
+        // given
+        DHTBucketRoutingTable routingTable = new DHTBucketRoutingTable();
+        DHTNode node0 = new DHTNode(new BigInteger("1"), null, 0);
+        DHTNode node1 = new DHTNode(new BigInteger(
+                "217572328821850967755762913845138112465869557436"), null, 0);
+        DHTNode node2 = new DHTNode(new BigInteger(
+                "253718933283387888344146948372599275024431560999"), null, 0);
+        DHTNode node3 = new DHTNode(new BigInteger(
+                "909396897490697132528408310795708133687135388426"), null, 0);
+
+        // when
+        routingTable.addNode(node0);
+        routingTable.addNode(node3);
+        routingTable.addNode(node2);
+        routingTable.addNode(node1);
+
+        // then
+        assertEquals(4, routingTable.getTotalNodeCount());
+        SortedList<DHTNode> nodes = routingTable.getNodes();
+        assertEquals(node0, nodes.get(0));
+        assertEquals(node1, nodes.get(1));
+        assertEquals(node2, nodes.get(2));
+        assertEquals(node3, nodes.get(3));
+    }
+
+    /**
      * testFindClosestNodes01() - find the closests 8 nodes.
      */
     @Test
@@ -121,7 +151,7 @@ public final class DHTBucketRoutingTableUnitTest {
         }
 
         // when
-        List<DHTNode> results = rt.findClosestNodes(n);
+        List<DHTNode> results = rt.findClosestNodes(n.getId(), 8);
 
         // then
         assertEquals(8, results.size());
@@ -151,7 +181,7 @@ public final class DHTBucketRoutingTableUnitTest {
         }
 
         // when
-        List<DHTNode> results = rt.findClosestNodes(n);
+        List<DHTNode> results = rt.findClosestNodes(n.getId(), 8);
 
         // then
         assertEquals(8, results.size());
@@ -181,7 +211,7 @@ public final class DHTBucketRoutingTableUnitTest {
         }
 
         // when
-        List<DHTNode> results = rt.findClosestNodes(n);
+        List<DHTNode> results = rt.findClosestNodes(n.getId(), 8);
 
         // then
         assertEquals(8, results.size());
@@ -210,7 +240,7 @@ public final class DHTBucketRoutingTableUnitTest {
         }
 
         // when
-        List<DHTNode> results = rt.findClosestNodes(n);
+        List<DHTNode> results = rt.findClosestNodes(n.getId(), 8);
 
         // then
         assertEquals(8, results.size());

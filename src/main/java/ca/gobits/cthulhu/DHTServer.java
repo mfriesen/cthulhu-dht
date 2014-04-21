@@ -40,7 +40,7 @@ public class DHTServer {
     private final int port;
 
     /** DHT Node Id. */
-    static final byte[] NODE_ID = DHTIdentifier.sha1(DHTServer.class
+    public static final byte[] NODE_ID = DHTIdentifier.sha1(DHTServer.class
             .getName());
 
     /** Main Event Loop. */

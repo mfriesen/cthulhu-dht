@@ -6,6 +6,8 @@ import static org.junit.Assert.assertTrue;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Modifier;
+import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.security.MessageDigest;
 
 import org.junit.Test;
@@ -60,6 +62,40 @@ public final class ArraysUnitTest {
     }
 
     /**
+     * testToByte02() - convert BigInteger to bytes[].
+     */
+    @Test
+    public void testToByte02() {
+        // given
+        BigInteger d = new BigInteger("59527");
+        byte[] expected = new byte[] {0, -24, -121 };
+
+        // when
+        byte[] result = Arrays.toByte(d);
+
+        // then
+        assertArrayEquals(expected, result);
+    }
+
+    /**
+     * testToByte03() - convert double to bytes[].
+     */
+    @Test
+    public void testToByte03() {
+        // given
+        double dd = Math.pow(2, 160);
+        BigInteger d = new BigDecimal(dd).toBigInteger();
+        byte[] expected = new byte[] {1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+                0, 0, 0, 0, 0, 0, 0, 0 };
+
+        // when
+        byte[] result = Arrays.toByte(d);
+
+        // then
+        assertArrayEquals(expected, result);
+    }
+
+    /**
      * testConstructorIsPrivate().
      * @throws Exception  Exception
      */
@@ -70,5 +106,36 @@ public final class ArraysUnitTest {
         assertTrue(Modifier.isPrivate(constructor.getModifiers()));
         constructor.setAccessible(true);
         constructor.newInstance();
+    }
+
+    /**
+     * testToDouble01() - convert bytes[] to double.
+     */
+    @Test
+    public void testToDouble01() {
+        // given
+        byte[] bytes = new byte[] {-24, -121 };
+
+        // when
+        double result = Arrays.toDouble(bytes);
+
+        // then
+        assertEquals(59527, (int) result);
+    }
+
+    /**
+     * testToDouble02() - convert ints[] to double.
+     */
+    @Test
+    public void testToDouble02() {
+        // given
+        int[] ints = new int[] {255, 255, 255, 255, 255, 255, 255, 255,
+                255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255 };
+
+        // when
+        double result = Arrays.toDouble(ints);
+
+        // then
+        assertEquals(Math.pow(2, 160), result, 0);
     }
 }

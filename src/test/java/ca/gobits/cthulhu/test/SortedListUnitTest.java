@@ -53,7 +53,7 @@ public final class SortedListUnitTest {
     }
 
     /**
-     * testAdd02() - add 2 elements in correct order.
+     * testAdd02() - add 3 elements in correct order.
      */
     @Test
     public void testAdd02() {
@@ -63,12 +63,14 @@ public final class SortedListUnitTest {
 
         // when
         list.add("a");
+        list.add("c");
         list.add("z");
 
         // then
-        assertEquals(2, list.size());
+        assertEquals(3, list.size());
         assertEquals("a", list.toArray()[0]);
-        assertEquals("z", list.toArray()[1]);
+        assertEquals("c", list.toArray()[1]);
+        assertEquals("z", list.toArray()[2]);
     }
 
     /**
@@ -78,23 +80,56 @@ public final class SortedListUnitTest {
     public void testAdd03() {
         // given
         boolean duplicates = true;
+        SortedList<Integer> list = new SortedList<Integer>(duplicates);
+
+        // when
+        for (int i = 18; i >= 0; i -= 2) {
+            list.add(Integer.valueOf(i));
+        }
+
+        list.add(Integer.valueOf(17));
+
+        // then
+        assertEquals(11, list.size());
+        assertEquals(Integer.valueOf(0), list.toArray()[0]);
+        assertEquals(Integer.valueOf(2), list.toArray()[1]);
+        assertEquals(Integer.valueOf(4), list.toArray()[2]);
+        assertEquals(Integer.valueOf(6), list.toArray()[3]);
+        assertEquals(Integer.valueOf(8), list.toArray()[4]);
+        assertEquals(Integer.valueOf(10), list.toArray()[5]);
+        assertEquals(Integer.valueOf(12), list.toArray()[6]);
+        assertEquals(Integer.valueOf(14), list.toArray()[7]);
+        assertEquals(Integer.valueOf(16), list.toArray()[8]);
+        assertEquals(Integer.valueOf(17), list.toArray()[9]);
+        assertEquals(Integer.valueOf(18), list.toArray()[10]);
+    }
+
+    /**
+     * testAdd04() - add 3 elements in reverse order.
+     */
+    @Test
+    public void testAdd04() {
+        // given
+        boolean duplicates = true;
         SortedList<String> list = new SortedList<String>(duplicates);
 
         // when
         list.add("z");
+        list.add("c");
         list.add("a");
 
         // then
-        assertEquals(2, list.size());
+        assertEquals(3, list.size());
         assertEquals("a", list.toArray()[0]);
-        assertEquals("z", list.toArray()[1]);
+        assertEquals("c", list.toArray()[1]);
+        assertEquals("z", list.toArray()[2]);
     }
 
     /**
-     * testAdd04() - add same elements, duplicate=TRUE.
+     * testAdd05() - add same elements, duplicate=TRUE.
      */
     @Test
-    public void testAdd04() {
+    public void testAdd05() {
         // given
         boolean duplicates = true;
         SortedList<String> list = new SortedList<String>(duplicates);
@@ -114,10 +149,10 @@ public final class SortedListUnitTest {
     }
 
     /**
-     * testAdd04() - add same elements, duplicate=FALSE.
+     * testAdd06() - add same elements, duplicate=FALSE.
      */
     @Test
-    public void testAdd05() {
+    public void testAdd06() {
         // given
         boolean duplicates = false;
         SortedList<String> list = new SortedList<String>(duplicates);
@@ -133,6 +168,36 @@ public final class SortedListUnitTest {
         assertEquals("a", list.toArray()[0]);
         assertEquals("c", list.toArray()[1]);
         assertEquals("z", list.toArray()[2]);
+    }
+
+    /**
+     * testAddNode07() - test adding nodes and checking order.
+     */
+    @Test
+    public void testAdd07() {
+        // given
+        boolean duplicates = false;
+        SortedList<Double> list = new SortedList<Double>(duplicates);
+        Double d0 = Double.valueOf(1);
+        Double d1 = Double
+                .valueOf(217572328821850967755762913845138112465869557436d);
+        Double d2 = Double
+                .valueOf(253718933283387888344146948372599275024431560999d);
+        Double d3 = Double
+                .valueOf(909396897490697132528408310795708133687135388426d);
+
+        // when
+        list.add(d0);
+        list.add(d3);
+        list.add(d2);
+        list.add(d1);
+
+        // then
+        assertEquals(4, list.size());
+        assertEquals(d0, list.get(0));
+        assertEquals(d1, list.get(1));
+        assertEquals(d2, list.get(2));
+        assertEquals(d3, list.get(3));
     }
 
     /**

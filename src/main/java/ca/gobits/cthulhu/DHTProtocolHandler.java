@@ -8,13 +8,19 @@ import io.netty.channel.socket.DatagramPacket;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.math.BigInteger;
+import java.net.InetAddress;
+import java.net.InetSocketAddress;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.apache.log4j.Logger;
 
+import ca.gobits.dht.Arrays;
 import ca.gobits.dht.BDecoder;
 import ca.gobits.dht.BEncoder;
+import ca.gobits.dht.DHTIdentifier;
 
 /**
  * DHTProtocolHandler  implementation of the BitTorrent protocol.
@@ -23,9 +29,15 @@ import ca.gobits.dht.BEncoder;
 public final class DHTProtocolHandler extends
         SimpleChannelInboundHandler<DatagramPacket> {
 
+    /** Contact information for nodes is encoded as a 26-byte string. */
+    private static final int COMPACT_NODE_LENGTH = 26;
+
     /** DHTProtocolHandler Logger. */
     private static final Logger LOGGER = Logger
             .getLogger(DHTProtocolHandler.class);
+
+    /** DHT Node Routing Table. */
+    private final DHTRoutingTable routingTable = new DHTBucketRoutingTable();
 
     @Override
     public void channelRead0(final ChannelHandlerContext ctx,
@@ -36,18 +48,24 @@ public final class DHTProtocolHandler extends
 
         try {
 
-            Map<String, Object> map = bdecode(packet.content());
-
-            String action = (String) map.get("q");
+            Map<String, Object> request = bdecode(packet.content());
 
             response.put("y", "r");
-            response.put("t", map.get("t"));
+            response.put("t", request.get("t"));
+
+            String action = new String((byte[]) request.get("q"));
 
             if (action.equals("ping")) {
-                response.put("r", map("id", DHTServer.NODE_ID));
+
+                addPingResponse(response);
+
+            } else if (action.equals("find_node")) {
+
+                addFindNodeResponse(request, response, packet);
+
             } else {
-                addServerError(response);
-                response.put("r", map("204", "Method Unknown"));
+
+                addMethodUnknownResponse(response);
             }
 
         } catch (Exception e) {
@@ -65,6 +83,125 @@ public final class DHTProtocolHandler extends
                 Unpooled.copiedBuffer(bytes), packet.sender()));
     }
 
+    /**
+     * Add Method Unknown Error to response.
+     * @param response Map<String, Object>
+     */
+    private void addMethodUnknownResponse(final Map<String, Object> response) {
+        addServerError(response);
+        response.put("r", map("204", "Method Unknown"));
+    }
+
+    /**
+     * Add "find_node" data to response.
+     * @param request  request parameters
+     * @param response  Map<String, Object>
+     * @param packet  DatagramPacket
+     * @throws IOException  IOException
+     */
+    private void addFindNodeResponse(final Map<String, Object> request,
+            final Map<String, Object> response,
+            final DatagramPacket packet) throws IOException {
+
+        addSenderIpResponse(response, packet);
+
+        @SuppressWarnings("unchecked")
+        Map<String, Object> arguments = (Map<String, Object>) request.get("a");
+
+        Map<String, Object> responseParameter = new HashMap<String, Object>();
+        response.put("r", responseParameter);
+        responseParameter.put("id", arguments.get("id"));
+
+        List<DHTNode> nodes = findClosestNodes(
+                (byte[]) arguments.get("target"));
+
+        byte[] transformNodes = transformNodes(nodes);
+        responseParameter.put("nodes", transformNodes);
+    }
+
+    /**
+     * Adds Send's IP to response.
+     * @param response  Map<String, Object>
+     * @param packet DatagramPacket
+     */
+    private void addSenderIpResponse(final Map<String, Object> response,
+            final DatagramPacket packet) {
+        InetSocketAddress addr = packet.sender();
+        response.put(
+                "ip", BEncoder.compactAddress(addr.getAddress(),
+                        addr.getPort()));
+    }
+
+    /**
+     * Add "ping" data to response.
+     * @param response  Map<String, Object>
+     */
+    private void addPingResponse(final Map<String, Object> response) {
+        response.put("r", map("id", DHTServer.NODE_ID));
+    }
+
+    /**
+     * Transforms Nodes to "compact node info" mode.
+     * @param nodes  List of DHTNode objects
+     * @return byte[]
+     * @throws IOException  IOException
+     */
+    private byte[] transformNodes(final List<DHTNode> nodes)
+            throws IOException {
+
+        byte[] bytes = new byte[nodes.size() * COMPACT_NODE_LENGTH];
+
+        int pos = 0;
+        for (DHTNode node : nodes) {
+            byte[] nodeBytes = transform(node);
+            System.arraycopy(nodeBytes, 0, bytes, pos, nodeBytes.length);
+            pos += nodeBytes.length;
+        }
+
+        return bytes;
+    }
+
+    /**
+     * Find the closest X nodes to the target.
+     * @param targetBytes  ID of the target node to find
+     * @return List<DHTNode>
+     */
+    private List<DHTNode> findClosestNodes(final byte[] targetBytes) {
+
+        int[] targetInts = Arrays.toInt(targetBytes);
+        BigInteger target = Arrays.toBigInteger(targetInts);
+
+        return routingTable.findClosestNodes(target);
+    }
+
+    /**
+     * Transform DHTNode into 26-byte string. Known as "Compact node info" the
+     * 20-byte Node ID in network byte order has the compact IP-address/port
+     * info concatenated to the end.
+     *
+     * @param node  DHTNode
+     * @return byte[]
+     * @throws IOException  IOException
+     */
+    private byte[] transform(final DHTNode node) throws IOException {
+
+        int max = DHTIdentifier.NODE_ID_LENGTH;
+        byte[] bytes = new byte[COMPACT_NODE_LENGTH];
+        byte[] id = Arrays.toByte(node.getId());
+
+        int start = id.length > max ? id.length - max : 0;
+        int len = id.length > max ? max : id.length;
+        int destPos = max > id.length ? max - id.length : 0;
+        System.arraycopy(id, start, bytes, destPos, len);
+
+        InetAddress addr = InetAddress.getByName(node.getHost());
+        byte[] addrBytes = BEncoder.compactAddress(addr, node.getPort());
+
+        System.arraycopy(addrBytes, 0, bytes, max, addrBytes.length);
+
+        return bytes;
+    }
+
     @Override
     public void channelReadComplete(final ChannelHandlerContext ctx)
             throws Exception {
@@ -76,7 +213,7 @@ public final class DHTProtocolHandler extends
      * @param msg  ByteBuf
      * @return ByteArrayOutputStream
      */
-    private ByteArrayOutputStream extractBytes(final ByteBuf msg) {
+    public ByteArrayOutputStream extractBytes(final ByteBuf msg) {
         ByteArrayOutputStream os = new ByteArrayOutputStream();
         ByteBuf in = msg;
         while (in.isReadable()) {
@@ -120,7 +257,7 @@ public final class DHTProtocolHandler extends
 
         ByteArrayOutputStream os = extractBytes(byteBuf);
         Map<String, Object> map = (Map<String, Object>) new BDecoder()
-                .decode(new String(os.toByteArray()));
+                .decode(os.toByteArray());
         os.close();
         return map;
     }

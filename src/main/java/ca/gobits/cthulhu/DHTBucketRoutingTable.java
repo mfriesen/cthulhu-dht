@@ -16,6 +16,7 @@
 
 package ca.gobits.cthulhu;
 
+import java.math.BigInteger;
 import java.util.List;
 
 /**
@@ -48,8 +49,15 @@ public final class DHTBucketRoutingTable implements DHTRoutingTable {
     }
 
     @Override
-    public List<DHTNode> findClosestNodes(final DHTNode node) {
+    public List<DHTNode> findClosestNodes(final BigInteger nodeId) {
+        return findClosestNodes(nodeId, DEFAULT_SEARCH_COUNT);
+    }
 
+    @Override
+    public List<DHTNode> findClosestNodes(final BigInteger nodeId,
+            final int returnCount) {
+
+        DHTNode node = new DHTNode(nodeId, null, 0);
         int index = nodes.indexOf(node);
 
         int fromIndex = index > 0 ? index - 1 : 0;
@@ -57,14 +65,14 @@ public final class DHTBucketRoutingTable implements DHTRoutingTable {
                 : getTotalNodeCount();
         int count = toIndex - fromIndex;
 
-        while (count < MAX_NODE_SEARCH_COUNT) {
+        while (count < returnCount) {
 
             if (fromIndex > 0) {
                 fromIndex--;
                 count++;
             }
 
-            if (count < MAX_NODE_SEARCH_COUNT
+            if (count < returnCount
                     && toIndex < getTotalNodeCount()) {
                 toIndex++;
                 count++;

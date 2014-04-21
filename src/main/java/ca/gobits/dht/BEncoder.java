@@ -17,6 +17,7 @@
 package ca.gobits.dht;
 
 import java.io.ByteArrayOutputStream;
+import java.net.InetAddress;
 import java.util.Collection;
 import java.util.Map;
 import java.util.SortedMap;
@@ -28,6 +29,9 @@ import java.util.TreeMap;
  *
  */
 public final class BEncoder {
+
+    /** Number of bits per byte. */
+    private static final int BIT_COUNT = 8;
 
     /**
      * private constructor.
@@ -58,7 +62,8 @@ public final class BEncoder {
 
         if (ob instanceof byte[]) {
             bencoding((byte[]) ob, os);
-
+        } else if (ob instanceof int[]) {
+            bencoding((int[]) ob, os);
         } else if (ob instanceof Map) {
             bencoding((Map<Object, Object>) ob, os);
         } else if (ob instanceof Collection) {
@@ -135,6 +140,22 @@ public final class BEncoder {
     }
 
     /**
+     * Encode a array of ints.
+     * @param ints  ints to encode
+     * @param os ByteArrayOutputStream to append to
+     */
+    private static void bencoding(final int[] ints,
+            final ByteArrayOutputStream os) {
+        byte[] len = String.valueOf(ints.length).getBytes();
+
+        os.write(len, 0, len.length);
+        os.write(':');
+        for (int i : ints) {
+            os.write(i);
+        }
+    }
+
+    /**
      * B encode an object.
      * @param n  Number to encode
      * @param os ByteArrayOutputStream to append to
@@ -145,5 +166,24 @@ public final class BEncoder {
         os.write('i');
         os.write(bytes, 0, bytes.length);
         os.write('e');
+    }
+
+    /**
+     * "Compact IP-address/port info" the 4-byte IP address is in network
+     * byte order with the 2 byte port in network byte order concatenated
+     * onto the end.
+     * @param addr  InetAddress
+     * @param port  port number
+     * @return byte[]
+     */
+    public static byte[] compactAddress(final InetAddress addr,
+            final int port) {
+        byte[] bytes = addr.getAddress();
+        byte[] ret = new byte[bytes.length + 2];
+        System.arraycopy(bytes, 0, ret, 0, bytes.length);
+        System.arraycopy(new byte[] {(byte) (port >>> BIT_COUNT),
+                (byte) port }, 0, ret, bytes.length, 2);
+
+        return ret;
     }
 }

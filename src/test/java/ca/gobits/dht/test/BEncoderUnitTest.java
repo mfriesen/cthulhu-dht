@@ -22,6 +22,7 @@ import static org.junit.Assert.assertTrue;
 import java.io.ByteArrayOutputStream;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Modifier;
+import java.net.InetAddress;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -179,10 +180,40 @@ public final class BEncoderUnitTest {
      */
     @Test
     public void testConstructorIsPrivate() throws Exception {
+        // given
         Constructor<BEncoder> constructor = BEncoder.class
                 .getDeclaredConstructor();
-        assertTrue(Modifier.isPrivate(constructor.getModifiers()));
+
+        // when
+        int result = constructor.getModifiers();
+
+        // then
+        assertTrue(Modifier.isPrivate(result));
         constructor.setAccessible(true);
         constructor.newInstance();
+    }
+
+    /**
+     * Tests changing an IP / Port into
+     * 6 byte compact version.
+     * @throws Exception  Exception
+     */
+    @Test
+    public void testCompactAddress01() throws Exception {
+        // given
+        InetAddress addr = InetAddress.getByName("37.76.160.28");
+        int port = 37518;
+
+        // when
+        byte[] result = BEncoder.compactAddress(addr, port);
+
+        // then
+        assertEquals(6, result.length);
+        assertEquals(37, result[0]);
+        assertEquals(76, result[1]);
+        assertEquals(-96, result[2]);
+        assertEquals(28, result[3]);
+        assertEquals(-110, result[4]);
+        assertEquals(-114, result[5]);
     }
 }

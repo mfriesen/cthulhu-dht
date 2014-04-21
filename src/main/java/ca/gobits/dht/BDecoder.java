@@ -25,7 +25,10 @@ import java.util.Map;
  * BDecoder decodes objects as per spec
  * https://wiki.theory.org/BitTorrentSpecification#Bencoding.
  */
-public class BDecoder {
+public final class BDecoder {
+
+    /** Number of bits per byte. */
+    private static final int BIT_COUNT = 8;
 
     /** decoder string position. */
     private int position = 0;
@@ -37,70 +40,89 @@ public class BDecoder {
     }
 
     /**
-     * B decodes an string.
-     * @param s  string to decode
-     * @return Object
+     * Decodes a compact IP-address/port info".
+     * The 4-byte IP address is in network byte order with
+     * the 2 byte port in network byte order concatenated onto the end.
+     * @param bytes  compact IP-address/port info
+     * @return String <ipadress>:<port>
      */
-    public final Object decode(final String s) {
+    public static String decodeCompactIP(final byte[] bytes) {
 
-        position = 0;
+        int i = 0;
+        int len = bytes.length;
 
-        char[] chars = s.toCharArray();
-        return decode(chars);
+        StringBuilder ip = new StringBuilder();
+        while (i < len - 2) {
+            if (i > 0) {
+                ip.append(".");
+            }
+            ip.append(bytes[i] & Arrays.BYTE_TO_INT);
+            i++;
+        }
+
+        int port = (bytes[len - 2] & Arrays.BYTE_TO_INT) << BIT_COUNT
+                | (bytes[len - 1] & Arrays.BYTE_TO_INT);
+
+        return ip + ":" + port;
     }
 
     /**
      * B decodes an character array.
-     * @param chars  char array to decode
+     * @param bytes  bytes array to decode
      * @return Object
      */
-    public final Object decode(final char[] chars) {
+    public Object decode(final byte[] bytes) {
 
         Object obj = null;
-        char type = chars[position];
+        char type = (char) bytes[position];
 
         if (type == 'd') { // map
 
-            obj = buildMap(chars);
+            obj = buildMap(bytes);
 
         } else if (type == 'l') { // list
 
-            obj = buildList(chars);
+            obj = buildList(bytes);
 
         } else if (type == 'i') {  // long
 
-            obj = buildLong(chars);
+            obj = buildLong(bytes);
 
-        } else {  // string
+        } else {  // bytes
 
-            obj = buildString(chars);
+            int len = getInt(bytes);
+            position++; // throw away ':'
+            obj = getBytes(bytes, len);
+//            return getString(bytes, len);
+
+//            obj = buildString(bytes);
         }
 
         return obj;
     }
 
-    /**
-     * Builds String.
-     * @param chars character array
-     * @return String
-     */
-    private String buildString(final char[] chars) {
-        int len = getInt(chars);
-        position++; // throw away ':'
-        return getString(chars, len);
-    }
+//    /**
+//     * Builds String.
+//     * @param bytes bytes array
+//     * @return byte[]
+//     */
+//    private byte[] buildString(final byte[] bytes) {
+//        int len = getInt(bytes);
+//        position++; // throw away ':'
+//        return getString(bytes, len);
+//    }
 
     /**
      * Builds List<Object> Object.
-     * @param chars character array
+     * @param bytes  bytes array
      * @return List<Object>
      */
-    private List<Object> buildList(final char[] chars) {
+    private List<Object> buildList(final byte[] bytes) {
         position++;
         List<Object> list = new ArrayList<Object>();
 
-        while (chars[position] != 'e') {
-            list.add(decode(chars));
+        while ((char) bytes[position] != 'e') {
+            list.add(decode(bytes));
         }
 
         position++;
@@ -110,23 +132,23 @@ public class BDecoder {
 
     /**
      * Builds Map<Object, Object> Object.
-     * @param chars character array
+     * @param bytes  bytes array
      * @return Map<Object, Object>
      */
-    private Map<Object, Object> buildMap(final char[] chars) {
+    private Map<Object, Object> buildMap(final byte[] bytes) {
 
         position++;
 
         Map<Object, Object> map = new HashMap<Object, Object>();
 
-        while (chars[position] != 'e') {
+        while ((char) bytes[position] != 'e') {
 
-            int len = getInt(chars);
+            int len = getInt(bytes);
             position++; // throw away ':'
 
-            String key = getString(chars, len);
+            String key = new String(getBytes(bytes, len));
 
-            map.put(key, decode(chars));
+            map.put(key, decode(bytes));
         }
 
         position++;
@@ -136,15 +158,15 @@ public class BDecoder {
 
     /**
      * Builds Long Object.
-     * @param chars character array
+     * @param bytes bytes array
      * @return Long
      */
-    private Long buildLong(final char[] chars) {
+    private Long buildLong(final byte[] bytes) {
         position++;
         StringBuilder sb = new StringBuilder();
 
-        while (chars[position] != 'e') {
-            sb.append(chars[position]);
+        while ((char) bytes[position] != 'e') {
+            sb.append((char) bytes[position]);
             position++;
         }
 
@@ -154,33 +176,31 @@ public class BDecoder {
     }
 
     /**
-     * Copys a substring of the character array.
-     * @param chars character array
-     * @param len length to copy
-     * @return String
+     * Copies a len of bytes.
+     * @param bytes  bytes
+     * @param len  length to copy
+     * @return byte[]
      */
-    private String getString(final char[] chars, final int len) {
-        char[] dest = new char[len];
-        System.arraycopy(chars, position, dest, 0, len);
-
-        String s = new String(dest);
-        position += s.length();
-        return s;
+    private byte[] getBytes(final byte[] bytes, final int len) {
+        byte[] dest = new byte[len];
+        System.arraycopy(bytes, position, dest, 0, len);
+        position += len;
+        return dest;
     }
 
     /**
      * Copies an integer from the character array.
-     * @param chars character array
+     * @param bytes bytes array
      * @return int
      */
-    private int getInt(final char[] chars) {
+    private int getInt(final byte[] bytes) {
 
         StringBuilder sb = new StringBuilder();
 
-        while (position < chars.length) {
+        while (position < bytes.length) {
 
-            if (Character.isDigit(chars[position])) {
-                sb.append(chars[position]);
+            if (Character.isDigit((char) bytes[position])) {
+                sb.append((char) bytes[position]);
             } else {
                 break;
             }

@@ -109,18 +109,25 @@ public final class SortedList<E extends Comparable<E>> extends ArrayList<E> {
             // calculate the midpoint for roughly equal partition
             int imid = imin + ((imax - imin) / 2);
 
-            int c = get(imid).compareTo(e);
+            int c = e.compareTo(get(imid));
 
             if (c == 0) {
                 // key found at index imid
                 return duplicates ? imid : -1;
                 // determine which subarray to search
             } else if (c < 0) {
-                // change min index to search upper subarray
-                imin = imid + 1;
-            } else {
                 // change max index to search lower subarray
                 imax = imid - 1;
+            } else {
+                // change min index to search upper subarray
+                imin = imid + 1;
+            }
+        }
+
+        if (size() > imin) {
+            int c = e.compareTo(get(imin));
+            if (c > 0) {
+                imin++;
             }
         }
 
