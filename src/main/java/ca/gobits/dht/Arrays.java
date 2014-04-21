@@ -38,35 +38,9 @@ public final class Arrays {
     }
 
     /**
-     * Transform bytes an unsigned INT then to a double.
-     * @param bytes  bytes
-     * @return double
-     */
-    public static double toDouble(final byte[] bytes) {
-
-        StringBuilder sb = new StringBuilder();
-
-        for (int i = 0; i < bytes.length; i++) {
-            int ii = bytes[i] & Arrays.BYTE_TO_INT;
-            sb.append(Integer.toHexString(ii));
-        }
-
-        return new BigInteger(sb.toString(), HEX_RADIX).doubleValue();
-    }
-
-    /**
-     * Transform int[] to a double.
-     * @param ints  int array
-     * @return double
-     */
-    public static double toDouble(final int[] ints) {
-        return toBigInteger(ints).doubleValue();
-    }
-
-    /**
      * Transform int[] to a BigInteger.
      * @param ints  int array
-     * @return double
+     * @return BigInteger
      */
     public static BigInteger toBigInteger(final int[] ints) {
 

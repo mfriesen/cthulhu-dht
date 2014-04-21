@@ -137,10 +137,10 @@ public final class DHTProtocolHandlerUnitTest extends EasyMockSupport {
     private void assertNodesEquals(final byte[] a, final byte[] b) {
         assertEquals(a.length, b.length);
 
-        Map<Double, String> mapA = buildNodeMap(a);
-        Map<Double, String> mapB = buildNodeMap(b);
+        Map<BigInteger, String> mapA = buildNodeMap(a);
+        Map<BigInteger, String> mapB = buildNodeMap(b);
 
-        for (Map.Entry<Double, String> e : mapA.entrySet()) {
+        for (Map.Entry<BigInteger, String> e : mapA.entrySet()) {
             assertTrue(mapB.containsKey(e.getKey()));
             assertTrue(mapB.containsValue(e.getValue()));
         }
@@ -150,10 +150,10 @@ public final class DHTProtocolHandlerUnitTest extends EasyMockSupport {
     /**
      * Build a Map from a node list.
      * @param a  byte[]
-     * @return Map<byte[], String>
+     * @return Map<BigInteger, String>
      */
-    private Map<Double, String> buildNodeMap(final byte[] a) {
-        Map<Double, String> map = new HashMap<Double, String>();
+    private Map<BigInteger, String> buildNodeMap(final byte[] a) {
+        Map<BigInteger, String> map = new HashMap<BigInteger, String>();
 
         int i = 0;
         while (i < a.length) {
@@ -162,8 +162,9 @@ public final class DHTProtocolHandlerUnitTest extends EasyMockSupport {
             byte[] ipBytes = Arrays.copyOfRange(a, i, i + 6);
             String addr = BDecoder.decodeCompactIP(ipBytes);
             i += 6;
-            double d = ca.gobits.dht.Arrays.toDouble(key);
-            map.put(Double.valueOf(d), addr);
+
+            int[] ints = ca.gobits.dht.Arrays.toInt(key);
+            map.put(ca.gobits.dht.Arrays.toBigInteger(ints), addr);
         }
 
         return map;

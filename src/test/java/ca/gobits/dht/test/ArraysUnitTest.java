@@ -109,33 +109,34 @@ public final class ArraysUnitTest {
     }
 
     /**
-     * testToDouble01() - convert bytes[] to double.
+     * testToBigInteger01() - convert bytes[] to BigInteger.
      */
     @Test
-    public void testToDouble01() {
+    public void testToBigInteger01() {
         // given
         byte[] bytes = new byte[] {-24, -121 };
+        int[] ints = Arrays.toInt(bytes);
 
         // when
-        double result = Arrays.toDouble(bytes);
+        BigInteger result = Arrays.toBigInteger(ints);
 
         // then
-        assertEquals(59527, (int) result);
+        assertEquals(59527, result.intValue());
     }
 
     /**
-     * testToDouble02() - convert ints[] to double.
+     * testToBigInteger02() - convert ints[] to BigInteger.
      */
     @Test
-    public void testToDouble02() {
+    public void testToBigInteger02() {
         // given
         int[] ints = new int[] {255, 255, 255, 255, 255, 255, 255, 255,
                 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255 };
 
         // when
-        double result = Arrays.toDouble(ints);
+        BigInteger result = Arrays.toBigInteger(ints);
 
         // then
-        assertEquals(Math.pow(2, 160), result, 0);
+        assertEquals(Math.pow(2, 160), result.doubleValue(), 0);
     }
 }
