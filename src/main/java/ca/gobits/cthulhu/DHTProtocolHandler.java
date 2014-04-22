@@ -168,9 +168,7 @@ public final class DHTProtocolHandler extends
      */
     private List<DHTNode> findClosestNodes(final byte[] targetBytes) {
 
-        int[] targetInts = Arrays.toInt(targetBytes);
-        BigInteger target = Arrays.toBigInteger(targetInts);
-
+        BigInteger target = Arrays.toBigInteger(targetBytes);
         return routingTable.findClosestNodes(target);
     }
 

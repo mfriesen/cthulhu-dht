@@ -163,8 +163,7 @@ public final class DHTProtocolHandlerUnitTest extends EasyMockSupport {
             String addr = BDecoder.decodeCompactIP(ipBytes);
             i += 6;
 
-            int[] ints = ca.gobits.dht.Arrays.toInt(key);
-            map.put(ca.gobits.dht.Arrays.toBigInteger(ints), addr);
+            map.put(new BigInteger(key), addr);
         }
 
         return map;

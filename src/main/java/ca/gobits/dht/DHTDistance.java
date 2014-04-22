@@ -29,13 +29,9 @@ public final class DHTDistance {
                     + " != " + s2.length);
         }
 
-        int[] distance = new int[s1.length];
+        BigInteger b1 = new BigInteger(s1);
+        BigInteger b2 = new BigInteger(s2);
 
-        for (int i = 0; i < s1.length; i++) {
-            distance[i] = s1[i] ^ s2[i];
-        }
-
-        byte[] result = Arrays.toByte(distance);
-        return new BigInteger(result);
+        return b1.xor(b2);
     }
 }
