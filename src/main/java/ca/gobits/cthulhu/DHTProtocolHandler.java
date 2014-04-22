@@ -16,6 +16,8 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.log4j.Logger;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 import ca.gobits.dht.Arrays;
 import ca.gobits.dht.BDecoder;
@@ -26,6 +28,7 @@ import ca.gobits.dht.DHTIdentifier;
  * DHTProtocolHandler  implementation of the BitTorrent protocol.
  * http://www.bittorrent.org/beps/bep_0005.html
  */
+@Service
 public final class DHTProtocolHandler extends
         SimpleChannelInboundHandler<DatagramPacket> {
 
@@ -37,7 +40,8 @@ public final class DHTProtocolHandler extends
             .getLogger(DHTProtocolHandler.class);
 
     /** DHT Node Routing Table. */
-    private final DHTRoutingTable routingTable = new DHTBucketRoutingTable();
+    @Autowired
+    private DHTRoutingTable routingTable;
 
     @Override
     public void channelRead0(final ChannelHandlerContext ctx,

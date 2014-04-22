@@ -16,16 +16,20 @@ import org.apache.commons.cli.MissingArgumentException;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.UnrecognizedOptionException;
 import org.apache.log4j.Logger;
+import org.springframework.context.annotation.AnnotationConfigApplicationContext;
+import org.springframework.context.support.GenericApplicationContext;
+import org.springframework.stereotype.Service;
 
 import ca.gobits.dht.DHTIdentifier;
 
 /**
  * DHTServer implementation.
  */
+@Service
 public class DHTServer {
 
-    /** Reference to DHTServer. */
-    private static DHTServer server = null;
+    /** DHT Spring Context. */
+    private static GenericApplicationContext ac;
 
     /** DHT Server Logger. */
     private static final Logger LOGGER = Logger.getLogger(DHTServer.class);
@@ -36,9 +40,6 @@ public class DHTServer {
     /** SO_BROADCAST. */
     private static final Boolean SO_BROADCAST = Boolean.valueOf(true);
 
-    /** Port to run server on. */
-    private final int port;
-
     /** DHT Node Id. */
     public static final byte[] NODE_ID = DHTIdentifier.sha1(DHTServer.class
             .getName());
@@ -48,19 +49,18 @@ public class DHTServer {
 
     /**
      * Constructor.
-     * @param bindPort  bind to port
      */
-    public DHTServer(final int bindPort) {
-        this.port = bindPort;
+    public DHTServer() {
     }
 
     /**
      * Run DHTServer.
+     * @param port port to run server on
      * @throws Exception  Exception
      */
-    public final void run() throws Exception {
+    public final void run(final int port) throws Exception {
 
-        LOGGER.info("starting cthulhu on " + this.port);
+        LOGGER.info("starting cthulhu on " + port);
 
         try {
             Bootstrap b = new Bootstrap();
@@ -71,7 +71,7 @@ public class DHTServer {
 
             b.bind(port).sync().channel().closeFuture().await();
         } finally {
-            group.shutdownGracefully();
+            shutdownGracefully();
         }
     }
 
@@ -80,6 +80,7 @@ public class DHTServer {
      */
     public final void shutdownGracefully() {
         group.shutdownGracefully();
+        ac.close();
     }
 
     /**
@@ -109,8 +110,11 @@ public class DHTServer {
                     port = Integer.parseInt(portStr);
                 }
 
-                server = new DHTServer(port);
-                server.run();
+                ac = new AnnotationConfigApplicationContext(
+                        DHTConfiguration.class);
+
+                DHTServer server = ac.getBean(DHTServer.class);
+                server.run(port);
 
             }
         } catch (UnrecognizedOptionException e) {
@@ -126,6 +130,7 @@ public class DHTServer {
      * Shutsdown server.
      */
     public static void shutdown() {
+        DHTServer server = ac.getBean(DHTServer.class);
         server.shutdownGracefully();
     }
 

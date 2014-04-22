@@ -28,6 +28,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.test.util.ReflectionTestUtils;
 
+import ca.gobits.cthulhu.DHTBucketRoutingTable;
 import ca.gobits.cthulhu.DHTNode;
 import ca.gobits.cthulhu.DHTProtocolHandler;
 import ca.gobits.cthulhu.DHTRoutingTable;
@@ -46,8 +47,7 @@ public final class DHTProtocolHandlerUnitTest extends EasyMockSupport {
     private final DHTProtocolHandler handler = new DHTProtocolHandler();
 
     /** Reference to routing table. */
-    private final DHTRoutingTable routingTable = (DHTRoutingTable)
-            ReflectionTestUtils.getField(handler, "routingTable");
+    private final DHTRoutingTable routingTable = new DHTBucketRoutingTable();
 
     /** Mock ChannelHandlerContext. */
     @Mock
@@ -56,6 +56,8 @@ public final class DHTProtocolHandlerUnitTest extends EasyMockSupport {
     /** before(). */
     @Before
     public void before() {
+        ReflectionTestUtils.setField(handler, "routingTable", routingTable);
+
         addRandomNodesToRoutingTable();
         addExpectedNodesToRoutingTable();
     }
