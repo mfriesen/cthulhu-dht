@@ -68,6 +68,7 @@
        <property name="message" value="Line has trailing spaces."/>
     </module>
     <module name="SuppressionCommentFilter"/>
+    <module name="FileContentsHolder"/>
     <!-- Checks for Headers                                -->
     <!-- See http://checkstyle.sf.net/config_header.html   -->
     <!-- <module name="Header"> -->
@@ -159,7 +160,9 @@
 
         <!-- Checks for class design                         -->
         <!-- See http://checkstyle.sf.net/config_design.html -->
-        <module name="DesignForExtension"/>
+        <module name="DesignForExtension">
+            <property name="ignorePattern" value="^import.*$"/>
+        </module>
         <module name="FinalClass"/>
         <module name="HideUtilityClassConstructor"/>
         <module name="InterfaceIsType"/>
