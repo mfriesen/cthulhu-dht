@@ -93,24 +93,10 @@ public final class BDecoder {
             int len = getInt(bytes);
             position++; // throw away ':'
             obj = getBytes(bytes, len);
-//            return getString(bytes, len);
-
-//            obj = buildString(bytes);
         }
 
         return obj;
     }
-
-//    /**
-//     * Builds String.
-//     * @param bytes bytes array
-//     * @return byte[]
-//     */
-//    private byte[] buildString(final byte[] bytes) {
-//        int len = getInt(bytes);
-//        position++; // throw away ':'
-//        return getString(bytes, len);
-//    }
 
     /**
      * Builds List<Object> Object.
