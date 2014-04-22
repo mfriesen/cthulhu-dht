@@ -35,6 +35,13 @@ public interface DHTRoutingTable {
     void addNode(DHTNode node);
 
     /**
+     * Find the node with matching ID or NULL.
+     * @param nodeId to find closest nodes to.
+     * @return DHTNode
+     */
+    DHTNode findExactNode(BigInteger nodeId);
+
+    /**
      * Find the closest X nodes to the nodeId.
      * @param nodeId to find closest nodes to.
      * @return List<DHTNode>

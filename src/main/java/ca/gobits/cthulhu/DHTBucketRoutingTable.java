@@ -54,6 +54,23 @@ public final class DHTBucketRoutingTable implements DHTRoutingTable {
     }
 
     @Override
+    public DHTNode findExactNode(final BigInteger nodeId) {
+
+        DHTNode nodeMatch = null;
+        DHTNode node = new DHTNode(nodeId, null, 0);
+        int index = this.nodes.indexOf(node);
+
+        if (index < this.nodes.size()) {
+            DHTNode foundNode = this.nodes.get(index);
+            if (foundNode.getId().equals(nodeId)) {
+                nodeMatch = foundNode;
+            }
+        }
+
+        return nodeMatch;
+    }
+
+    @Override
     public List<DHTNode> findClosestNodes(final BigInteger nodeId,
             final int returnCount) {
 
