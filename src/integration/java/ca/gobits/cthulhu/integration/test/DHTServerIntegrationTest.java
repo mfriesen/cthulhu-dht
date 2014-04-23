@@ -24,6 +24,7 @@ import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
 
+import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
@@ -46,14 +47,23 @@ public final class DHTServerIntegrationTest {
     public static void beforeClass() throws Exception {
         Thread thread = runDHTServerInNewThread(new String[]{});
         thread.start();
-        Thread.sleep(1000);
+        Thread.sleep(5000);
+    }
+
+    /**
+     * afterClass().
+     * @throws Exception  Exception
+     */
+    @AfterClass
+    public static void afterClass() throws Exception {
+        DHTServer.shutdown();
     }
 
     /**
      * testPing01().
      * @throws Exception  Exception
      */
-    @Test
+    @Test(timeout = 10000)
     public void testPing01() throws Exception {
 
         // given
@@ -72,7 +82,7 @@ public final class DHTServerIntegrationTest {
      * testUnknownMethod01().
      * @throws Exception  Exception
      */
-    @Test
+    @Test(timeout = 10000)
     public void testUnknownMethod01() throws Exception {
 
         // given
@@ -91,7 +101,7 @@ public final class DHTServerIntegrationTest {
      * testServerError01().
      * @throws Exception  Exception
      */
-    @Test
+    @Test(timeout = 10000)
     public void testServerError01() throws Exception {
 
         // given
@@ -109,7 +119,7 @@ public final class DHTServerIntegrationTest {
      * testMissingQParameter01().
      * @throws Exception  Exception
      */
-    @Test
+    @Test(timeout = 10000)
     public void testMissingQParameter01() throws Exception {
 
         // given

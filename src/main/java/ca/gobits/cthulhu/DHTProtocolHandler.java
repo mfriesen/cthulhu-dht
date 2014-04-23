@@ -27,6 +27,7 @@ import java.io.IOException;
 import java.math.BigInteger;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -77,7 +78,7 @@ public final class DHTProtocolHandler extends
 
             if (action.equals("ping")) {
 
-                addPingResponse(response);
+                addPingResponse(request, response, packet);
 
             } else if (action.equals("find_node")) {
 
@@ -154,10 +155,37 @@ public final class DHTProtocolHandler extends
 
     /**
      * Add "ping" data to response.
+     * @param request  Map<String, Object>
      * @param response  Map<String, Object>
+     * @param packet DatagramPacket
      */
-    private void addPingResponse(final Map<String, Object> response) {
+    private void addPingResponse(final Map<String, Object> request,
+            final Map<String, Object> response,
+            final DatagramPacket packet) {
+
+        @SuppressWarnings("unchecked")
+        Map<String, Object> arguments = (Map<String, Object>) request.get("a");
+
+        byte[] id = (byte[]) arguments.get("id");
+        ping(Arrays.toBigInteger(id), packet.sender());
+
         response.put("r", map("id", DHTServer.NODE_ID));
+    }
+
+    /**
+     * Ping a node in the routing table.
+     * @param nodeId the nodeId to ping
+     * @param addr sender of the ping
+     */
+    private void ping(final BigInteger nodeId, final InetSocketAddress addr) {
+        DHTNode node = routingTable.findExactNode(nodeId);
+        if (node == null) {
+            String host = addr.getAddress().getHostAddress();
+            node = new DHTNode(nodeId, host, addr.getPort());
+            routingTable.addNode(node);
+        }
+
+        node.setLastUpdated(new Date());
     }
 
     /**

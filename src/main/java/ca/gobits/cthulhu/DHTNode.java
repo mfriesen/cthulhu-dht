@@ -17,6 +17,7 @@
 package ca.gobits.cthulhu;
 
 import java.math.BigInteger;
+import java.util.Date;
 
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
@@ -35,6 +36,8 @@ public final class DHTNode implements Comparable<DHTNode> {
     private final int port;
     /** cached hashCode value. */
     private final int hashCode;
+    /** Date the node was last pinged. */
+    private Date lastUpdated;
 
     /**
      * constructor.
@@ -47,6 +50,7 @@ public final class DHTNode implements Comparable<DHTNode> {
         this.id = nodeId;
         this.host = nodeHost;
         this.port = nodePort;
+        this.lastUpdated = new Date();
 
         this.hashCode = new HashCodeBuilder()
         .append(id)
@@ -115,5 +119,20 @@ public final class DHTNode implements Comparable<DHTNode> {
     @Override
     public int compareTo(final DHTNode o) {
         return getId().compareTo(o.getId());
+    }
+
+    /**
+     * @return Date
+     */
+    public Date getLastUpdated() {
+        return lastUpdated;
+    }
+
+    /**
+     * Sets the Last Updated Date.
+     * @param date sets Last Updated Date
+     */
+    public void setLastUpdated(final Date date) {
+        this.lastUpdated = date;
     }
 }

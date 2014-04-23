@@ -55,4 +55,9 @@ public interface DHTRoutingTable {
      * @return List<DHTNode>
      */
     List<DHTNode> findClosestNodes(BigInteger nodeId, int returnCount);
+
+    /**
+     * @return int
+     */
+    int getTotalNodeCount();
 }

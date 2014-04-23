@@ -106,9 +106,7 @@ public final class DHTBucketRoutingTable implements DHTRoutingTable {
         return nodes;
     }
 
-    /**
-     * @return int
-     */
+    @Override
     public int getTotalNodeCount() {
         return nodes.size();
     }

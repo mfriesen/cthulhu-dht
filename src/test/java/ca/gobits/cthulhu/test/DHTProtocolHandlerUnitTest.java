@@ -20,16 +20,20 @@ import static org.easymock.EasyMock.capture;
 import static org.easymock.EasyMock.expect;
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.socket.DatagramPacket;
 
 import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.math.BigInteger;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -69,33 +73,114 @@ public final class DHTProtocolHandlerUnitTest extends EasyMockSupport {
     @Mock
     private ChannelHandlerContext ctx;
 
-    /** before(). */
+    /** Capture DatagramPacket. */
+    private final Capture<DatagramPacket> capturedPacket =
+            new Capture<DatagramPacket>();
+
+    /** InetSocketAddress. */
+    private InetSocketAddress socketAddress;
+
+    /**
+     * before().
+     * @throws Exception Exception
+     */
     @Before
-    public void before() {
+    public void before() throws Exception {
         ReflectionTestUtils.setField(handler, "routingTable", routingTable);
+
+        socketAddress = new InetSocketAddress(
+                InetAddress.getByName("50.71.214.139"), 64568);
 
         addRandomNodesToRoutingTable();
         addExpectedNodesToRoutingTable();
     }
 
     /**
-     * testChannelRead001() - compare our result from
+     * testChannelRead001() - test first "ping" request.
+     * @throws Exception  Exception
+     */
+    @Test
+    public void testChannelRead001() throws Exception {
+        // given
+        BigInteger nodeId = new BigInteger("abcdefghij0123456789".getBytes());
+        String dat = "d1:ad2:id20:abcdefghij0123456789e1:q4:ping1:t2:aa1:y1:qe";
+
+        DatagramPacket packet = new DatagramPacket(
+                Unpooled.copiedBuffer(dat.getBytes()), socketAddress,
+                socketAddress);
+
+        assertNull(routingTable.findExactNode(nodeId));
+        assertEquals(17, routingTable.getTotalNodeCount());
+
+        // when
+        expect(ctx.write(capture(capturedPacket))).andReturn(null);
+
+        replayAll();
+        handler.channelRead0(ctx , packet);
+
+        // then
+        verifyAll();
+
+        ByteArrayOutputStream os = handler.extractBytes(capturedPacket
+                .getValue().content());
+
+        String result = new String(os.toByteArray());
+        assertTrue(result.startsWith("d1:rd2:id20:6h"));
+        assertTrue(result.contains("e1:t2:aa1:y1:re"));
+
+        assertEquals(18, routingTable.getTotalNodeCount());
+
+        DHTNode node = routingTable.findExactNode(nodeId);
+        assertNotNull(node.getHost());
+        assertTrue(node.getPort() > 0);
+        assertNotNull(node.getLastUpdated());
+
+        os.close();
+    }
+
+    /**
+     * testChannelRead001() - test second "ping" request
+     * Last Updated Date is changed.
+     * @throws Exception  Exception
+     */
+    @Test
+    public void testChannelRead002() throws Exception {
+        // given
+        BigInteger nodeId = new BigInteger("abcdefghij0123456789".getBytes());
+        DHTNode node = new DHTNode(nodeId, null, 0);
+        Date date = node.getLastUpdated();
+        routingTable.addNode(node);
+
+        String dat = "d1:ad2:id20:abcdefghij0123456789e1:q4:ping1:t2:aa1:y1:qe";
+
+        DatagramPacket packet = new DatagramPacket(
+                Unpooled.copiedBuffer(dat.getBytes()), socketAddress,
+                socketAddress);
+
+        // when
+        expect(ctx.write(capture(capturedPacket))).andReturn(null);
+
+        replayAll();
+        handler.channelRead0(ctx , packet);
+
+        // then
+        verifyAll();
+
+        Thread.sleep(500);
+        DHTNode node2 = routingTable.findExactNode(nodeId);
+        assertTrue(node2.getLastUpdated().after(date));
+    }
+
+    /**
+     * testChannelRead003() - "find_node" compare our result from
      * router.bittorrent.com response.
      * @throws Exception  Exception
      */
     @SuppressWarnings("unchecked")
     @Test
-    public void testChannelRead001() throws Exception {
+    public void testChannelRead003() throws Exception {
         // given
-        Capture<DatagramPacket> capturedPacket = new Capture<DatagramPacket>();
-        Map<String, Object> map = createFindRequest();
-        ByteArrayOutputStream bytes = BEncoder.bencoding(map);
-
-        InetSocketAddress recipient = new InetSocketAddress(
-                InetAddress.getByName("50.71.214.139"), 64568);
-        DatagramPacket packet = new DatagramPacket(
-                Unpooled.copiedBuffer(bytes.toByteArray()), recipient,
-                recipient);
+        DatagramPacket packet = createFindNodeRequest();
 
         // when
         expect(ctx.write(capture(capturedPacket))).andReturn(null);
@@ -143,7 +228,6 @@ public final class DHTProtocolHandlerUnitTest extends EasyMockSupport {
         assertNodesEquals((byte[]) mapA1.get("nodes"),
                 (byte[]) mapB1.get("nodes"));
 
-        bytes.close();
         os.close();
     }
 
@@ -187,6 +271,86 @@ public final class DHTProtocolHandlerUnitTest extends EasyMockSupport {
         return map;
     }
 
+    /**
+     * testChannelRead004() - test "unknown method" request.
+     * @throws Exception  Exception
+     */
+    @Test
+    public void testChannelRead004() throws Exception {
+        // given
+        String dat = "d1:ad2:id20:abcdefghij0123456789e1:q4:pinA1:t2:aa1:y1:qe";
+
+        DatagramPacket packet = new DatagramPacket(
+                Unpooled.copiedBuffer(dat.getBytes()), socketAddress,
+                socketAddress);
+
+        // when
+        expect(ctx.write(capture(capturedPacket))).andReturn(null);
+
+        replayAll();
+        handler.channelRead0(ctx , packet);
+
+        // then
+        verifyAll();
+
+        ByteArrayOutputStream os = handler.extractBytes(capturedPacket
+                .getValue().content());
+
+        String result = new String(os.toByteArray());
+        assertTrue(result
+                .startsWith("d1:rd3:20414:Method Unknowne1:t2:aa1:y1:ee"));
+
+        os.close();
+    }
+
+    /**
+     * testChannelRead005() - test "garbage" request.
+     * @throws Exception  Exception
+     */
+    @Test
+    public void testChannelRead005() throws Exception {
+        // given
+        String dat = "adsadadsa";
+
+        DatagramPacket packet = new DatagramPacket(
+                Unpooled.copiedBuffer(dat.getBytes()), socketAddress,
+                socketAddress);
+
+        // when
+        expect(ctx.write(capture(capturedPacket))).andReturn(null);
+
+        replayAll();
+        handler.channelRead0(ctx , packet);
+
+        // then
+        verifyAll();
+
+        ByteArrayOutputStream os = handler.extractBytes(capturedPacket
+                .getValue().content());
+
+        String result = new String(os.toByteArray());
+        assertTrue(result.startsWith("d1:rd3:20212:Server Errore1:y1:ee"));
+
+        os.close();
+    }
+
+    /**
+     * testChannelReadComplete01().
+     * @throws Exception Exception
+     */
+    @Test
+    public void testChannelReadComplete01() throws Exception {
+        // given
+
+        // when
+        expect(ctx.flush()).andReturn(null);
+        replayAll();
+
+        handler.channelReadComplete(ctx);
+
+        // then
+        verifyAll();
+    }
     /**
      * Adds random nodes to the routing table.
      */
@@ -254,7 +418,7 @@ public final class DHTProtocolHandlerUnitTest extends EasyMockSupport {
      * Creates a find request.
      * @return Map<String, Object>
      */
-    private Map<String, Object> createFindRequest() {
+    private Map<String, Object> createFindNodeRequestMap() {
         Map<String, Object> map = new HashMap<String, Object>();
         map.put("t", "aa");
         map.put("y", "q");
@@ -268,6 +432,25 @@ public final class DHTProtocolHandlerUnitTest extends EasyMockSupport {
 
         return map;
     }
+
+    /**
+     * Create Find Node Request packet.
+     * @return DatagramPacket
+     * @throws IOException IOException
+     */
+    private DatagramPacket createFindNodeRequest() throws IOException {
+        Map<String, Object> map = createFindNodeRequestMap();
+        ByteArrayOutputStream bytes = BEncoder.bencoding(map);
+
+        DatagramPacket packet = new DatagramPacket(
+                Unpooled.copiedBuffer(bytes.toByteArray()), socketAddress,
+                socketAddress);
+
+        bytes.close();
+
+        return packet;
+    }
+
 
     /**
      * real find_node response from router.bittorrent.com.
