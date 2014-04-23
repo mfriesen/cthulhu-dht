@@ -89,11 +89,27 @@ public final class DHTServerUnitTest {
     }
 
     /**
-     * testMain04() -p with port.
+     * testMain04() -p with invalid port.
+     */
+    @Test
+    public void testMain04() {
+        // given
+        String[] args = new String[] {"-p", "SDASDA"};
+        ByteArrayOutputStream bo = new ByteArrayOutputStream();
+        ReflectionTestUtils.setField(System.out, "out", bo);
+
+        // when
+        DHTServer.main(args);
+
+        assertUsage(bo);
+    }
+
+    /**
+     * testMain05() -p with port.
      * @throws Exception Exception
      */
     @Test(timeout = 10000)
-    public void testMain04() throws Exception {
+    public void testMain05() throws Exception {
         // given
         int port = 8000;
         final String[] args = new String[] {"-p", "" + port};
@@ -103,7 +119,7 @@ public final class DHTServerUnitTest {
         result.start();
 
         // then
-        Thread.sleep(1000);
+        Thread.sleep(4000);
 
         assertConnectedToServer(port);
 
@@ -115,7 +131,7 @@ public final class DHTServerUnitTest {
      * @throws Exception Exception
      */
     @Test(timeout = 10000)
-    public void testMain05() throws Exception {
+    public void testMain06() throws Exception {
         // given
         int port = 8080;
         final String[] args = new String[] {};
@@ -125,7 +141,7 @@ public final class DHTServerUnitTest {
         result.start();
 
         // then
-        Thread.sleep(1000);
+        Thread.sleep(4000);
 
         assertConnectedToServer(port);
 

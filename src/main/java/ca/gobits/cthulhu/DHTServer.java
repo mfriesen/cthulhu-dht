@@ -143,7 +143,7 @@ public class DHTServer {
         } catch (MissingArgumentException e) {
             showUsage(options);
         } catch (Exception e) {
-            LOGGER.fatal(e, e);
+            showUsage(options);
         }
     }
 

@@ -166,7 +166,7 @@ public final class DHTProtocolHandlerUnitTest extends EasyMockSupport {
         // then
         verifyAll();
 
-        Thread.sleep(500);
+        Thread.sleep(1500);
         DHTNode node2 = routingTable.findExactNode(nodeId);
         assertTrue(node2.getLastUpdated().after(date));
     }
