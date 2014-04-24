@@ -18,13 +18,14 @@ package ca.gobits.cthulhu;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Comparator;
 
 /**
  * ArrayList back class that guarantee the order of elements.
  *
  * @param <E> - Type of Class
  */
-public final class SortedList<E extends Comparable<E>> extends ArrayList<E> {
+public final class SortedList<E> extends ArrayList<E> {
 
     /** serialVersionUID. */
     private static final long serialVersionUID = -3438432973777683931L;
@@ -32,23 +33,31 @@ public final class SortedList<E extends Comparable<E>> extends ArrayList<E> {
     /** flag to indicate whether duplicate values are supported. */
     private final boolean allowDuplicates;
 
+    /** Comparator instance. */
+    private final Comparator<E> comparable;
+
     /**
      * Constructs an empty list with an initial capacity of ten.
+     * @param compare Comparable
      * @param duplicates  whether to allow duplicates or not
      */
-    public SortedList(final boolean duplicates) {
+    public SortedList(final Comparator<E> compare, final boolean duplicates) {
         super();
         this.allowDuplicates = duplicates;
+        this.comparable = compare;
     }
 
     /**
      * Constructs an list with initial capacity.
      * @param initialCapacity  inital capacity of list
+     * @param compare Comparable
      * @param duplicates  whether to allow duplicates or not
      */
-    public SortedList(final int initialCapacity, final boolean duplicates) {
+    public SortedList(final int initialCapacity, final Comparator<E> compare,
+            final boolean duplicates) {
         super(initialCapacity);
         this.allowDuplicates = duplicates;
+        this.comparable = compare;
     }
 
     /**
@@ -57,11 +66,12 @@ public final class SortedList<E extends Comparable<E>> extends ArrayList<E> {
      * iterator.
      *
      * @param c the collection whose elements are to be placed into this list
+     * @param compare Comparable
      * @param duplicates  whether to allow duplicates or not
      */
     public SortedList(final Collection<? extends E> c,
-            final boolean duplicates) {
-        this(c.size(), duplicates);
+        final Comparator<E> compare, final boolean duplicates) {
+        this(c.size(), compare, duplicates);
         addAll(c);
     }
 
@@ -125,7 +135,7 @@ public final class SortedList<E extends Comparable<E>> extends ArrayList<E> {
             // calculate the midpoint for roughly equal partition
             int imid = imin + ((imax - imin) / 2);
 
-            int c = e.compareTo(get(imid));
+            int c = comparable.compare(e, get(imid));
 
             if (c == 0) {
                 // key found at index imid
@@ -141,7 +151,7 @@ public final class SortedList<E extends Comparable<E>> extends ArrayList<E> {
         }
 
         if (size() > imin) {
-            int c = e.compareTo(get(imin));
+            int c = comparable.compare(e, get(imin));
             if (c > 0) {
                 imin++;
             }
@@ -153,12 +163,6 @@ public final class SortedList<E extends Comparable<E>> extends ArrayList<E> {
     @SuppressWarnings("unchecked")
     @Override
     public int indexOf(final Object o) {
-
-        if (o instanceof Comparable) {
-            return indexOf((E) o, true);
-        }
-
-        throw new UnsupportedOperationException(
-                "object must be instanceof Comparable");
+        return indexOf((E) o, true);
     }
 }

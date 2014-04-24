@@ -38,17 +38,17 @@ public final class DHTNodeUnitTest {
     public void testConstructor01() {
         // given
         BigInteger nodeId = new BigInteger("123");
-        String nodeHost = "localhost";
+        byte[] address = new byte[] {127, 0, 0, 1 };
         int nodePort = 103;
 
         // when
-        DHTNode result = new DHTNode(nodeId, nodeHost, nodePort);
+        DHTNode result = new DHTNode(nodeId, address, nodePort);
 
         // then
         assertEquals(nodeId, result.getId());
-        assertEquals(nodeHost, result.getHost());
+        assertEquals(address, result.getAddress());
         assertEquals(nodePort, result.getPort());
-        assertEquals(-1619759594, result.hashCode());
+        assertEquals(845066699, result.hashCode());
     }
 
     /**
@@ -58,16 +58,16 @@ public final class DHTNodeUnitTest {
     public void testToString01() {
         // given
         BigInteger nodeId = new BigInteger("123");
-        String nodeHost = "localhost";
+        byte[] address = new byte[] {127, 0, 0, 1 };
         int nodePort = 103;
 
         // when
-        DHTNode result = new DHTNode(nodeId, nodeHost, nodePort);
+        DHTNode result = new DHTNode(nodeId, address, nodePort);
 
         // then
         assertTrue(result.toString().startsWith("ca.gobits.cthulhu.DHTNode"));
         assertTrue(result.toString().endsWith(
-                "[id=123,host=localhost,port=103]"));
+                "[id=123,address={127,0,0,1},port=103]"));
     }
 
     /**
@@ -77,9 +77,9 @@ public final class DHTNodeUnitTest {
     public void testEquals01() {
         // given
         BigInteger nodeId = new BigInteger("123");
-        String nodeHost = "localhost";
+        byte[] address = new byte[] {127, 0, 0, 1 };
         int nodePort = 103;
-        DHTNode node = new DHTNode(nodeId, nodeHost, nodePort);
+        DHTNode node = new DHTNode(nodeId, address, nodePort);
 
         // when
         boolean result = node.equals(null);
@@ -95,9 +95,9 @@ public final class DHTNodeUnitTest {
     public void testEquals02() {
         // given
         BigInteger nodeId = new BigInteger("123");
-        String nodeHost = "localhost";
+        byte[] address = new byte[] {127, 0, 0, 1 };
         int nodePort = 103;
-        DHTNode node = new DHTNode(nodeId, nodeHost, nodePort);
+        DHTNode node = new DHTNode(nodeId, address, nodePort);
 
         // when
         boolean result = node.equals(node);
@@ -113,9 +113,9 @@ public final class DHTNodeUnitTest {
     public void testEquals03() {
         // given
         BigInteger nodeId = new BigInteger("123");
-        String nodeHost = "localhost";
+        byte[] address = new byte[] {127, 0, 0, 1 };
         int nodePort = 103;
-        DHTNode node = new DHTNode(nodeId, nodeHost, nodePort);
+        DHTNode node = new DHTNode(nodeId, address, nodePort);
 
         // when
         boolean result = node.equals("");
@@ -131,10 +131,10 @@ public final class DHTNodeUnitTest {
     public void testEquals04() {
         // given
         BigInteger nodeId = new BigInteger("123");
-        String nodeHost = "localhost";
+        byte[] address = new byte[] {127, 0, 0, 1 };
         int nodePort = 103;
-        DHTNode node = new DHTNode(nodeId, nodeHost, nodePort);
-        DHTNode node1 = new DHTNode(nodeId, nodeHost, nodePort);
+        DHTNode node = new DHTNode(nodeId, address, nodePort);
+        DHTNode node1 = new DHTNode(nodeId, address, nodePort);
 
         // when
         boolean result = node.equals(node1);
@@ -150,63 +150,15 @@ public final class DHTNodeUnitTest {
     public void testEquals05() {
         // given
         BigInteger nodeId = new BigInteger("123");
-        String nodeHost = "localhost";
+        byte[] address = new byte[] {127, 0, 0, 1 };
         int nodePort = 103;
-        DHTNode node = new DHTNode(nodeId, nodeHost, nodePort);
-        DHTNode node1 = new DHTNode(nodeId, nodeHost, 1);
+        DHTNode node = new DHTNode(nodeId, address, nodePort);
+        DHTNode node1 = new DHTNode(nodeId, address, 1);
 
         // when
         boolean result = node.equals(node1);
 
         // then
         assertFalse(result);
-    }
-
-    /**
-     * testCompareTo01() IDs are equal.
-     */
-    @Test
-    public void testCompareTo01() {
-        // given
-        DHTNode node0 = new DHTNode(new BigInteger("2"), null, 0);
-        DHTNode node1 = new DHTNode(new BigInteger("2"), null, 0);
-
-        // when
-        int result = node0.compareTo(node1);
-
-        // then
-        assertEquals(0, result);
-    }
-
-    /**
-     * testCompareTo02() ID less than.
-     */
-    @Test
-    public void testCompareTo02() {
-        // given
-        DHTNode node0 = new DHTNode(new BigInteger("2"), null, 0);
-        DHTNode node1 = new DHTNode(new BigInteger("5"), null, 0);
-
-        // when
-        int result = node0.compareTo(node1);
-
-        // then
-        assertEquals(-1, result);
-    }
-
-    /**
-     * testCompareTo03() ID greater than.
-     */
-    @Test
-    public void testCompareTo03() {
-        // given
-        DHTNode node0 = new DHTNode(new BigInteger("5"), null, 0);
-        DHTNode node1 = new DHTNode(new BigInteger("2"), null, 0);
-
-        // when
-        int result = node0.compareTo(node1);
-
-        // then
-        assertEquals(1, result);
     }
 }

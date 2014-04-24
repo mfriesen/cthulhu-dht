@@ -37,7 +37,8 @@ public final class DHTBucketRoutingTable implements DHTRoutingTable {
      * constructor.
      */
     public DHTBucketRoutingTable() {
-        this.nodes = new SortedList<DHTNode>(false);
+        this.nodes = new SortedList<DHTNode>(DHTNodeComparator.getInstance(),
+                false);
     }
 
     @Override
@@ -57,10 +58,10 @@ public final class DHTBucketRoutingTable implements DHTRoutingTable {
     public DHTNode findExactNode(final BigInteger nodeId) {
 
         DHTNode nodeMatch = null;
-        DHTNode node = new DHTNode(nodeId, null, 0);
+        DHTNode node = new DHTNode(nodeId, (byte[]) null, 0);
         int index = this.nodes.indexOf(node);
 
-        if (index < this.nodes.size()) {
+        if (index >= 0 && index < this.nodes.size()) {
             DHTNode foundNode = this.nodes.get(index);
             if (foundNode.getId().equals(nodeId)) {
                 nodeMatch = foundNode;
@@ -74,7 +75,7 @@ public final class DHTBucketRoutingTable implements DHTRoutingTable {
     public List<DHTNode> findClosestNodes(final BigInteger nodeId,
             final int returnCount) {
 
-        DHTNode node = new DHTNode(nodeId, null, 0);
+        DHTNode node = new DHTNode(nodeId, (byte[]) null, 0);
         int index = nodes.indexOf(node);
 
         int fromIndex = index > 0 ? index - 1 : 0;

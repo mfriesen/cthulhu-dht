@@ -17,6 +17,9 @@
 package ca.gobits.cthulhu;
 
 import java.math.BigInteger;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
+import java.util.Collection;
 import java.util.Date;
 
 import org.apache.commons.lang3.builder.EqualsBuilder;
@@ -26,12 +29,12 @@ import org.apache.commons.lang3.builder.ToStringBuilder;
 /**
  * DHTNode - holder for information about a DHT Node.
  */
-public final class DHTNode implements Comparable<DHTNode> {
+public final class DHTNode {
 
     /** Node identifier. */
     private final BigInteger id;
     /** Node IP address. */
-    private final String host;
+    private final byte[] address;
     /** Node listening port. */
     private final int port;
     /** cached hashCode value. */
@@ -42,23 +45,45 @@ public final class DHTNode implements Comparable<DHTNode> {
     /**
      * constructor.
      * @param nodeId Identifier
-     * @param nodeHost listening host
+     * @param addr IP address
      * @param nodePort listening port
      */
-    public DHTNode(final BigInteger nodeId, final String nodeHost,
+    public DHTNode(final BigInteger nodeId, final byte[] addr,
             final int nodePort) {
         this.id = nodeId;
-        this.host = nodeHost;
+        this.address = addr;
         this.port = nodePort;
         this.lastUpdated = new Date();
 
         this.hashCode = new HashCodeBuilder()
         .append(id)
-        .append(host)
+        .append(addr)
         .append(port)
         .toHashCode();
     }
 
+    /**
+     * constructor.
+     * @param nodeId Identifier
+     * @param addr  InetAddress
+     * @param nodePort  listening port
+     */
+    public DHTNode(final BigInteger nodeId, final InetAddress addr,
+            final int nodePort) {
+        this(nodeId, addr.getAddress(), nodePort);
+    }
+
+    /**
+     *
+     * @param nodeId Identifier
+     * @param addr  String version of address
+     * @param nodePort  listening port
+     * @throws UnknownHostException  UnknownHostException
+     */
+    public DHTNode(final BigInteger nodeId, final String addr,
+            final int nodePort) throws UnknownHostException {
+        this(nodeId, InetAddress.getByName(addr).getAddress(), nodePort);
+    }
     /**
      * @return BigInteger
      */
@@ -67,10 +92,10 @@ public final class DHTNode implements Comparable<DHTNode> {
     }
 
     /**
-     * @return String
+     * @return byte[]
      */
-    public String getHost() {
-        return host;
+    public byte[] getAddress() {
+        return address;
     }
 
     /**
@@ -84,7 +109,7 @@ public final class DHTNode implements Comparable<DHTNode> {
     public String toString() {
         ToStringBuilder builder = new ToStringBuilder(this);
         builder.append("id", id);
-        builder.append("host", host);
+        builder.append("address", address);
         builder.append("port", port);
         return builder.toString();
     }
@@ -111,14 +136,9 @@ public final class DHTNode implements Comparable<DHTNode> {
         DHTNode rhs = (DHTNode) obj;
         return new EqualsBuilder()
             .append(id, rhs.id)
-            .append(host, rhs.host)
+            .append(address, rhs.address)
             .append(port, rhs.port)
             .isEquals();
-    }
-
-    @Override
-    public int compareTo(final DHTNode o) {
-        return getId().compareTo(o.getId());
     }
 
     /**
@@ -134,5 +154,21 @@ public final class DHTNode implements Comparable<DHTNode> {
      */
     public void setLastUpdated(final Date date) {
         this.lastUpdated = date;
+    }
+
+    /**
+     * @return Collection<DHTNode>
+     */
+    public Collection<DHTNode> getPeers() {
+//        return this.peers;
+        return null;
+    }
+
+    /**
+     * Add a peer to list.
+     * @param peer  InetSocketAddress
+     */
+    public void addPeers(final DHTNode peer) {
+//        this.peers.add(peer);
     }
 }

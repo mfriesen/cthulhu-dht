@@ -22,7 +22,6 @@ import static org.junit.Assert.assertTrue;
 import java.io.ByteArrayOutputStream;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Modifier;
-import java.net.InetAddress;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -201,7 +200,7 @@ public final class BEncoderUnitTest {
     @Test
     public void testCompactAddress01() throws Exception {
         // given
-        InetAddress addr = InetAddress.getByName("37.76.160.28");
+        byte[] addr = new byte[] {37, 76, -96, 28 };
         int port = 37518;
 
         // when

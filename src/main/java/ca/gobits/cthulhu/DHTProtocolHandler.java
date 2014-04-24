@@ -25,16 +25,19 @@ import io.netty.channel.socket.DatagramPacket;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.math.BigInteger;
-import java.net.InetAddress;
 import java.net.InetSocketAddress;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Random;
 
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
 
 import ca.gobits.dht.Arrays;
 import ca.gobits.dht.BDecoder;
@@ -48,6 +51,9 @@ import ca.gobits.dht.DHTIdentifier;
 @Service
 public final class DHTProtocolHandler extends
         SimpleChannelInboundHandler<DatagramPacket> {
+
+    /** Length of Get_Peers token. */
+    private static final int GET_PEERS_TOKEN_LENGTH = 10;
 
     /** Contact information for nodes is encoded as a 26-byte string. */
     private static final int COMPACT_NODE_LENGTH = 26;
@@ -84,6 +90,10 @@ public final class DHTProtocolHandler extends
 
                 addFindNodeResponse(request, response, packet);
 
+            } else if (action.equals("get_peers")) {
+
+                addGetPeersResponse(request, response, packet);
+
             } else {
 
                 addMethodUnknownResponse(response);
@@ -102,6 +112,45 @@ public final class DHTProtocolHandler extends
 
         ctx.write(new DatagramPacket(
                 Unpooled.copiedBuffer(bytes), packet.sender()));
+    }
+
+    /**
+     * Get peers associated with a torrent infohash. If the queried node has no
+     * peers for the infohash, a key "nodes" is returned containing the K nodes
+     * in the queried nodes routing table closest to the infohash supplied in
+     * the query.
+     *
+     * @param request  Map<String, Object>
+     * @param response  Map<String, Object>
+     * @param packet  DatagramPacket
+     * @throws IOException  IOException
+     */
+    private void addGetPeersResponse(final Map<String, Object> request,
+        final Map<String, Object> response, final DatagramPacket packet)
+            throws IOException {
+
+        Map<String, Object> responseParameter = new HashMap<String, Object>();
+
+        @SuppressWarnings("unchecked")
+        Map<String, Object> arguments = (Map<String, Object>) request.get("a");
+        BigInteger infoHash = Arrays.toBigInteger((byte[]) arguments
+                .get("info_hash"));
+
+        DHTNode node = routingTable.findExactNode(infoHash);
+        if (node != null && !CollectionUtils.isEmpty(node.getPeers())) {
+            responseParameter.put("values",
+                    transformCompactPeer(node.getPeers()));
+        } else {
+
+            List<DHTNode> nodes = routingTable.findClosestNodes(infoHash);
+            byte[] transformNodes = transformNodes(nodes);
+            responseParameter.put("nodes", transformNodes);
+        }
+
+        responseParameter.put("token", generateToken(packet.sender()));
+        responseParameter.put("id", arguments.get("id"));
+
+        response.put("r", responseParameter);
     }
 
     /**
@@ -149,7 +198,7 @@ public final class DHTProtocolHandler extends
             final DatagramPacket packet) {
         InetSocketAddress addr = packet.sender();
         response.put(
-                "ip", BEncoder.compactAddress(addr.getAddress(),
+                "ip", BEncoder.compactAddress(addr.getAddress().getAddress(),
                         addr.getPort()));
     }
 
@@ -180,8 +229,8 @@ public final class DHTProtocolHandler extends
     private void ping(final BigInteger nodeId, final InetSocketAddress addr) {
         DHTNode node = routingTable.findExactNode(nodeId);
         if (node == null) {
-            String host = addr.getAddress().getHostAddress();
-            node = new DHTNode(nodeId, host, addr.getPort());
+            node = new DHTNode(nodeId, addr.getAddress().getAddress(),
+                    addr.getPort());
             routingTable.addNode(node);
         }
 
@@ -189,12 +238,30 @@ public final class DHTProtocolHandler extends
     }
 
     /**
+     * Transforms DHTNode into "compact" format peer.
+     * @param nodes  Collection of DHTNode objects
+     * @return Collection<byte[]>
+     */
+    private Collection<byte[]> transformCompactPeer(
+            final Collection<DHTNode> nodes) {
+
+        Collection<byte[]> results = new ArrayList<byte[]>(nodes.size());
+
+        for (DHTNode node : nodes) {
+            results.add(BEncoder.compactAddress(node.getAddress(),
+                    node.getPort()));
+        }
+
+        return results;
+    }
+
+    /**
      * Transforms Nodes to "compact node info" mode.
-     * @param nodes  List of DHTNode objects
+     * @param nodes  Collection of DHTNode objects
      * @return byte[]
      * @throws IOException  IOException
      */
-    private byte[] transformNodes(final List<DHTNode> nodes)
+    private byte[] transformNodes(final Collection<DHTNode> nodes)
             throws IOException {
 
         byte[] bytes = new byte[nodes.size() * COMPACT_NODE_LENGTH];
@@ -240,8 +307,8 @@ public final class DHTProtocolHandler extends
         int destPos = max > id.length ? max - id.length : 0;
         System.arraycopy(id, start, bytes, destPos, len);
 
-        InetAddress addr = InetAddress.getByName(node.getHost());
-        byte[] addrBytes = BEncoder.compactAddress(addr, node.getPort());
+        byte[] addrBytes = BEncoder.compactAddress(node.getAddress(),
+                node.getPort());
 
         System.arraycopy(addrBytes, 0, bytes, max, addrBytes.length);
 
@@ -306,5 +373,18 @@ public final class DHTProtocolHandler extends
                 .decode(os.toByteArray());
         os.close();
         return map;
+    }
+
+    /**
+     * Token returned to a get_peers request.
+     * This is to prevent malicious hosts from signing up other hosts
+     * @param inetSocketAddress address of sender
+     * @return byte[]
+     */
+    private byte[] generateToken(final InetSocketAddress inetSocketAddress) {
+        byte[] bytes = new byte[GET_PEERS_TOKEN_LENGTH];
+        Random random = new Random();
+        random.nextBytes(bytes);
+        return bytes;
     }
 }

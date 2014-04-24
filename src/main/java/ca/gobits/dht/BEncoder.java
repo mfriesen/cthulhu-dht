@@ -17,7 +17,6 @@
 package ca.gobits.dht;
 
 import java.io.ByteArrayOutputStream;
-import java.net.InetAddress;
 import java.util.Collection;
 import java.util.Map;
 import java.util.SortedMap;
@@ -172,17 +171,16 @@ public final class BEncoder {
      * "Compact IP-address/port info" the 4-byte IP address is in network
      * byte order with the 2 byte port in network byte order concatenated
      * onto the end.
-     * @param addr  InetAddress
+     * @param address  IP Address
      * @param port  port number
      * @return byte[]
      */
-    public static byte[] compactAddress(final InetAddress addr,
+    public static byte[] compactAddress(final byte[] address,
             final int port) {
-        byte[] bytes = addr.getAddress();
-        byte[] ret = new byte[bytes.length + 2];
-        System.arraycopy(bytes, 0, ret, 0, bytes.length);
+        byte[] ret = new byte[address.length + 2];
+        System.arraycopy(address, 0, ret, 0, address.length);
         System.arraycopy(new byte[] {(byte) (port >>> BIT_COUNT),
-                (byte) port }, 0, ret, bytes.length, 2);
+                (byte) port }, 0, ret, address.length, 2);
 
         return ret;
     }

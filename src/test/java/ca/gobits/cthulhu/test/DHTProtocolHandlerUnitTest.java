@@ -21,7 +21,6 @@ import static org.easymock.EasyMock.expect;
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.ChannelHandlerContext;
@@ -32,9 +31,10 @@ import java.io.IOException;
 import java.math.BigInteger;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
+import java.net.UnknownHostException;
 import java.util.Arrays;
-import java.util.Date;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.codec.binary.Base64;
@@ -48,7 +48,6 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.test.util.ReflectionTestUtils;
 
-import ca.gobits.cthulhu.DHTBucketRoutingTable;
 import ca.gobits.cthulhu.DHTNode;
 import ca.gobits.cthulhu.DHTProtocolHandler;
 import ca.gobits.cthulhu.DHTRoutingTable;
@@ -66,8 +65,9 @@ public final class DHTProtocolHandlerUnitTest extends EasyMockSupport {
     @TestSubject
     private final DHTProtocolHandler handler = new DHTProtocolHandler();
 
-    /** Reference to routing table. */
-    private final DHTRoutingTable routingTable = new DHTBucketRoutingTable();
+    /** Mock routing table. */
+    @Mock
+    private DHTRoutingTable routingTable;
 
     /** Mock ChannelHandlerContext. */
     @Mock
@@ -76,6 +76,9 @@ public final class DHTProtocolHandlerUnitTest extends EasyMockSupport {
     /** Capture DatagramPacket. */
     private final Capture<DatagramPacket> capturedPacket =
             new Capture<DatagramPacket>();
+
+    /** Capture DHTNode. */
+    private final Capture<DHTNode> captureNode = new Capture<DHTNode>();
 
     /** InetSocketAddress. */
     private InetSocketAddress socketAddress;
@@ -91,8 +94,8 @@ public final class DHTProtocolHandlerUnitTest extends EasyMockSupport {
         socketAddress = new InetSocketAddress(
                 InetAddress.getByName("50.71.214.139"), 64568);
 
-        addRandomNodesToRoutingTable();
-        addExpectedNodesToRoutingTable();
+//        addRandomNodesToRoutingTable();
+//        addExpectedNodesToRoutingTable();
     }
 
     /**
@@ -102,6 +105,7 @@ public final class DHTProtocolHandlerUnitTest extends EasyMockSupport {
     @Test
     public void testChannelRead001() throws Exception {
         // given
+        DHTNode node = null;
         BigInteger nodeId = new BigInteger("abcdefghij0123456789".getBytes());
         String dat = "d1:ad2:id20:abcdefghij0123456789e1:q4:ping1:t2:aa1:y1:qe";
 
@@ -109,10 +113,9 @@ public final class DHTProtocolHandlerUnitTest extends EasyMockSupport {
                 Unpooled.copiedBuffer(dat.getBytes()), socketAddress,
                 socketAddress);
 
-        assertNull(routingTable.findExactNode(nodeId));
-        assertEquals(17, routingTable.getTotalNodeCount());
-
         // when
+        expect(routingTable.findExactNode(nodeId)).andReturn(node);
+        routingTable.addNode(capture(captureNode));
         expect(ctx.write(capture(capturedPacket))).andReturn(null);
 
         replayAll();
@@ -128,12 +131,9 @@ public final class DHTProtocolHandlerUnitTest extends EasyMockSupport {
         assertTrue(result.startsWith("d1:rd2:id20:6h"));
         assertTrue(result.contains("e1:t2:aa1:y1:re"));
 
-        assertEquals(18, routingTable.getTotalNodeCount());
-
-        DHTNode node = routingTable.findExactNode(nodeId);
-        assertNotNull(node.getHost());
-        assertTrue(node.getPort() > 0);
-        assertNotNull(node.getLastUpdated());
+        assertNotNull(captureNode.getValue().getAddress());
+        assertEquals(64568, captureNode.getValue().getPort());
+        assertNotNull(captureNode.getValue().getLastUpdated());
 
         os.close();
     }
@@ -147,9 +147,8 @@ public final class DHTProtocolHandlerUnitTest extends EasyMockSupport {
     public void testChannelRead002() throws Exception {
         // given
         BigInteger nodeId = new BigInteger("abcdefghij0123456789".getBytes());
-        DHTNode node = new DHTNode(nodeId, null, 0);
-        Date date = node.getLastUpdated();
-        routingTable.addNode(node);
+        DHTNode node = new DHTNode(nodeId, (byte[]) null, 0);
+        node.setLastUpdated(null);
 
         String dat = "d1:ad2:id20:abcdefghij0123456789e1:q4:ping1:t2:aa1:y1:qe";
 
@@ -158,6 +157,7 @@ public final class DHTProtocolHandlerUnitTest extends EasyMockSupport {
                 socketAddress);
 
         // when
+        expect(routingTable.findExactNode(nodeId)).andReturn(node);
         expect(ctx.write(capture(capturedPacket))).andReturn(null);
 
         replayAll();
@@ -166,9 +166,7 @@ public final class DHTProtocolHandlerUnitTest extends EasyMockSupport {
         // then
         verifyAll();
 
-        Thread.sleep(1500);
-        DHTNode node2 = routingTable.findExactNode(nodeId);
-        assertTrue(node2.getLastUpdated().after(date));
+        assertNotNull(node.getLastUpdated());
     }
 
     /**
@@ -180,9 +178,12 @@ public final class DHTProtocolHandlerUnitTest extends EasyMockSupport {
     @Test
     public void testChannelRead003() throws Exception {
         // given
+        BigInteger nodeId = new BigInteger(
+                "1461501637330902918203684832716283019655932542975");
         DatagramPacket packet = createFindNodeRequest();
 
         // when
+        expect(routingTable.findClosestNodes(nodeId)).andReturn(getFindNodes());
         expect(ctx.write(capture(capturedPacket))).andReturn(null);
 
         replayAll();
@@ -335,6 +336,153 @@ public final class DHTProtocolHandlerUnitTest extends EasyMockSupport {
     }
 
     /**
+     * testChannelRead006() - test "get_peers" request and peers exists.
+     * @throws Exception  Exception
+     */
+    @Test
+    public void testChannelRead006() throws Exception {
+        // given
+        BigInteger nodeId = new BigInteger("mnopqrstuvwxyz123456".getBytes());
+        String dat = "d1:ad2:id20:abcdefghij01234567899:info_hash20:"
+                + "mnopqrstuvwxyz123456e1:q9:get_peers1:t2:aa1:y1:qe";
+
+        DHTNode node = new DHTNode(nodeId, "12.12.12.12", 99);
+        DHTNode peer = new DHTNode(null, "240.120.222.12", 23);
+        node.addPeers(peer);
+
+        DatagramPacket packet = new DatagramPacket(
+                Unpooled.copiedBuffer(dat.getBytes()), socketAddress,
+                socketAddress);
+
+        // when
+        expect(routingTable.findExactNode(nodeId)).andReturn(node);
+        expect(ctx.write(capture(capturedPacket))).andReturn(null);
+
+        replayAll();
+        handler.channelRead0(ctx , packet);
+
+        // then
+        verifyAll();
+
+        ByteArrayOutputStream os = handler.extractBytes(capturedPacket
+                .getValue().content());
+
+        @SuppressWarnings("unchecked")
+        Map<String, Object> map = (Map<String, Object>) new BDecoder()
+            .decode(os.toByteArray());
+
+        assertEquals("aa", new String((byte[]) map.get("t")));
+        assertEquals("r", new String((byte[]) map.get("y")));
+
+        @SuppressWarnings("unchecked")
+        Map<String, Object> rmap = (Map<String, Object>) map.get("r");
+
+        assertEquals(20, ((byte[]) rmap.get("id")).length);
+        assertEquals(10, ((byte[]) rmap.get("token")).length);
+
+        @SuppressWarnings("unchecked")
+        List<byte[]> list = (List<byte[]>) rmap.get("values");
+        assertEquals(1, list.size());
+        byte[] addr = list.get(0);
+        assertEquals(6, addr.length);
+        assertEquals(-16, addr[0]);
+        assertEquals(120, addr[1]);
+        assertEquals(-34, addr[2]);
+        assertEquals(12, addr[3]);
+        assertEquals(0, addr[4]);
+        assertEquals(23, addr[5]);
+
+        os.close();
+    }
+
+    /**
+     * testChannelRead007() - test "get_peers" request and InfoHash node is
+     * null.
+     *
+     * @throws Exception Exception
+     */
+    @Test
+    public void testChannelRead007() throws Exception {
+        // given
+        DHTNode node = null;
+        testGetPeersAndPeersNotFound(node);
+    }
+
+    /**
+     * testChannelRead008() - test "get_peers" request and InfoHash node is
+     * empty.
+     *
+     * @throws Exception Exception
+     */
+    @Test
+    public void testChannelRead008() throws Exception {
+        // given
+        DHTNode node = new DHTNode(null, (byte[]) null, 0);
+        testGetPeersAndPeersNotFound(node);
+    }
+
+    /**
+     * Test "get_peers" and expect peers not found.
+     * @param node  DHTNode to return
+     * @throws Exception  Exception
+     */
+    private void testGetPeersAndPeersNotFound(final DHTNode node)
+            throws Exception {
+
+        BigInteger nodeId = new BigInteger("mnopqrstuvwxyz123456".getBytes());
+        String dat = "d1:ad2:id20:abcdefghij01234567899:info_hash20:"
+                + "mnopqrstuvwxyz123456e1:q9:get_peers1:t2:aa1:y1:qe";
+
+        DatagramPacket packet = new DatagramPacket(
+                Unpooled.copiedBuffer(dat.getBytes()), socketAddress,
+                socketAddress);
+
+        // when
+        expect(routingTable.findExactNode(nodeId)).andReturn(node);
+        expect(routingTable.findClosestNodes(nodeId)).andReturn(getFindNodes());
+        expect(ctx.write(capture(capturedPacket))).andReturn(null);
+
+        replayAll();
+        handler.channelRead0(ctx , packet);
+
+        // then
+        verifyAll();
+
+        ByteArrayOutputStream os = handler.extractBytes(capturedPacket
+                .getValue().content());
+
+        @SuppressWarnings("unchecked")
+        Map<String, Object> map = (Map<String, Object>) new BDecoder()
+            .decode(os.toByteArray());
+
+        assertEquals("aa", new String((byte[]) map.get("t")));
+        assertEquals("r", new String((byte[]) map.get("y")));
+
+        @SuppressWarnings("unchecked")
+        Map<String, Object> rmap = (Map<String, Object>) map.get("r");
+
+        assertEquals(20, ((byte[]) rmap.get("id")).length);
+        assertEquals(10, ((byte[]) rmap.get("token")).length);
+
+        assertEquals(416, ((byte[]) rmap.get("nodes")).length);
+        assertEquals(
+                "s6s1sj0aMsjo0fAFMAYObQwHAZUlTKAcko6fSsRpI5pQsyj+7UB/D5"
+                + "fUrH1DCrY7sMcs71v5bQCnbfiHZdCYH+bzcSJBMroBsnzNMUIPc0T"
+                + "rbacU+emI/f3ENJ80FvNRHtQFDdrW2zSAW+gVIoWVAVfYp36yPfzL"
+                + "wyChrE+jbUxxbdwPD/tJnDRHnKk+LL0E2lNsZDNMAr7eT+L6hgEV0"
+                + "dmFDd76VjKCOU0lzsq2xcpc7V1FQ3c1TskWAgINWmFP8ZwVCfqL+C2"
+                + "gGgWB5RBVXXIJ0QSc7jPmoezhUWU4FxDLlSqWQ6YyH8+qJhxH2JA24"
+                + "fZkTg2cGqCiigLpTryy3qIXR2LYcjkD0zuwq7mXTdW4xHM0jckJkh/"
+                + "YovBPn1VwC+JW0CQiRviQspuEOdqnVNgDH7U4wuofhLVzzTAzsibfP6"
+                + "HZ5PrsGT6YuQxQ6bXWL8YscSaD7Z5naTyhNbye99B64dG5J08WQ0yWd"
+                + "pwHVCMYWbhgQ2OE3X4RTyLF7WXyXGNXe2YIxN47mXqYnZtH9vXi/dzC"
+                + "giaNTUqwDDsy8HE=",
+                Base64.encodeBase64String((byte[]) rmap.get("nodes")));
+
+        os.close();
+    }
+
+    /**
      * testChannelReadComplete01().
      * @throws Exception Exception
      */
@@ -351,65 +499,61 @@ public final class DHTProtocolHandlerUnitTest extends EasyMockSupport {
         // then
         verifyAll();
     }
-    /**
-     * Adds random nodes to the routing table.
-     */
-    private void addRandomNodesToRoutingTable() {
-        routingTable.addNode(new DHTNode(new BigInteger("1"), "12.12.12.12",
-                432));
-    }
 
     /**
      * Adds expected nodes to the routing table.
+     * @throws UnknownHostException  UnknownHostException
+     * @return List<DHTNode>
      */
-    private void addExpectedNodesToRoutingTable() {
+    private List<DHTNode> getFindNodes() throws UnknownHostException {
 
-        routingTable.addNode(new DHTNode(new BigInteger(
+        return Arrays.asList(
+                new DHTNode(new BigInteger(
                 "1025727453009050644114422909938179475956677673365"),
-                "37.76.160.28", 37518));
-        routingTable.addNode(new DHTNode(new BigInteger(
+                "37.76.160.28", 37518),
+        new DHTNode(new BigInteger(
                 "909396897490697132528408310795708133687135388426"),
-                "182.59.176.199", 11503));
-        routingTable.addNode(new DHTNode(new BigInteger(
+                "182.59.176.199", 11503),
+        new DHTNode(new BigInteger(
                 "525080541161122160152898021711579691652547262977"),
-                "178.124.205.49", 16911));
-        routingTable.addNode(new DHTNode(new BigInteger(
+                "178.124.205.49", 16911),
+        new DHTNode(new BigInteger(
                 "658070898018303575756492289276695009391046368980"),
-                "5.13.218.214", 56116));
-        routingTable.addNode(new DHTNode(new BigInteger(
+                "5.13.218.214", 56116),
+        new DHTNode(new BigInteger(
                 "732800403720670969048970409366815229228420735404"),
-                "79.163.109.76", 29037));
-        routingTable.addNode(new DHTNode(new BigInteger(
+                "79.163.109.76", 29037),
+        new DHTNode(new BigInteger(
                 "1256313872952230430598882201394466767467396215628"),
-                "2.190.222.79", 58106));
-        routingTable.addNode(new DHTNode(new BigInteger(
+                "2.190.222.79", 58106),
+        new DHTNode(new BigInteger(
                 "765028964801745612216665519019856689419949360586"),
-                "92.237.93.69", 17271));
-        routingTable.addNode(new DHTNode(new BigInteger(
+                "92.237.93.69", 17271),
+        new DHTNode(new BigInteger(
                 "304333486037502350876881646365121976203989590042"),
-                "5.129.229.16", 21853));
-        routingTable.addNode(new DHTNode(new BigInteger(
+                "5.129.229.16", 21853),
+        new DHTNode(new BigInteger(
                 "651043862618190073616414008555095633000553327254"),
-                "67.166.50.31", 53162));
-        routingTable.addNode(new DHTNode(new BigInteger(
+                "67.166.50.31", 53162),
+        new DHTNode(new BigInteger(
                 "217572328821850967755762913845138112465869557436"),
-                "178.222.162.23", 18274));
-        routingTable.addNode(new DHTNode(new BigInteger(
+                "178.222.162.23", 18274),
+        new DHTNode(new BigInteger(
                 "1235689258152504075304182876266224318368488950162"),
-                "31.216.162.240", 20383));
-        routingTable.addNode(new DHTNode(new BigInteger(
+                "31.216.162.240", 20383),
+        new DHTNode(new BigInteger(
                 "487762934236616301113020799412763967579181340675"),
-                "31.181.56.194", 59935));
-        routingTable.addNode(new DHTNode(new BigInteger(
+                "31.181.56.194", 59935),
+        new DHTNode(new BigInteger(
                 "757633304364519595494275276101980823332425611532"),
-                "80.233.181.214", 12230));
-        routingTable.addNode(new DHTNode(new BigInteger(
+                "80.233.181.214", 12230),
+        new DHTNode(new BigInteger(
                 "253718933283387888344146948372599275024431560999"),
-                "79.22.67.76", 38518));
-        routingTable.addNode(new DHTNode(new BigInteger(
+                "79.22.67.76", 38518),
+        new DHTNode(new BigInteger(
                 "890765994839177116145299793227790251293353534962"),
-                "92.99.87.123", 26120));
-        routingTable.addNode(new DHTNode(new BigInteger(
+                "92.99.87.123", 26120),
+        new DHTNode(new BigInteger(
                 "1123918148366576699094456176144333565208604527946"),
                 "176.12.59.50", 61553));
     }

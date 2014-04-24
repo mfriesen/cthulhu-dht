@@ -20,8 +20,8 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 import java.math.BigInteger;
-import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Random;
@@ -35,6 +35,33 @@ import ca.gobits.cthulhu.SortedList;
  */
 public final class SortedListUnitTest {
 
+    /** BigInteger Comparator. */
+    private static final Comparator<BigInteger> BIGINTEGER_COMPARATOR =
+            new Comparator<BigInteger>() {
+        @Override
+        public int compare(final BigInteger o1, final BigInteger o2) {
+            return o1.compareTo(o2);
+        }
+    };
+
+    /** Integer Comparator. */
+    private static final Comparator<Integer> INTEGER_COMPARATOR =
+            new Comparator<Integer>() {
+        @Override
+        public int compare(final Integer o1, final Integer o2) {
+            return o1.compareTo(o2);
+        }
+    };
+
+    /** Double Comparator. */
+    private static final Comparator<Double> DOUBLE_COMPARATOR =
+            new Comparator<Double>() {
+        @Override
+        public int compare(final Double o1, final Double o2) {
+            return o1.compareTo(o2);
+        }
+    };
+
     /**
      * testConstructor01().
      */
@@ -45,7 +72,8 @@ public final class SortedListUnitTest {
         List<String> elements = Arrays.asList("z", "c", "a", "c");
 
         // when
-        SortedList<String> list = new SortedList<String>(elements, duplicates);
+        SortedList<String> list = new SortedList<String>(elements,
+                String.CASE_INSENSITIVE_ORDER, duplicates);
 
         // then
         assertEquals(4, list.size());
@@ -62,7 +90,8 @@ public final class SortedListUnitTest {
     public void testAdd01() {
         // given
         boolean duplicates = true;
-        SortedList<String> list = new SortedList<String>(duplicates);
+        SortedList<String> list = new SortedList<String>(
+                String.CASE_INSENSITIVE_ORDER, duplicates);
 
         // when
         list.add("test");
@@ -79,7 +108,8 @@ public final class SortedListUnitTest {
     public void testAdd02() {
         // given
         boolean duplicates = true;
-        SortedList<String> list = new SortedList<String>(duplicates);
+        SortedList<String> list = new SortedList<String>(
+                String.CASE_INSENSITIVE_ORDER, duplicates);
 
         // when
         list.add("a");
@@ -100,7 +130,8 @@ public final class SortedListUnitTest {
     public void testAdd03() {
         // given
         boolean duplicates = true;
-        SortedList<Integer> list = new SortedList<Integer>(duplicates);
+        SortedList<Integer> list = new SortedList<Integer>(
+                INTEGER_COMPARATOR, duplicates);
 
         // when
         for (int i = 18; i >= 0; i -= 2) {
@@ -131,7 +162,8 @@ public final class SortedListUnitTest {
     public void testAdd04() {
         // given
         boolean duplicates = true;
-        SortedList<String> list = new SortedList<String>(duplicates);
+        SortedList<String> list = new SortedList<String>(
+                String.CASE_INSENSITIVE_ORDER, duplicates);
 
         // when
         list.add("z");
@@ -152,7 +184,8 @@ public final class SortedListUnitTest {
     public void testAdd05() {
         // given
         boolean duplicates = true;
-        SortedList<String> list = new SortedList<String>(duplicates);
+        SortedList<String> list = new SortedList<String>(
+                String.CASE_INSENSITIVE_ORDER, duplicates);
 
         // when
         list.add("z");
@@ -175,7 +208,8 @@ public final class SortedListUnitTest {
     public void testAdd06() {
         // given
         boolean duplicates = false;
-        SortedList<String> list = new SortedList<String>(duplicates);
+        SortedList<String> list = new SortedList<String>(
+                String.CASE_INSENSITIVE_ORDER, duplicates);
 
         // when
         list.add("z");
@@ -197,7 +231,8 @@ public final class SortedListUnitTest {
     public void testAdd07() {
         // given
         boolean duplicates = false;
-        SortedList<Double> list = new SortedList<Double>(duplicates);
+        SortedList<Double> list = new SortedList<Double>(
+                DOUBLE_COMPARATOR, duplicates);
         Double d0 = Double.valueOf(1);
         Double d1 = Double
                 .valueOf(217572328821850967755762913845138112465869557436d);
@@ -229,7 +264,8 @@ public final class SortedListUnitTest {
         // given
         int len = 10000;
         boolean duplicates = false;
-        SortedList<BigInteger> list = new SortedList<BigInteger>(duplicates);
+        SortedList<BigInteger> list = new SortedList<BigInteger>(
+                BIGINTEGER_COMPARATOR, duplicates);
         Random rnd = new Random(System.currentTimeMillis());
 
         // when
@@ -255,7 +291,8 @@ public final class SortedListUnitTest {
     public void testAddAll01() {
         // given
         boolean duplicates = false;
-        SortedList<String> list = new SortedList<String>(duplicates);
+        SortedList<String> list = new SortedList<String>(
+                String.CASE_INSENSITIVE_ORDER, duplicates);
 
         // when
         list.addAll(Arrays.asList("z", "c", "a", "c"));
@@ -274,7 +311,8 @@ public final class SortedListUnitTest {
     public void testAddAll02() {
         // given
         boolean duplicates = true;
-        SortedList<String> list = new SortedList<String>(duplicates);
+        SortedList<String> list = new SortedList<String>(
+                String.CASE_INSENSITIVE_ORDER, duplicates);
 
         // when
         list.addAll(Arrays.asList("z", "c", "a", "c"));
@@ -293,7 +331,8 @@ public final class SortedListUnitTest {
     @Test
     public void testIndexOf01() {
         // given
-        SortedList<String> list = new SortedList<String>(true);
+        SortedList<String> list = new SortedList<String>(
+                String.CASE_INSENSITIVE_ORDER, true);
 
         // when
         list.addAll(Arrays.asList("z", "c", "a", "c"));
@@ -306,27 +345,14 @@ public final class SortedListUnitTest {
     }
 
     /**
-     * testIndexOf02() - not instance of Comparable.
-     */
-    @Test(expected = UnsupportedOperationException.class)
-    public void testIndexOf02() {
-        // given
-        SortedList<String> list = new SortedList<String>(true);
-
-        // when
-        list.indexOf(new ArrayList<String>());
-
-        // then
-    }
-
-    /**
      * testAddAtIndex01().
      */
     @Test(expected = UnsupportedOperationException.class)
     public void testAddAtIndex01() {
         // given
         boolean duplicates = false;
-        SortedList<String> list = new SortedList<String>(duplicates);
+        SortedList<String> list = new SortedList<String>(
+                String.CASE_INSENSITIVE_ORDER, duplicates);
 
         // when
         list.add(0, "AD");
@@ -341,7 +367,8 @@ public final class SortedListUnitTest {
     public void testAddAllAtIndex01() {
         // given
         boolean duplicates = false;
-        SortedList<String> list = new SortedList<String>(duplicates);
+        SortedList<String> list = new SortedList<String>(
+                String.CASE_INSENSITIVE_ORDER, duplicates);
 
         // when
         list.addAll(0, Arrays.asList("AD"));
@@ -356,7 +383,8 @@ public final class SortedListUnitTest {
     public void testSet01() {
         // given
         boolean duplicates = false;
-        SortedList<String> list = new SortedList<String>(duplicates);
+        SortedList<String> list = new SortedList<String>(
+                String.CASE_INSENSITIVE_ORDER, duplicates);
 
         // when
         list.set(0, "AD");
