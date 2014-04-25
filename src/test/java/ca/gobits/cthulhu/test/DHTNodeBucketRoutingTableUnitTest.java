@@ -25,14 +25,14 @@ import java.util.List;
 
 import org.junit.Test;
 
-import ca.gobits.cthulhu.DHTBucketRoutingTable;
 import ca.gobits.cthulhu.DHTNode;
+import ca.gobits.cthulhu.DHTNodeBucketRoutingTable;
 import ca.gobits.cthulhu.SortedList;
 
 /**
  * DHTBucketRoutingTableTest.
  */
-public final class DHTBucketRoutingTableUnitTest {
+public final class DHTNodeBucketRoutingTableUnitTest {
 
     /**
      * testConstructor01().
@@ -40,10 +40,10 @@ public final class DHTBucketRoutingTableUnitTest {
     @Test
     public void testConstructor01() {
         // given
-        DHTBucketRoutingTable routingTable = new DHTBucketRoutingTable();
+        DHTNodeBucketRoutingTable rt = new DHTNodeBucketRoutingTable();
 
         // when
-        SortedList<DHTNode> result = routingTable.getNodes();
+        SortedList<DHTNode> result = rt.getNodes();
 
         // then
         assertEquals(0, result.size());
@@ -55,15 +55,15 @@ public final class DHTBucketRoutingTableUnitTest {
     @Test
     public void testAddNode01() {
         // given
-        DHTBucketRoutingTable routingTable = new DHTBucketRoutingTable();
+        DHTNodeBucketRoutingTable rt = new DHTNodeBucketRoutingTable();
         DHTNode node = new DHTNode(new BigInteger("1"), (byte[]) null, 0);
 
         // when
-        routingTable.addNode(node);
+        rt.addNode(node);
 
         // then
-        assertEquals(1, routingTable.getTotalNodeCount());
-        SortedList<DHTNode> root = routingTable.getNodes();
+        assertEquals(1, rt.getTotalNodeCount());
+        SortedList<DHTNode> root = rt.getNodes();
         assertEquals(1, root.size());
         assertEquals(node, root.get(0));
     }
@@ -74,19 +74,19 @@ public final class DHTBucketRoutingTableUnitTest {
     @Test
     public void testAddNode02() {
         // given
-        int nodeCount = DHTBucketRoutingTable.MAX_NUMBER_OF_NODES + 1;
-        DHTBucketRoutingTable routingTable = new DHTBucketRoutingTable();
+        int nodeCount = DHTNodeBucketRoutingTable.MAX_NUMBER_OF_NODES + 1;
+        DHTNodeBucketRoutingTable rt = new DHTNodeBucketRoutingTable();
 
         // when
         for (int i = 0; i < nodeCount; i++) {
             DHTNode node = new DHTNode(new BigInteger("" + i),
                     (byte[]) null, 0);
-            routingTable.addNode(node);
+            rt.addNode(node);
         }
 
         // then
-        assertEquals(DHTBucketRoutingTable.MAX_NUMBER_OF_NODES,
-                routingTable.getTotalNodeCount());
+        assertEquals(DHTNodeBucketRoutingTable.MAX_NUMBER_OF_NODES,
+                rt.getTotalNodeCount());
     }
 
     /**
@@ -95,17 +95,17 @@ public final class DHTBucketRoutingTableUnitTest {
     @Test
     public void testAddNode03() {
         // given
-        DHTBucketRoutingTable routingTable = new DHTBucketRoutingTable();
+        DHTNodeBucketRoutingTable rt = new DHTNodeBucketRoutingTable();
         DHTNode node = new DHTNode(new BigInteger("1"),
                 (byte[]) null, 0);
 
         // when
-        routingTable.addNode(node);
-        routingTable.addNode(node);
+        rt.addNode(node);
+        rt.addNode(node);
 
         // then
-        assertEquals(1, routingTable.getTotalNodeCount());
-        SortedList<DHTNode> root = routingTable.getNodes();
+        assertEquals(1, rt.getTotalNodeCount());
+        SortedList<DHTNode> root = rt.getNodes();
         assertEquals(1, root.size());
         assertEquals(node, root.get(0));
     }
@@ -116,7 +116,7 @@ public final class DHTBucketRoutingTableUnitTest {
     @Test
     public void testAddNode04() {
         // given
-        DHTBucketRoutingTable routingTable = new DHTBucketRoutingTable();
+        DHTNodeBucketRoutingTable rt = new DHTNodeBucketRoutingTable();
         DHTNode node0 = new DHTNode(new BigInteger("1"), (byte[]) null, 0);
         DHTNode node1 = new DHTNode(new BigInteger(
                 "217572328821850967755762913845138112465869557436"),
@@ -129,14 +129,14 @@ public final class DHTBucketRoutingTableUnitTest {
                 (byte[]) null, 0);
 
         // when
-        routingTable.addNode(node0);
-        routingTable.addNode(node3);
-        routingTable.addNode(node2);
-        routingTable.addNode(node1);
+        rt.addNode(node0);
+        rt.addNode(node3);
+        rt.addNode(node2);
+        rt.addNode(node1);
 
         // then
-        assertEquals(4, routingTable.getTotalNodeCount());
-        SortedList<DHTNode> nodes = routingTable.getNodes();
+        assertEquals(4, rt.getTotalNodeCount());
+        SortedList<DHTNode> nodes = rt.getNodes();
         assertEquals(node0, nodes.get(0));
         assertEquals(node1, nodes.get(1));
         assertEquals(node2, nodes.get(2));
@@ -150,7 +150,7 @@ public final class DHTBucketRoutingTableUnitTest {
     public void testFindClosestNodes01() {
         // given
         DHTNode n = new DHTNode(new BigInteger("11"), (byte[]) null, 0);
-        DHTBucketRoutingTable rt = new DHTBucketRoutingTable();
+        DHTNodeBucketRoutingTable rt = new DHTNodeBucketRoutingTable();
 
         addNodes(rt);
 
@@ -177,7 +177,7 @@ public final class DHTBucketRoutingTableUnitTest {
     public void testFindClosestNodes02() {
         // given
         DHTNode n = new DHTNode(new BigInteger("1"), (byte[]) null, 0);
-        DHTBucketRoutingTable rt = new DHTBucketRoutingTable();
+        DHTNodeBucketRoutingTable rt = new DHTNodeBucketRoutingTable();
 
         addNodes(rt);
 
@@ -204,7 +204,7 @@ public final class DHTBucketRoutingTableUnitTest {
     public void testFindClosestNodes03() {
         // given
         DHTNode n = new DHTNode(new BigInteger("41"), (byte[]) null, 0);
-        DHTBucketRoutingTable rt = new DHTBucketRoutingTable();
+        DHTNodeBucketRoutingTable rt = new DHTNodeBucketRoutingTable();
 
         addNodes(rt);
 
@@ -230,7 +230,7 @@ public final class DHTBucketRoutingTableUnitTest {
     public void testFindClosestNodes04() {
         // given
         DHTNode n = new DHTNode(new BigInteger("22"), (byte[]) null, 0);
-        DHTBucketRoutingTable rt = new DHTBucketRoutingTable();
+        DHTNodeBucketRoutingTable rt = new DHTNodeBucketRoutingTable();
 
         addNodes(rt);
 
@@ -256,7 +256,7 @@ public final class DHTBucketRoutingTableUnitTest {
     public void testFindClosestNodes05() {
         // given
         DHTNode n = new DHTNode(new BigInteger("0"), (byte[]) null, 0);
-        DHTBucketRoutingTable rt = new DHTBucketRoutingTable();
+        DHTNodeBucketRoutingTable rt = new DHTNodeBucketRoutingTable();
 
         addNodes(rt);
 
@@ -273,7 +273,7 @@ public final class DHTBucketRoutingTableUnitTest {
     @Test
     public void testFindExactNode01() {
         // given
-        DHTBucketRoutingTable rt = new DHTBucketRoutingTable();
+        DHTNodeBucketRoutingTable rt = new DHTNodeBucketRoutingTable();
         BigInteger nodeId = new BigInteger("5");
 
         // when
@@ -289,7 +289,7 @@ public final class DHTBucketRoutingTableUnitTest {
     @Test
     public void testFindExactNode02() {
         // given
-        DHTBucketRoutingTable rt = new DHTBucketRoutingTable();
+        DHTNodeBucketRoutingTable rt = new DHTNodeBucketRoutingTable();
         BigInteger nodeId = new BigInteger("5");
         addNodes(rt);
 
@@ -306,7 +306,7 @@ public final class DHTBucketRoutingTableUnitTest {
     @Test
     public void testFindExactNode03() {
         // given
-        DHTBucketRoutingTable rt = new DHTBucketRoutingTable();
+        DHTNodeBucketRoutingTable rt = new DHTNodeBucketRoutingTable();
         BigInteger nodeId = new BigInteger("4");
         addNodes(rt);
 
@@ -322,7 +322,7 @@ public final class DHTBucketRoutingTableUnitTest {
      * Add Nodes to routing table.
      * @param rt routing table.
      */
-    private void addNodes(final DHTBucketRoutingTable rt) {
+    private void addNodes(final DHTNodeBucketRoutingTable rt) {
         for (int i = 0; i < 40; i = i + 2) {
             DHTNode node = new DHTNode(new BigInteger("" + i),
                     (byte[]) null, 0);

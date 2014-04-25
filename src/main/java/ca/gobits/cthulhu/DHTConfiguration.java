@@ -32,8 +32,8 @@ public class DHTConfiguration {
      * @return DHTRoutingTable
      */
     @Bean
-    public DHTRoutingTable routingTable() {
-        return new DHTBucketRoutingTable();
+    public DHTNodeRoutingTable routingTable() {
+        return new DHTNodeBucketRoutingTable();
     }
 
     /**

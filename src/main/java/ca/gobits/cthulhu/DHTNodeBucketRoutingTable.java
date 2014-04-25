@@ -25,7 +25,7 @@ import java.util.List;
  * http://www.bittorrent.org/beps/bep_0005.html
  *
  */
-public final class DHTBucketRoutingTable implements DHTRoutingTable {
+public final class DHTNodeBucketRoutingTable implements DHTNodeRoutingTable {
 
     /** root node of the routing table. */
     private final SortedList<DHTNode> nodes;
@@ -36,7 +36,7 @@ public final class DHTBucketRoutingTable implements DHTRoutingTable {
     /**
      * constructor.
      */
-    public DHTBucketRoutingTable() {
+    public DHTNodeBucketRoutingTable() {
         this.nodes = new SortedList<DHTNode>(DHTNodeComparator.getInstance(),
                 false);
     }

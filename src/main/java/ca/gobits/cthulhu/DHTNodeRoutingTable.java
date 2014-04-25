@@ -20,10 +20,10 @@ import java.math.BigInteger;
 import java.util.List;
 
 /**
- * DHTRoutingTable interface.
+ * DHTNodeRoutingTable interface.
  *
  */
-public interface DHTRoutingTable {
+public interface DHTNodeRoutingTable {
 
     /** Default Max Number of nodes returned on search. */
     int DEFAULT_SEARCH_COUNT = 16;

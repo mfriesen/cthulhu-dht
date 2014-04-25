@@ -63,7 +63,7 @@ public final class DHTProtocolHandler extends
 
     /** DHT Node Routing Table. */
     @Autowired
-    private DHTRoutingTable routingTable;
+    private DHTNodeRoutingTable routingTable;
 
     /** DHT Peer Routing Table. */
     @Autowired
