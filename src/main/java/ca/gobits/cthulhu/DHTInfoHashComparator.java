@@ -16,32 +16,33 @@
 
 package ca.gobits.cthulhu;
 
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.ComponentScan;
-import org.springframework.context.annotation.Configuration;
+import java.util.Comparator;
 
 /**
- * DHT Configuration class.
+ * DHTInfoHash Comparator.
+ *
  */
-@Configuration
-@ComponentScan({"ca.gobits.cthulhu" })
-public class DHTConfiguration {
+public final class DHTInfoHashComparator implements Comparator<DHTInfoHash> {
 
-    //CHECKSTYLE:OFF
+    /** static comparator instance. */
+    private static DHTInfoHashComparator comparator =
+            new DHTInfoHashComparator();
+
     /**
-     * @return DHTRoutingTable
+     * @return Comparator<DHTInfoHash>
      */
-    @Bean
-    public DHTRoutingTable routingTable() {
-        return new DHTBucketRoutingTable();
+    public static Comparator<DHTInfoHash> getInstance() {
+        return comparator;
     }
 
     /**
-     * @return DHTInfoHashRoutingTable
+     * private constructor.
      */
-    @Bean
-    public DHTInfoHashRoutingTable infoHashRoutingTable() {
-        return new DHTInfoHashRoutingTableBasic();
+    private DHTInfoHashComparator() {
     }
-    //CHECKSTYLE:ON
+
+    @Override
+    public int compare(final DHTInfoHash o1, final DHTInfoHash o2) {
+        return o1.getId().compareTo(o2.getId());
+    }
 }

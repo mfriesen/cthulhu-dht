@@ -26,7 +26,6 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.math.BigInteger;
 import java.net.InetSocketAddress;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
@@ -65,6 +64,10 @@ public final class DHTProtocolHandler extends
     /** DHT Node Routing Table. */
     @Autowired
     private DHTRoutingTable routingTable;
+
+    /** DHT Peer Routing Table. */
+    @Autowired
+    private DHTInfoHashRoutingTable peerRoutingTable;
 
     @Override
     public void channelRead0(final ChannelHandlerContext ctx,
@@ -136,10 +139,9 @@ public final class DHTProtocolHandler extends
         BigInteger infoHash = Arrays.toBigInteger((byte[]) arguments
                 .get("info_hash"));
 
-        DHTNode node = routingTable.findExactNode(infoHash);
-        if (node != null && !CollectionUtils.isEmpty(node.getPeers())) {
-            responseParameter.put("values",
-                    transformCompactPeer(node.getPeers()));
+        Collection<byte[]> peers = peerRoutingTable.findPeers(infoHash);
+        if (!CollectionUtils.isEmpty(peers)) {
+            responseParameter.put("values", peers);
         } else {
 
             List<DHTNode> nodes = routingTable.findClosestNodes(infoHash);
@@ -235,24 +237,6 @@ public final class DHTProtocolHandler extends
         }
 
         node.setLastUpdated(new Date());
-    }
-
-    /**
-     * Transforms DHTNode into "compact" format peer.
-     * @param nodes  Collection of DHTNode objects
-     * @return Collection<byte[]>
-     */
-    private Collection<byte[]> transformCompactPeer(
-            final Collection<DHTNode> nodes) {
-
-        Collection<byte[]> results = new ArrayList<byte[]>(nodes.size());
-
-        for (DHTNode node : nodes) {
-            results.add(BEncoder.compactAddress(node.getAddress(),
-                    node.getPort()));
-        }
-
-        return results;
     }
 
     /**

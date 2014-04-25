@@ -48,6 +48,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.test.util.ReflectionTestUtils;
 
+import ca.gobits.cthulhu.DHTInfoHashRoutingTable;
 import ca.gobits.cthulhu.DHTNode;
 import ca.gobits.cthulhu.DHTProtocolHandler;
 import ca.gobits.cthulhu.DHTRoutingTable;
@@ -68,6 +69,10 @@ public final class DHTProtocolHandlerUnitTest extends EasyMockSupport {
     /** Mock routing table. */
     @Mock
     private DHTRoutingTable routingTable;
+
+    /** Mock Peer Routing Table. */
+    @Mock
+    private DHTInfoHashRoutingTable peerRoutingTable;
 
     /** Mock ChannelHandlerContext. */
     @Mock
@@ -346,16 +351,17 @@ public final class DHTProtocolHandlerUnitTest extends EasyMockSupport {
         String dat = "d1:ad2:id20:abcdefghij01234567899:info_hash20:"
                 + "mnopqrstuvwxyz123456e1:q9:get_peers1:t2:aa1:y1:qe";
 
-        DHTNode node = new DHTNode(nodeId, "12.12.12.12", 99);
-        DHTNode peer = new DHTNode(null, "240.120.222.12", 23);
-        node.addPeers(peer);
+        byte[] compactAddr = BEncoder.compactAddress(
+                InetAddress.getByName("240.120.222.12")
+                .getAddress(), 23);
 
         DatagramPacket packet = new DatagramPacket(
                 Unpooled.copiedBuffer(dat.getBytes()), socketAddress,
                 socketAddress);
 
         // when
-        expect(routingTable.findExactNode(nodeId)).andReturn(node);
+        expect(peerRoutingTable.findPeers(nodeId)).andReturn(
+                Arrays.asList(compactAddr));
         expect(ctx.write(capture(capturedPacket))).andReturn(null);
 
         replayAll();
@@ -404,31 +410,6 @@ public final class DHTProtocolHandlerUnitTest extends EasyMockSupport {
     @Test
     public void testChannelRead007() throws Exception {
         // given
-        DHTNode node = null;
-        testGetPeersAndPeersNotFound(node);
-    }
-
-    /**
-     * testChannelRead008() - test "get_peers" request and InfoHash node is
-     * empty.
-     *
-     * @throws Exception Exception
-     */
-    @Test
-    public void testChannelRead008() throws Exception {
-        // given
-        DHTNode node = new DHTNode(null, (byte[]) null, 0);
-        testGetPeersAndPeersNotFound(node);
-    }
-
-    /**
-     * Test "get_peers" and expect peers not found.
-     * @param node  DHTNode to return
-     * @throws Exception  Exception
-     */
-    private void testGetPeersAndPeersNotFound(final DHTNode node)
-            throws Exception {
-
         BigInteger nodeId = new BigInteger("mnopqrstuvwxyz123456".getBytes());
         String dat = "d1:ad2:id20:abcdefghij01234567899:info_hash20:"
                 + "mnopqrstuvwxyz123456e1:q9:get_peers1:t2:aa1:y1:qe";
@@ -438,7 +419,7 @@ public final class DHTProtocolHandlerUnitTest extends EasyMockSupport {
                 socketAddress);
 
         // when
-        expect(routingTable.findExactNode(nodeId)).andReturn(node);
+        expect(peerRoutingTable.findPeers(nodeId)).andReturn(null);
         expect(routingTable.findClosestNodes(nodeId)).andReturn(getFindNodes());
         expect(ctx.write(capture(capturedPacket))).andReturn(null);
 

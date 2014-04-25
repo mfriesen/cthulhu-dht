@@ -16,16 +16,19 @@
 
 package ca.gobits.cthulhu;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Comparator;
+import java.util.Iterator;
+import java.util.List;
 
 /**
  * ArrayList back class that guarantee the order of elements.
  *
  * @param <E> - Type of Class
  */
-public final class SortedList<E> extends ArrayList<E> {
+public final class SortedList<E> implements Serializable {
 
     /** serialVersionUID. */
     private static final long serialVersionUID = -3438432973777683931L;
@@ -36,13 +39,16 @@ public final class SortedList<E> extends ArrayList<E> {
     /** Comparator instance. */
     private final Comparator<E> comparable;
 
+    /** Backing list implementation. */
+    private final ArrayList<E> list;
+
     /**
      * Constructs an empty list with an initial capacity of ten.
      * @param compare Comparable
      * @param duplicates  whether to allow duplicates or not
      */
     public SortedList(final Comparator<E> compare, final boolean duplicates) {
-        super();
+        list = new ArrayList<E>();
         this.allowDuplicates = duplicates;
         this.comparable = compare;
     }
@@ -55,7 +61,7 @@ public final class SortedList<E> extends ArrayList<E> {
      */
     public SortedList(final int initialCapacity, final Comparator<E> compare,
             final boolean duplicates) {
-        super(initialCapacity);
+        list = new ArrayList<E>(initialCapacity);
         this.allowDuplicates = duplicates;
         this.comparable = compare;
     }
@@ -75,39 +81,28 @@ public final class SortedList<E> extends ArrayList<E> {
         addAll(c);
     }
 
-    @Override
+    /**
+     * Adds object to list.
+     * @param e  object to add
+     * @return boolean whether add was successful or not
+     */
     public boolean add(final E e) {
 
         int position = indexOf(e, allowDuplicates);
         boolean added = position > -1;
 
         if (added) {
-            super.add(position, e);
+            list.add(position, e);
         }
 
         return added;
     }
 
-    @Override
-    public void add(final int index, final E element) {
-        throw new UnsupportedOperationException(
-                "element position cannot be specified");
-    }
-
-    @Override
-    public boolean addAll(final int index,
-            final Collection<? extends E> c) {
-        throw new UnsupportedOperationException(
-                "element position cannot be specified");
-    }
-
-    @Override
-    public E set(final int index, final E element) {
-        throw new UnsupportedOperationException(
-                "element position cannot be specified");
-    }
-
-    @Override
+    /**
+     * Adds collection of objects to list.
+     * @param c  collection of objects
+     * @return boolean whether add was successful or not
+     */
     public boolean addAll(final Collection<? extends E> c) {
 
         boolean added = false;
@@ -129,13 +124,13 @@ public final class SortedList<E> extends ArrayList<E> {
     private int indexOf(final E e, final boolean duplicates) {
 
         int imin = 0;
-        int imax = size();
+        int imax = list.size();
         // continue searching while [imin,imax] is not empty
-        while (size() > 0 && imax > imin) {
+        while (list.size() > 0 && imax > imin) {
             // calculate the midpoint for roughly equal partition
             int imid = imin + ((imax - imin) / 2);
 
-            int c = comparable.compare(e, get(imid));
+            int c = comparable.compare(e, list.get(imid));
 
             if (c == 0) {
                 // key found at index imid
@@ -150,8 +145,8 @@ public final class SortedList<E> extends ArrayList<E> {
             }
         }
 
-        if (size() > imin) {
-            int c = comparable.compare(e, get(imin));
+        if (list.size() > imin) {
+            int c = comparable.compare(e, list.get(imin));
             if (c > 0) {
                 imin++;
             }
@@ -160,9 +155,74 @@ public final class SortedList<E> extends ArrayList<E> {
         return imin;
     }
 
-    @SuppressWarnings("unchecked")
-    @Override
-    public int indexOf(final Object o) {
-        return indexOf((E) o, true);
+    /**
+     * Find the position of object in list.
+     * @param o object to find position of
+     * @return int
+     */
+    public int indexOf(final E o) {
+        // TODO shouldn't this use the duplicates class variable?
+        return indexOf(o, true);
+    }
+
+    /**
+     * Finds equals object from list.
+     * @param e  object to find
+     * @return E
+     */
+    public E get(final E e) {
+
+        E nodeMatch = null;
+        int index = this.indexOf(e);
+
+        if (index >= 0 && index < list.size()) {
+            E foundNode = list.get(index);
+            if (foundNode.equals(e)) {
+                nodeMatch = foundNode;
+            }
+        }
+
+        return nodeMatch;
+    }
+
+    /**
+     * size of list.
+     * @return int
+     */
+    public int size() {
+        return list.size();
+    }
+
+    /**
+     * @return Object[]
+     */
+    public Object[] toArray() {
+        return list.toArray();
+    }
+
+    /**
+     * Gets object at specific index.
+     * @param index  position to get object from
+     * @return E
+     */
+    public E get(final int index) {
+        return list.get(index);
+    }
+
+    /**
+     * Returns sublist.
+     * @param fromIndex  start index
+     * @param toIndex  end index
+     * @return List<E>
+     */
+    public List<E> subList(final int fromIndex, final int toIndex) {
+        return list.subList(fromIndex, toIndex);
+    }
+
+    /**
+     * @return Iterator<E>
+     */
+    public Iterator<E> iterator() {
+        return list.iterator();
     }
 }

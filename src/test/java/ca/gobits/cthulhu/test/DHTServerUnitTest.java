@@ -16,7 +16,6 @@
 
 package ca.gobits.cthulhu.test;
 
-import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 import java.io.ByteArrayOutputStream;
@@ -183,7 +182,7 @@ public final class DHTServerUnitTest {
             + " -?         help\n"
             + " -p <arg>   bind to port\n";
 
-        assertEquals(expected, bo.toString());
+        assertTrue(bo.toString().contains(expected));
     }
 
     /**

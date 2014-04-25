@@ -19,7 +19,6 @@ package ca.gobits.cthulhu;
 import java.math.BigInteger;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
-import java.util.Collection;
 import java.util.Date;
 
 import org.apache.commons.lang3.builder.EqualsBuilder;
@@ -154,21 +153,5 @@ public final class DHTNode {
      */
     public void setLastUpdated(final Date date) {
         this.lastUpdated = date;
-    }
-
-    /**
-     * @return Collection<DHTNode>
-     */
-    public Collection<DHTNode> getPeers() {
-//        return this.peers;
-        return null;
-    }
-
-    /**
-     * Add a peer to list.
-     * @param peer  InetSocketAddress
-     */
-    public void addPeers(final DHTNode peer) {
-//        this.peers.add(peer);
     }
 }
