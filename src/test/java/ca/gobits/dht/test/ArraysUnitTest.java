@@ -111,4 +111,66 @@ public final class ArraysUnitTest {
         // then
         assertEquals(Math.pow(2, 160), result.doubleValue(), 0);
     }
+
+    /**
+     * testToLong01().
+     */
+    @Test
+    public void testToLong01() {
+        // given
+        byte[] bytes = new byte[] {127, 0, 123, 43, 12, 32 };
+
+        // when
+        long result = Arrays.toLong(bytes);
+
+        // then
+        assertEquals(139640043146272L, result);
+    }
+
+    /**
+     * testToLong02().
+     */
+    @Test
+    public void testToLong02() {
+        // given
+        byte[] bytes = new byte[] {-1, -1, -1, -1, -1, -1 };
+
+        // when
+        long result = Arrays.toLong(bytes);
+
+        // then
+        assertEquals(281474976710655L, result);
+    }
+
+    /**
+     * testToByteArray01().
+     */
+    @Test
+    public void testToByteArray01() {
+        // given
+        long l = 139640043146272L;
+
+        // when
+        byte[] results = Arrays.toByteArray(l);
+
+        // then
+        assertEquals("[0, 0, 127, 0, 123, 43, 12, 32]",
+                java.util.Arrays.toString(results));
+    }
+
+    /**
+     * testToByteArray02().
+     */
+    @Test
+    public void testToByteArray02() {
+        // given
+        long l = 281474976710655L;
+
+        // when
+        byte[] results = Arrays.toByteArray(l);
+
+        // then
+        assertEquals("[0, 0, -1, -1, -1, -1, -1, -1]",
+                java.util.Arrays.toString(results));
+    }
 }

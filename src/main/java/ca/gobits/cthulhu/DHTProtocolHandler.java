@@ -41,7 +41,6 @@ import org.springframework.util.CollectionUtils;
 import ca.gobits.dht.Arrays;
 import ca.gobits.dht.BDecoder;
 import ca.gobits.dht.BEncoder;
-import ca.gobits.dht.DHTIdentifier;
 
 /**
  * DHTProtocolHandler  implementation of the BitTorrent protocol.
@@ -53,6 +52,9 @@ public final class DHTProtocolHandler extends
 
     /** Length of Get_Peers token. */
     private static final int GET_PEERS_TOKEN_LENGTH = 10;
+
+    /** Length Node ID. */
+    private static final int NODE_ID_LENGTH = 20;
 
     /** Contact information for nodes is encoded as a 26-byte string. */
     private static final int COMPACT_NODE_LENGTH = 26;
@@ -282,7 +284,7 @@ public final class DHTProtocolHandler extends
      */
     private byte[] transform(final DHTNode node) throws IOException {
 
-        int max = DHTIdentifier.NODE_ID_LENGTH;
+        int max = NODE_ID_LENGTH;
         byte[] bytes = new byte[COMPACT_NODE_LENGTH];
         byte[] id = Arrays.toByte(node.getId());
 
@@ -291,10 +293,11 @@ public final class DHTProtocolHandler extends
         int destPos = max > id.length ? max - id.length : 0;
         System.arraycopy(id, start, bytes, destPos, len);
 
-        byte[] addrBytes = BEncoder.compactAddress(node.getAddress(),
-                node.getPort());
-
-        System.arraycopy(addrBytes, 0, bytes, max, addrBytes.length);
+        byte[] addrBytes = Arrays.toByteArray(node.getAddress());
+        System.arraycopy(addrBytes,
+                addrBytes.length - COMPACT_NODE_LENGTH + NODE_ID_LENGTH, bytes,
+                max, COMPACT_NODE_LENGTH
+                - NODE_ID_LENGTH);
 
         return bytes;
     }

@@ -24,9 +24,6 @@ import java.security.NoSuchAlgorithmException;
  */
 public final class DHTIdentifier {
 
-    /** Length Node ID. */
-    public static final int NODE_ID_LENGTH = 20;
-
     /**
      * private constructor.
      */

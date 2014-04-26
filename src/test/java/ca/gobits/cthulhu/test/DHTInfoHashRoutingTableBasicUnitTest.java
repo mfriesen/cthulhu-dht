@@ -57,12 +57,14 @@ public final class DHTInfoHashRoutingTableBasicUnitTest {
         // then
         assertEquals(1, result.size());
         byte[] bytes = result.iterator().next();
-        assertEquals(127, bytes[0]);
+        assertEquals(0, bytes[0]);
         assertEquals(0, bytes[1]);
-        assertEquals(0, bytes[2]);
-        assertEquals(1, bytes[3]);
-        assertEquals(4, bytes[4]);
-        assertEquals(-46, bytes[5]);
+        assertEquals(127, bytes[2]);
+        assertEquals(0, bytes[3]);
+        assertEquals(0, bytes[4]);
+        assertEquals(1, bytes[5]);
+        assertEquals(4, bytes[6]);
+        assertEquals(-46, bytes[7]);
     }
 
     /**
@@ -83,13 +85,8 @@ public final class DHTInfoHashRoutingTableBasicUnitTest {
         // then
         assertNotNull(result);
         assertEquals(1, result.getPeers().size());
-        byte[] bytes = result.getPeers().iterator().next();
-        assertEquals(127, bytes[0]);
-        assertEquals(0, bytes[1]);
-        assertEquals(0, bytes[2]);
-        assertEquals(1, bytes[3]);
-        assertEquals(4, bytes[4]);
-        assertEquals(-46, bytes[5]);
+        Long l = result.getPeers().iterator().next();
+        assertEquals(139637976794322L, l.longValue());
     }
 
     /**
@@ -110,23 +107,8 @@ public final class DHTInfoHashRoutingTableBasicUnitTest {
 
         // then
         assertNotNull(result);
-        assertEquals(2, result.getPeers().size());
-        Iterator<byte[]> itr = result.getPeers().iterator();
-
-        byte[] bytes = itr.next();
-        assertEquals(127, bytes[0]);
-        assertEquals(0, bytes[1]);
-        assertEquals(0, bytes[2]);
-        assertEquals(1, bytes[3]);
-        assertEquals(4, bytes[4]);
-        assertEquals(-46, bytes[5]);
-
-        bytes = itr.next();
-        assertEquals(127, bytes[0]);
-        assertEquals(0, bytes[1]);
-        assertEquals(0, bytes[2]);
-        assertEquals(1, bytes[3]);
-        assertEquals(4, bytes[4]);
-        assertEquals(-46, bytes[5]);
+        assertEquals(1, result.getPeers().size());
+        Iterator<Long> itr = result.getPeers().iterator();
+        assertEquals(139637976794322L, itr.next().longValue());
     }
 }

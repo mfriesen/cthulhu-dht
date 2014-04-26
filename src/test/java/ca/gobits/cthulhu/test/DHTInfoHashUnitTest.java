@@ -18,20 +18,20 @@ package ca.gobits.cthulhu.test;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
 import java.math.BigInteger;
-import java.util.Date;
+import java.util.Collection;
 
 import org.junit.Test;
 
-import ca.gobits.cthulhu.DHTNode;
+import ca.gobits.cthulhu.DHTInfoHash;
 
 /**
- * Unit Test for DHTNode.
+ * Unit Test for DHTInfoHash.
  */
-public final class DHTNodeUnitTest {
+public final class DHTInfoHashUnitTest {
 
     /**
      * testConstructor01().
@@ -40,37 +40,13 @@ public final class DHTNodeUnitTest {
     public void testConstructor01() {
         // given
         BigInteger nodeId = new BigInteger("123");
-        byte[] address = new byte[] {127, 0, 0, 1 };
-        int nodePort = 103;
 
         // when
-        DHTNode result = new DHTNode(nodeId, address, nodePort);
+        DHTInfoHash result = new DHTInfoHash(nodeId);
 
         // then
         assertEquals(nodeId, result.getId());
-        assertEquals(139637976793191L, result.getAddress());
         assertEquals(752, result.hashCode());
-        assertNotNull(result.getLastUpdated());
-    }
-
-    /**
-     * testConstructor02().  Null address
-     */
-    @Test
-    public void testConstructor02() {
-        // given
-        BigInteger nodeId = new BigInteger("123");
-        byte[] address = null;
-        int nodePort = 0;
-
-        // when
-        DHTNode result = new DHTNode(nodeId, address, nodePort);
-
-        // then
-        assertEquals(nodeId, result.getId());
-        assertEquals(0L, result.getAddress());
-        assertEquals(752, result.hashCode());
-        assertNotNull(result.getLastUpdated());
     }
 
     /**
@@ -80,16 +56,15 @@ public final class DHTNodeUnitTest {
     public void testToString01() {
         // given
         BigInteger nodeId = new BigInteger("123");
-        byte[] address = new byte[] {127, 0, 0, 1 };
-        int nodePort = 103;
 
         // when
-        DHTNode result = new DHTNode(nodeId, address, nodePort);
+        DHTInfoHash result = new DHTInfoHash(nodeId);
 
         // then
-        assertTrue(result.toString().startsWith("ca.gobits.cthulhu.DHTNode"));
+        assertTrue(result.toString()
+                .startsWith("ca.gobits.cthulhu.DHTInfoHash"));
         assertTrue(result.toString().endsWith(
-                "[id=123,address=139637976793191]"));
+                "[id=123]"));
     }
 
     /**
@@ -99,9 +74,7 @@ public final class DHTNodeUnitTest {
     public void testEquals01() {
         // given
         BigInteger nodeId = new BigInteger("123");
-        byte[] address = new byte[] {127, 0, 0, 1 };
-        int nodePort = 103;
-        DHTNode node = new DHTNode(nodeId, address, nodePort);
+        DHTInfoHash node = new DHTInfoHash(nodeId);
 
         // when
         boolean result = node.equals(null);
@@ -117,9 +90,7 @@ public final class DHTNodeUnitTest {
     public void testEquals02() {
         // given
         BigInteger nodeId = new BigInteger("123");
-        byte[] address = new byte[] {127, 0, 0, 1 };
-        int nodePort = 103;
-        DHTNode node = new DHTNode(nodeId, address, nodePort);
+        DHTInfoHash node = new DHTInfoHash(nodeId);
 
         // when
         boolean result = node.equals(node);
@@ -129,15 +100,13 @@ public final class DHTNodeUnitTest {
     }
 
     /**
-     * testEquals03()  non DHTNode object.
+     * testEquals03()  non DHTInfoHash object.
      */
     @Test
     public void testEquals03() {
         // given
         BigInteger nodeId = new BigInteger("123");
-        byte[] address = new byte[] {127, 0, 0, 1 };
-        int nodePort = 103;
-        DHTNode node = new DHTNode(nodeId, address, nodePort);
+        DHTInfoHash node = new DHTInfoHash(nodeId);
 
         // when
         boolean result = node.equals("");
@@ -147,16 +116,14 @@ public final class DHTNodeUnitTest {
     }
 
     /**
-     * testEquals04()  equal DHTNode object.
+     * testEquals04()  equal DHTInfoHash object.
      */
     @Test
     public void testEquals04() {
         // given
         BigInteger nodeId = new BigInteger("123");
-        byte[] address = new byte[] {127, 0, 0, 1 };
-        int nodePort = 103;
-        DHTNode node = new DHTNode(nodeId, address, nodePort);
-        DHTNode node1 = new DHTNode(nodeId, address, nodePort);
+        DHTInfoHash node = new DHTInfoHash(nodeId);
+        DHTInfoHash node1 = new DHTInfoHash(nodeId);
 
         // when
         boolean result = node.equals(node1);
@@ -166,18 +133,46 @@ public final class DHTNodeUnitTest {
     }
 
     /**
-     * testSetLastUpdated01().
+     * testAddPeer01() - first time through.
      */
     @Test
-    public void testSetLastUpdated01() {
+    public void testAddPeer01() {
         // given
-        Date date = new Date();
-        DHTNode node = new DHTNode(new BigInteger("1"), (byte[]) null, 0);
+        BigInteger nodeId = new BigInteger("123");
+        DHTInfoHash node = new DHTInfoHash(nodeId);
+        byte[] address = new byte[] {127, 0, 0, 1 };
+        int port = 103;
+
+        assertNull(node.getPeers());
 
         // when
-        node.setLastUpdated(date);
+        node.addPeer(address, port);
+        Collection<Long> result = node.getPeers();
 
         // then
-        assertEquals(date, node.getLastUpdated());
+        assertEquals(1, result.size());
+        assertEquals(139637976793191L, result.iterator().next().longValue());
+    }
+
+    /**
+     * testAddPeer02() - duplicate peer.
+     */
+    @Test
+    public void testAddPeer02() {
+        // given
+        BigInteger nodeId = new BigInteger("123");
+        DHTInfoHash node = new DHTInfoHash(nodeId);
+        byte[] address = new byte[] {127, 0, 0, 1 };
+        int port = 103;
+
+        assertNull(node.getPeers());
+
+        // when
+        node.addPeer(address, port);
+        node.addPeer(address, port);
+        Collection<Long> result = node.getPeers();
+
+        // then
+        assertEquals(1, result.size());
     }
 }

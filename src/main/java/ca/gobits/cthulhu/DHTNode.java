@@ -17,13 +17,14 @@
 package ca.gobits.cthulhu;
 
 import java.math.BigInteger;
-import java.net.InetAddress;
-import java.net.UnknownHostException;
 import java.util.Date;
 
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.builder.ToStringBuilder;
+
+import ca.gobits.dht.Arrays;
+import ca.gobits.dht.BEncoder;
 
 /**
  * DHTNode - holder for information about a DHT Node.
@@ -32,10 +33,8 @@ public final class DHTNode {
 
     /** Node identifier. */
     private final BigInteger id;
-    /** Node IP address. */
-    private final byte[] address;
-    /** Node listening port. */
-    private final int port;
+    /** "Compact IP-address/port info". */
+    private final long address;
     /** cached hashCode value. */
     private final int hashCode;
     /** Date the node was last pinged. */
@@ -45,44 +44,26 @@ public final class DHTNode {
      * constructor.
      * @param nodeId Identifier
      * @param addr IP address
-     * @param nodePort listening port
+     * @param port listening port
      */
     public DHTNode(final BigInteger nodeId, final byte[] addr,
-            final int nodePort) {
+            final int port) {
         this.id = nodeId;
-        this.address = addr;
-        this.port = nodePort;
+
+        if (addr != null) {
+            byte[] bytes = BEncoder.compactAddress(addr, port);
+            this.address = Arrays.toLong(bytes);
+        } else {
+            this.address = 0;
+        }
+
         this.lastUpdated = new Date();
 
         this.hashCode = new HashCodeBuilder()
         .append(id)
-        .append(addr)
-        .append(port)
         .toHashCode();
     }
 
-    /**
-     * constructor.
-     * @param nodeId Identifier
-     * @param addr  InetAddress
-     * @param nodePort  listening port
-     */
-    public DHTNode(final BigInteger nodeId, final InetAddress addr,
-            final int nodePort) {
-        this(nodeId, addr.getAddress(), nodePort);
-    }
-
-    /**
-     *
-     * @param nodeId Identifier
-     * @param addr  String version of address
-     * @param nodePort  listening port
-     * @throws UnknownHostException  UnknownHostException
-     */
-    public DHTNode(final BigInteger nodeId, final String addr,
-            final int nodePort) throws UnknownHostException {
-        this(nodeId, InetAddress.getByName(addr).getAddress(), nodePort);
-    }
     /**
      * @return BigInteger
      */
@@ -91,17 +72,10 @@ public final class DHTNode {
     }
 
     /**
-     * @return byte[]
+     * @return long
      */
-    public byte[] getAddress() {
+    public long getAddress() {
         return address;
-    }
-
-    /**
-     * @return int
-     */
-    public int getPort() {
-        return port;
     }
 
     @Override
@@ -109,7 +83,6 @@ public final class DHTNode {
         ToStringBuilder builder = new ToStringBuilder(this);
         builder.append("id", id);
         builder.append("address", address);
-        builder.append("port", port);
         return builder.toString();
     }
 
@@ -135,8 +108,6 @@ public final class DHTNode {
         DHTNode rhs = (DHTNode) obj;
         return new EqualsBuilder()
             .append(id, rhs.id)
-            .append(address, rhs.address)
-            .append(port, rhs.port)
             .isEquals();
     }
 

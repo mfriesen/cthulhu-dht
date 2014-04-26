@@ -23,7 +23,9 @@ import java.util.HashSet;
 
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
+import org.apache.commons.lang3.builder.ToStringBuilder;
 
+import ca.gobits.dht.Arrays;
 import ca.gobits.dht.BEncoder;
 
 /**
@@ -40,7 +42,7 @@ public final class DHTInfoHash implements Serializable {
     /** cached hashCode value. */
     private final int hashCode;
     /** Collection of Nodes "announced" to the peer. */
-    private Collection<byte[]> peers;
+    private Collection<Long> peers;
 
     /**
      * constructor.
@@ -56,9 +58,9 @@ public final class DHTInfoHash implements Serializable {
 
     /**
      * Peers are "<compact node info>" format.
-     * @return Collection<String>
+     * @return Collection<Long>
      */
-    public Collection<byte[]> getPeers() {
+    public Collection<Long> getPeers() {
         return peers;
     }
 
@@ -69,11 +71,12 @@ public final class DHTInfoHash implements Serializable {
      */
     public void addPeer(final byte[] address, final int port) {
         if (this.peers == null) {
-            this.peers = new HashSet<byte[]>();
+            this.peers = new HashSet<Long>();
         }
 
         byte[] bytes = BEncoder.compactAddress(address, port);
-        this.peers.add(bytes);
+        long addr = Arrays.toLong(bytes);
+        this.peers.add(Long.valueOf(addr));
     }
 
     @Override
@@ -99,6 +102,13 @@ public final class DHTInfoHash implements Serializable {
         return new EqualsBuilder()
             .append(id, rhs.id)
             .isEquals();
+    }
+
+    @Override
+    public String toString() {
+        ToStringBuilder builder = new ToStringBuilder(this);
+        builder.append("id", id);
+        return builder.toString();
     }
 
     /**

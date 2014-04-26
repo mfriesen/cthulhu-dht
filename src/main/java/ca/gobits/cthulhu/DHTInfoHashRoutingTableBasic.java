@@ -17,7 +17,10 @@
 package ca.gobits.cthulhu;
 
 import java.math.BigInteger;
+import java.util.ArrayList;
 import java.util.Collection;
+
+import ca.gobits.dht.Arrays;
 
 /**
  * Default implemenation of the DHTPeerRoutingTable.
@@ -43,7 +46,12 @@ public final class DHTInfoHashRoutingTableBasic implements
         Collection<byte[]> nodes = null;
         DHTInfoHash peer = this.infoHashes.get(new DHTInfoHash(infoHash));
         if (peer != null) {
-            nodes = peer.getPeers();
+            Collection<Long> peers = peer.getPeers();
+            nodes = new ArrayList<byte[]>(peers.size());
+
+            for (Long l : peers) {
+                nodes.add(Arrays.toByteArray(l.longValue()));
+            }
         }
 
         return nodes;

@@ -26,7 +26,7 @@ public interface DHTInfoHashRoutingTable {
 
     /** Finds peers given a info_hash.
      * @param infoHash  info_hash
-     * @return Collection<DHTNode>
+     * @return Collection<Long>
      */
     Collection<byte[]> findPeers(final BigInteger infoHash);
 

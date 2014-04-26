@@ -17,6 +17,7 @@
 package ca.gobits.dht;
 
 import java.math.BigInteger;
+import java.nio.ByteBuffer;
 
 /**
  * Arrays Helper Methods.
@@ -29,6 +30,9 @@ public final class Arrays {
 
     /** Constant to convert byte to unsigned int. */
     static final int BYTE_TO_INT = 0xFF;
+
+    /** Constant number of Bits per Byte. */
+    static final int BITS_PER_BYTE = 8;
 
     /**
      * private constructor.
@@ -59,5 +63,30 @@ public final class Arrays {
      */
     public static byte[] toByte(final BigInteger d) {
         return d.toByteArray();
+    }
+
+    /**
+     * Converts a byte array to a long.
+     * @param bytes  byte array
+     * @return long
+     */
+    public static long toLong(final byte[] bytes) {
+
+        long l = 0;
+        for (byte b : bytes) {
+            l = l << BITS_PER_BYTE;
+            l += b & BYTE_TO_INT;
+        }
+
+        return l;
+    }
+
+    /**
+     * Converts a long to byte array.
+     * @param l long
+     * @return byte[]
+     */
+    public static byte[] toByteArray(final long l) {
+        return ByteBuffer.allocate(BITS_PER_BYTE).putLong(l).array();
     }
 }

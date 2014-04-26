@@ -50,8 +50,8 @@ import org.springframework.test.util.ReflectionTestUtils;
 
 import ca.gobits.cthulhu.DHTInfoHashRoutingTable;
 import ca.gobits.cthulhu.DHTNode;
-import ca.gobits.cthulhu.DHTProtocolHandler;
 import ca.gobits.cthulhu.DHTNodeRoutingTable;
+import ca.gobits.cthulhu.DHTProtocolHandler;
 import ca.gobits.cthulhu.DHTServer;
 import ca.gobits.dht.BDecoder;
 import ca.gobits.dht.BEncoder;
@@ -98,9 +98,6 @@ public final class DHTProtocolHandlerUnitTest extends EasyMockSupport {
 
         socketAddress = new InetSocketAddress(
                 InetAddress.getByName("50.71.214.139"), 64568);
-
-//        addRandomNodesToRoutingTable();
-//        addExpectedNodesToRoutingTable();
     }
 
     /**
@@ -136,8 +133,7 @@ public final class DHTProtocolHandlerUnitTest extends EasyMockSupport {
         assertTrue(result.startsWith("d1:rd2:id20:6h"));
         assertTrue(result.contains("e1:t2:aa1:y1:re"));
 
-        assertNotNull(captureNode.getValue().getAddress());
-        assertEquals(64568, captureNode.getValue().getPort());
+        assertEquals(55284123565112L, captureNode.getValue().getAddress());
         assertNotNull(captureNode.getValue().getLastUpdated());
 
         os.close();
@@ -489,54 +485,68 @@ public final class DHTProtocolHandlerUnitTest extends EasyMockSupport {
     private List<DHTNode> getFindNodes() throws UnknownHostException {
 
         return Arrays.asList(
-                new DHTNode(new BigInteger(
-                "1025727453009050644114422909938179475956677673365"),
+                createDHTNode(
+                "1025727453009050644114422909938179475956677673365",
                 "37.76.160.28", 37518),
-        new DHTNode(new BigInteger(
-                "909396897490697132528408310795708133687135388426"),
+        createDHTNode(
+                "909396897490697132528408310795708133687135388426",
                 "182.59.176.199", 11503),
-        new DHTNode(new BigInteger(
-                "525080541161122160152898021711579691652547262977"),
+        createDHTNode(
+                "525080541161122160152898021711579691652547262977",
                 "178.124.205.49", 16911),
-        new DHTNode(new BigInteger(
-                "658070898018303575756492289276695009391046368980"),
+        createDHTNode(
+                "658070898018303575756492289276695009391046368980",
                 "5.13.218.214", 56116),
-        new DHTNode(new BigInteger(
-                "732800403720670969048970409366815229228420735404"),
+        createDHTNode(
+                "732800403720670969048970409366815229228420735404",
                 "79.163.109.76", 29037),
-        new DHTNode(new BigInteger(
-                "1256313872952230430598882201394466767467396215628"),
+        createDHTNode(
+                "1256313872952230430598882201394466767467396215628",
                 "2.190.222.79", 58106),
-        new DHTNode(new BigInteger(
-                "765028964801745612216665519019856689419949360586"),
+        createDHTNode(
+                "765028964801745612216665519019856689419949360586",
                 "92.237.93.69", 17271),
-        new DHTNode(new BigInteger(
-                "304333486037502350876881646365121976203989590042"),
+        createDHTNode(
+                "304333486037502350876881646365121976203989590042",
                 "5.129.229.16", 21853),
-        new DHTNode(new BigInteger(
-                "651043862618190073616414008555095633000553327254"),
+        createDHTNode(
+                "651043862618190073616414008555095633000553327254",
                 "67.166.50.31", 53162),
-        new DHTNode(new BigInteger(
-                "217572328821850967755762913845138112465869557436"),
+        createDHTNode(
+                "217572328821850967755762913845138112465869557436",
                 "178.222.162.23", 18274),
-        new DHTNode(new BigInteger(
-                "1235689258152504075304182876266224318368488950162"),
+        createDHTNode(
+                "1235689258152504075304182876266224318368488950162",
                 "31.216.162.240", 20383),
-        new DHTNode(new BigInteger(
-                "487762934236616301113020799412763967579181340675"),
+        createDHTNode(
+                "487762934236616301113020799412763967579181340675",
                 "31.181.56.194", 59935),
-        new DHTNode(new BigInteger(
-                "757633304364519595494275276101980823332425611532"),
+        createDHTNode(
+                "757633304364519595494275276101980823332425611532",
                 "80.233.181.214", 12230),
-        new DHTNode(new BigInteger(
-                "253718933283387888344146948372599275024431560999"),
+        createDHTNode(
+                "253718933283387888344146948372599275024431560999",
                 "79.22.67.76", 38518),
-        new DHTNode(new BigInteger(
-                "890765994839177116145299793227790251293353534962"),
+        createDHTNode(
+                "890765994839177116145299793227790251293353534962",
                 "92.99.87.123", 26120),
-        new DHTNode(new BigInteger(
-                "1123918148366576699094456176144333565208604527946"),
+        createDHTNode(
+                "1123918148366576699094456176144333565208604527946",
                 "176.12.59.50", 61553));
+    }
+
+    /**
+     * Create DHTNode.
+     * @param id  identifier
+     * @param address  hostname
+     * @param port  port
+     * @return DHTNode
+     * @throws UnknownHostException  UnknownHostException
+     */
+    private DHTNode createDHTNode(final String id, final String address,
+            final int port) throws UnknownHostException {
+        byte[] addr = InetAddress.getByName(address).getAddress();
+        return new DHTNode(new BigInteger(id), addr, port);
     }
 
     /**

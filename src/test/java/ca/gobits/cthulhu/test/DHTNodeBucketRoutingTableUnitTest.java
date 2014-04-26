@@ -34,6 +34,12 @@ import ca.gobits.cthulhu.SortedList;
  */
 public final class DHTNodeBucketRoutingTableUnitTest {
 
+    /** address. */
+    private static byte[] addr = new byte[] {50, 71, 50, 12 };
+
+    /** port. */
+    private static int port = 64568;
+
     /**
      * testConstructor01().
      */
@@ -56,7 +62,7 @@ public final class DHTNodeBucketRoutingTableUnitTest {
     public void testAddNode01() {
         // given
         DHTNodeBucketRoutingTable rt = new DHTNodeBucketRoutingTable();
-        DHTNode node = new DHTNode(new BigInteger("1"), (byte[]) null, 0);
+        DHTNode node = new DHTNode(new BigInteger("1"), addr, port);
 
         // when
         rt.addNode(node);
@@ -80,7 +86,7 @@ public final class DHTNodeBucketRoutingTableUnitTest {
         // when
         for (int i = 0; i < nodeCount; i++) {
             DHTNode node = new DHTNode(new BigInteger("" + i),
-                    (byte[]) null, 0);
+                    addr, port);
             rt.addNode(node);
         }
 
@@ -97,7 +103,7 @@ public final class DHTNodeBucketRoutingTableUnitTest {
         // given
         DHTNodeBucketRoutingTable rt = new DHTNodeBucketRoutingTable();
         DHTNode node = new DHTNode(new BigInteger("1"),
-                (byte[]) null, 0);
+                addr, port);
 
         // when
         rt.addNode(node);
@@ -117,16 +123,16 @@ public final class DHTNodeBucketRoutingTableUnitTest {
     public void testAddNode04() {
         // given
         DHTNodeBucketRoutingTable rt = new DHTNodeBucketRoutingTable();
-        DHTNode node0 = new DHTNode(new BigInteger("1"), (byte[]) null, 0);
+        DHTNode node0 = new DHTNode(new BigInteger("1"), addr, port);
         DHTNode node1 = new DHTNode(new BigInteger(
                 "217572328821850967755762913845138112465869557436"),
-                (byte[]) null, 0);
+                addr, port);
         DHTNode node2 = new DHTNode(new BigInteger(
                 "253718933283387888344146948372599275024431560999"),
-                (byte[]) null, 0);
+                addr, port);
         DHTNode node3 = new DHTNode(new BigInteger(
                 "909396897490697132528408310795708133687135388426"),
-                (byte[]) null, 0);
+                addr, port);
 
         // when
         rt.addNode(node0);
@@ -149,7 +155,7 @@ public final class DHTNodeBucketRoutingTableUnitTest {
     @Test
     public void testFindClosestNodes01() {
         // given
-        DHTNode n = new DHTNode(new BigInteger("11"), (byte[]) null, 0);
+        DHTNode n = new DHTNode(new BigInteger("11"), addr, port);
         DHTNodeBucketRoutingTable rt = new DHTNodeBucketRoutingTable();
 
         addNodes(rt);
@@ -176,7 +182,7 @@ public final class DHTNodeBucketRoutingTableUnitTest {
     @Test
     public void testFindClosestNodes02() {
         // given
-        DHTNode n = new DHTNode(new BigInteger("1"), (byte[]) null, 0);
+        DHTNode n = new DHTNode(new BigInteger("1"), addr, port);
         DHTNodeBucketRoutingTable rt = new DHTNodeBucketRoutingTable();
 
         addNodes(rt);
@@ -203,7 +209,7 @@ public final class DHTNodeBucketRoutingTableUnitTest {
     @Test
     public void testFindClosestNodes03() {
         // given
-        DHTNode n = new DHTNode(new BigInteger("41"), (byte[]) null, 0);
+        DHTNode n = new DHTNode(new BigInteger("41"), addr, port);
         DHTNodeBucketRoutingTable rt = new DHTNodeBucketRoutingTable();
 
         addNodes(rt);
@@ -229,7 +235,7 @@ public final class DHTNodeBucketRoutingTableUnitTest {
     @Test
     public void testFindClosestNodes04() {
         // given
-        DHTNode n = new DHTNode(new BigInteger("22"), (byte[]) null, 0);
+        DHTNode n = new DHTNode(new BigInteger("22"), addr, port);
         DHTNodeBucketRoutingTable rt = new DHTNodeBucketRoutingTable();
 
         addNodes(rt);
@@ -255,7 +261,7 @@ public final class DHTNodeBucketRoutingTableUnitTest {
     @Test
     public void testFindClosestNodes05() {
         // given
-        DHTNode n = new DHTNode(new BigInteger("0"), (byte[]) null, 0);
+        DHTNode n = new DHTNode(new BigInteger("0"), addr, port);
         DHTNodeBucketRoutingTable rt = new DHTNodeBucketRoutingTable();
 
         addNodes(rt);
@@ -325,7 +331,7 @@ public final class DHTNodeBucketRoutingTableUnitTest {
     private void addNodes(final DHTNodeBucketRoutingTable rt) {
         for (int i = 0; i < 40; i = i + 2) {
             DHTNode node = new DHTNode(new BigInteger("" + i),
-                    (byte[]) null, 0);
+                    addr, port);
             rt.addNode(node);
         }
     }
