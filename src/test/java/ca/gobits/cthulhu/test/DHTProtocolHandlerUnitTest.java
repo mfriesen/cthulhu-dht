@@ -16,7 +16,9 @@
 
 package ca.gobits.cthulhu.test;
 
+import static org.easymock.EasyMock.aryEq;
 import static org.easymock.EasyMock.capture;
+import static org.easymock.EasyMock.eq;
 import static org.easymock.EasyMock.expect;
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
@@ -455,6 +457,124 @@ public final class DHTProtocolHandlerUnitTest extends EasyMockSupport {
                 + "pwHVCMYWbhgQ2OE3X4RTyLF7WXyXGNXe2YIxN47mXqYnZtH9vXi/dzC"
                 + "giaNTUqwDDsy8HE=",
                 Base64.encodeBase64String((byte[]) rmap.get("nodes")));
+
+        os.close();
+    }
+
+    /**
+     * testChannelRead008() - "announce_peer" request and InfoHash is found.
+     *
+     * @throws Exception Exception
+     */
+    @Test
+    public void testChannelRead008() throws Exception {
+        // given
+        BigInteger nodeId = new BigInteger("mnopqrstuvwxyz123456".getBytes());
+        String dat = "d1:ad2:id20:abcdefghij01234567899:info_hash20:"
+                + "mnopqrstuvwxyz1234564:porti6881e5:token8:aoeusnthe1:q13:"
+                + "announce_peer1:t2:aa1:y1:qe";
+
+        DatagramPacket packet = new DatagramPacket(
+                Unpooled.copiedBuffer(dat.getBytes()), socketAddress,
+                socketAddress);
+
+        // when
+        peerRoutingTable.addPeer(eq(nodeId), aryEq(socketAddress.getAddress()
+                .getAddress()), eq(6881));
+        expect(ctx.write(capture(capturedPacket))).andReturn(null);
+
+        replayAll();
+        handler.channelRead0(ctx , packet);
+
+        // then
+        verifyAll();
+
+        verifyAnnouncePeer();
+    }
+
+    /**
+     * testChannelRead009() - "announce_peer" request, with implied_port of 0.
+     *
+     * @throws Exception Exception
+     */
+    @Test
+    public void testChannelRead009() throws Exception {
+        // given
+        BigInteger nodeId = new BigInteger("mnopqrstuvwxyz123456".getBytes());
+        String dat = "d1:ad2:id20:abcdefghij01234567899:info_hash20:"
+                + "mnopqrstuvwxyz12345612:implied_porti0e4:porti6881e5:"
+                + "token8:aoeusnthe1:q13:announce_peer1:t2:aa1:y1:qe";
+
+        DatagramPacket packet = new DatagramPacket(
+                Unpooled.copiedBuffer(dat.getBytes()), socketAddress,
+                socketAddress);
+
+        // when
+        peerRoutingTable.addPeer(eq(nodeId), aryEq(socketAddress.getAddress()
+                .getAddress()), eq(6881));
+        expect(ctx.write(capture(capturedPacket))).andReturn(null);
+
+        replayAll();
+        handler.channelRead0(ctx , packet);
+
+        // then
+        verifyAll();
+
+        verifyAnnouncePeer();
+    }
+
+    /**
+     * testChannelRead009() - "announce_peer" request, with implied_port of 1.
+     *
+     * @throws Exception Exception
+     */
+    @Test
+    public void testChannelRead010() throws Exception {
+        // given
+        BigInteger nodeId = new BigInteger("mnopqrstuvwxyz123456".getBytes());
+        String dat = "d1:ad2:id20:abcdefghij01234567899:info_hash20:"
+                + "mnopqrstuvwxyz12345612:implied_porti1e4:porti6881e5:"
+                + "token8:aoeusnthe1:q13:announce_peer1:t2:aa1:y1:qe";
+
+        DatagramPacket packet = new DatagramPacket(
+                Unpooled.copiedBuffer(dat.getBytes()), socketAddress,
+                socketAddress);
+
+        // when
+        peerRoutingTable.addPeer(eq(nodeId), aryEq(socketAddress.getAddress()
+                .getAddress()), eq(socketAddress.getPort()));
+        expect(ctx.write(capture(capturedPacket))).andReturn(null);
+
+        replayAll();
+        handler.channelRead0(ctx , packet);
+
+        // then
+        verifyAll();
+
+        verifyAnnouncePeer();
+    }
+
+    /**
+     * Verify AnnouncePeer response.
+     * @throws IOException  IOException
+     */
+    private void verifyAnnouncePeer() throws IOException {
+        ByteArrayOutputStream os = handler.extractBytes(capturedPacket
+                .getValue().content());
+
+        @SuppressWarnings("unchecked")
+        Map<String, Object> map = (Map<String, Object>) new BDecoder()
+            .decode(os.toByteArray());
+
+        assertEquals("aa", new String((byte[]) map.get("t")));
+        assertEquals("r", new String((byte[]) map.get("y")));
+
+        @SuppressWarnings("unchecked")
+        Map<String, Object> rmap = (Map<String, Object>) map.get("r");
+
+        byte[] id = (byte[]) rmap.get("id");
+        assertEquals(20, id.length);
+        assertEquals("mnopqrstuvwxyz123456", new String(id));
 
         os.close();
     }

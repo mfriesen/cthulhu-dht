@@ -16,6 +16,7 @@
 
 package ca.gobits.cthulhu;
 
+import java.io.Serializable;
 import java.math.BigInteger;
 import java.util.Date;
 
@@ -29,8 +30,10 @@ import ca.gobits.dht.BEncoder;
 /**
  * DHTNode - holder for information about a DHT Node.
  */
-public final class DHTNode {
+public final class DHTNode implements Serializable {
 
+    /** serialVersionUID. */
+    private static final long serialVersionUID = -32412433909683955L;
     /** Node identifier. */
     private final BigInteger id;
     /** "Compact IP-address/port info". */

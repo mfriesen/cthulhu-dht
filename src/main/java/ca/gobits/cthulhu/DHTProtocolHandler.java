@@ -87,17 +87,25 @@ public final class DHTProtocolHandler extends
 
             String action = new String((byte[]) request.get("q"));
 
+            @SuppressWarnings("unchecked")
+            DHTArgumentRequest arguments = new DHTArgumentRequest(
+                    (Map<String, Object>) request.get("a"));
+
             if (action.equals("ping")) {
 
-                addPingResponse(request, response, packet);
+                addPingResponse(arguments, response, packet);
 
             } else if (action.equals("find_node")) {
 
-                addFindNodeResponse(request, response, packet);
+                addFindNodeResponse(arguments, response, packet);
 
             } else if (action.equals("get_peers")) {
 
-                addGetPeersResponse(request, response, packet);
+                addGetPeersResponse(arguments, response, packet);
+
+            } else if (action.equals("announce_peer")) {
+
+                addAnnouncePeerResponse(arguments, response, packet);
 
             } else {
 
@@ -120,30 +128,66 @@ public final class DHTProtocolHandler extends
     }
 
     /**
+     * Announces that a peer has joined an InfoHash.
+     * @param arguments  DHTArgumentRequest
+     * @param response  Map<String, Object>
+     * @param packet  DatagramPacket
+     */
+    private void addAnnouncePeerResponse(final DHTArgumentRequest arguments,
+            final Map<String, Object> response, final DatagramPacket packet) {
+
+        // TODO add token validation -> byte[] token = arguments.getToken();
+        BigInteger infoHash = Arrays.toBigInteger(arguments.getInfoHash());
+
+        InetSocketAddress addr = packet.sender();
+        byte[] address = addr.getAddress().getAddress();
+        int port = isImpliedPort(arguments) ? addr.getPort()
+                : arguments.getPort().intValue();
+
+        peerRoutingTable.addPeer(infoHash, address, port);
+
+        Map<String, Object> responseParameter = new HashMap<String, Object>();
+        responseParameter.put("id", arguments.getInfoHash());
+        response.put("r", responseParameter);
+    }
+
+    /**
+     * Is "implied_port" value is set and non-zero, the port argument
+     * should be ignored and the source port of the UDP packet should
+     * be used as the peer's port instead.
+     * @param arguments  DHTArgumentRequest
+     * @return boolean
+     */
+    private boolean isImpliedPort(final DHTArgumentRequest arguments) {
+        Long impliedPort = arguments.getImpliedPort();
+        return impliedPort != null && impliedPort.intValue() > 0;
+    }
+
+    /**
      * Get peers associated with a torrent infohash. If the queried node has no
      * peers for the infohash, a key "nodes" is returned containing the K nodes
      * in the queried nodes routing table closest to the infohash supplied in
      * the query.
      *
-     * @param request  Map<String, Object>
+     * @param arguments DHTArgumentRequest
      * @param response  Map<String, Object>
      * @param packet  DatagramPacket
      * @throws IOException  IOException
      */
-    private void addGetPeersResponse(final Map<String, Object> request,
+    private void addGetPeersResponse(final DHTArgumentRequest arguments,
         final Map<String, Object> response, final DatagramPacket packet)
             throws IOException {
 
         Map<String, Object> responseParameter = new HashMap<String, Object>();
 
-        @SuppressWarnings("unchecked")
-        Map<String, Object> arguments = (Map<String, Object>) request.get("a");
-        BigInteger infoHash = Arrays.toBigInteger((byte[]) arguments
-                .get("info_hash"));
+        BigInteger infoHash = Arrays.toBigInteger(arguments.getInfoHash());
 
         Collection<byte[]> peers = peerRoutingTable.findPeers(infoHash);
+
         if (!CollectionUtils.isEmpty(peers)) {
+
             responseParameter.put("values", peers);
+
         } else {
 
             List<DHTNode> nodes = routingTable.findClosestNodes(infoHash);
@@ -152,7 +196,7 @@ public final class DHTProtocolHandler extends
         }
 
         responseParameter.put("token", generateToken(packet.sender()));
-        responseParameter.put("id", arguments.get("id"));
+        responseParameter.put("id", arguments.getId());
 
         response.put("r", responseParameter);
     }
@@ -168,26 +212,22 @@ public final class DHTProtocolHandler extends
 
     /**
      * Add "find_node" data to response.
-     * @param request  request parameters
+     * @param arguments  DHTArgumentRequest
      * @param response  Map<String, Object>
      * @param packet  DatagramPacket
      * @throws IOException  IOException
      */
-    private void addFindNodeResponse(final Map<String, Object> request,
+    private void addFindNodeResponse(final DHTArgumentRequest arguments,
             final Map<String, Object> response,
             final DatagramPacket packet) throws IOException {
 
         addSenderIpResponse(response, packet);
 
-        @SuppressWarnings("unchecked")
-        Map<String, Object> arguments = (Map<String, Object>) request.get("a");
-
         Map<String, Object> responseParameter = new HashMap<String, Object>();
         response.put("r", responseParameter);
-        responseParameter.put("id", arguments.get("id"));
+        responseParameter.put("id", arguments.getId());
 
-        List<DHTNode> nodes = findClosestNodes(
-                (byte[]) arguments.get("target"));
+        List<DHTNode> nodes = findClosestNodes(arguments.getTarget());
 
         byte[] transformNodes = transformNodes(nodes);
         responseParameter.put("nodes", transformNodes);
@@ -208,18 +248,15 @@ public final class DHTProtocolHandler extends
 
     /**
      * Add "ping" data to response.
-     * @param request  Map<String, Object>
+     * @param arguments  DHTArgumentRequest
      * @param response  Map<String, Object>
      * @param packet DatagramPacket
      */
-    private void addPingResponse(final Map<String, Object> request,
+    private void addPingResponse(final DHTArgumentRequest arguments,
             final Map<String, Object> response,
             final DatagramPacket packet) {
 
-        @SuppressWarnings("unchecked")
-        Map<String, Object> arguments = (Map<String, Object>) request.get("a");
-
-        byte[] id = (byte[]) arguments.get("id");
+        byte[] id = arguments.getId();
         ping(Arrays.toBigInteger(id), packet.sender());
 
         response.put("r", map("id", DHTServer.NODE_ID));
