@@ -132,8 +132,14 @@ public final class DHTProtocolHandlerUnitTest extends EasyMockSupport {
                 .getValue().content());
 
         String result = new String(os.toByteArray());
-        assertTrue(result.startsWith("d1:rd2:id20:6h"));
+
+        assertTrue(result.contains("d2:ip6:2G"));
+        assertTrue(result.contains(":rd2:id20:6h"));
         assertTrue(result.contains("e1:t2:aa1:y1:re"));
+
+        assertEquals("ZDI6aXA2OjJH1ov8ODE6cmQyOmlkMjA6NmjAFP"
+                + "wuQVw4idejCIEqBeXEPQFlMTp0MjphYTE6eTE6cmU=",
+                Base64.encodeBase64String(os.toByteArray()));
 
         assertEquals(55284123565112L, captureNode.getValue().getAddress());
         assertNotNull(captureNode.getValue().getLastUpdated());
@@ -266,7 +272,7 @@ public final class DHTProtocolHandlerUnitTest extends EasyMockSupport {
             byte[] key = Arrays.copyOfRange(a, i, i + 20);
             i += 20;
             byte[] ipBytes = Arrays.copyOfRange(a, i, i + 6);
-            String addr = BDecoder.decodeCompactIP(ipBytes);
+            String addr = BDecoder.decodeCompactAddressToString(ipBytes);
             i += 6;
 
             map.put(new BigInteger(key), addr);
@@ -301,8 +307,11 @@ public final class DHTProtocolHandlerUnitTest extends EasyMockSupport {
                 .getValue().content());
 
         String result = new String(os.toByteArray());
-        assertTrue(result
-                .startsWith("d1:rd3:20414:Method Unknowne1:t2:aa1:y1:ee"));
+        assertTrue(result.endsWith(":rd3:20414:Method Unknowne1:t2:aa1:y1:ee"));
+
+        assertEquals("ZDI6aXA2OjJH1ov8ODE6cmQzOjIwNDE0Ok1ldGh"
+                + "vZCBVbmtub3duZTE6dDI6YWExOnkxOmVl",
+                Base64.encodeBase64String(os.toByteArray()));
 
         os.close();
     }

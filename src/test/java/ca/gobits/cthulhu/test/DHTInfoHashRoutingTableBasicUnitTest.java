@@ -57,14 +57,13 @@ public final class DHTInfoHashRoutingTableBasicUnitTest {
         // then
         assertEquals(1, result.size());
         byte[] bytes = result.iterator().next();
-        assertEquals(0, bytes[0]);
+        assertEquals(6, bytes.length);
+        assertEquals(127, bytes[0]);
         assertEquals(0, bytes[1]);
-        assertEquals(127, bytes[2]);
-        assertEquals(0, bytes[3]);
-        assertEquals(0, bytes[4]);
-        assertEquals(1, bytes[5]);
-        assertEquals(4, bytes[6]);
-        assertEquals(-46, bytes[7]);
+        assertEquals(0, bytes[2]);
+        assertEquals(1, bytes[3]);
+        assertEquals(4, bytes[4]);
+        assertEquals(-46, bytes[5]);
     }
 
     /**

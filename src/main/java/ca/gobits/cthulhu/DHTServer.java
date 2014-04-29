@@ -23,17 +23,11 @@ import io.netty.channel.socket.nio.NioDatagramChannel;
 
 import java.io.PrintWriter;
 
-import org.apache.commons.cli.BasicParser;
-import org.apache.commons.cli.CommandLine;
-import org.apache.commons.cli.CommandLineParser;
 import org.apache.commons.cli.HelpFormatter;
-import org.apache.commons.cli.MissingArgumentException;
-import org.apache.commons.cli.Options;
-import org.apache.commons.cli.UnrecognizedOptionException;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
-import org.springframework.context.support.GenericApplicationContext;
 import org.springframework.stereotype.Service;
 
 import ca.gobits.dht.DHTIdentifier;
@@ -45,14 +39,8 @@ import ca.gobits.dht.DHTIdentifier;
 @Service
 public class DHTServer {
 
-    /** DHT Spring Context. */
-    private static GenericApplicationContext ac;
-
     /** DHT Server Logger. */
     private static final Logger LOGGER = Logger.getLogger(DHTServer.class);
-
-    /** Default Port. */
-    public static final int DEFAULT_PORT = 8080;
 
     /** SO_BROADCAST. */
     private static final Boolean SO_BROADCAST = Boolean.valueOf(true);
@@ -92,16 +80,12 @@ public class DHTServer {
 
             b.bind(port).sync().channel().closeFuture().await();
         } finally {
-            shutdownGracefully();
+            group.shutdownGracefully();
         }
     }
 
-    /**
-     * Shut down all event loops to terminate all threads.
-     */
-    public final void shutdownGracefully() {
+    public void shutdown() {
         group.shutdownGracefully();
-        ac.close();
     }
 
     /**
@@ -110,62 +94,42 @@ public class DHTServer {
      */
     public static void main(final String[] args) {
 
-        Options options = new Options();
-        options.addOption("p", true, "bind to port");
-        options.addOption("?", false, "help");
+        DHTServerConfig config = new DHTServerConfig(args);
 
-        try {
+        if (config.isShowHelp()) {
 
-            int port = DEFAULT_PORT;
-            CommandLineParser parser = new BasicParser();
+            showUsage();
 
-            CommandLine cmd = parser.parse(options, args);
+        } else {
 
-            if (cmd.hasOption("?")) {
-                showUsage(options);
-            } else {
+            ConfigurableApplicationContext ac =
+                    new AnnotationConfigApplicationContext(
+                            DHTConfiguration.class);
 
-                if (cmd.hasOption("p")) {
-
-                    String portStr = cmd.getOptionValue("p");
-                    port = Integer.parseInt(portStr);
-                }
-
-                ac = new AnnotationConfigApplicationContext(
-                        DHTConfiguration.class);
+            try {
 
                 DHTServer server = ac.getBean(DHTServer.class);
-                server.run(port);
+                server.run(config.getPort());
 
+            } catch (Exception e) {
+
+                LOGGER.fatal(e, e);
+
+            } finally {
+                ac.close();
             }
-        } catch (UnrecognizedOptionException e) {
-            showUsage(options);
-        } catch (MissingArgumentException e) {
-            showUsage(options);
-        } catch (Exception e) {
-            LOGGER.fatal(e, e);
-            showUsage(options);
         }
     }
 
     /**
-     * Shutsdown server.
-     */
-    public static void shutdown() {
-        DHTServer server = ac.getBean(DHTServer.class);
-        server.shutdownGracefully();
-    }
-
-    /**
      * Shows Usage Message.
-     * @param options  Options command line arguments
      */
-    private static void showUsage(final Options options) {
+    private static void showUsage() {
 
         PrintWriter writer = new PrintWriter(System.out);
         HelpFormatter usageFormatter = new HelpFormatter();
         usageFormatter.printHelp("java -jar dht.jar", "Parameters",
-                options, "");
+                DHTServerConfig.DHTSERVER_OPTIONS, "");
         writer.close();
     }
 }

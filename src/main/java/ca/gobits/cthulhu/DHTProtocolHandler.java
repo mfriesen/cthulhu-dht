@@ -53,12 +53,6 @@ public final class DHTProtocolHandler extends
     /** Length of Get_Peers token. */
     private static final int GET_PEERS_TOKEN_LENGTH = 10;
 
-    /** Length Node ID. */
-    private static final int NODE_ID_LENGTH = 20;
-
-    /** Contact information for nodes is encoded as a 26-byte string. */
-    private static final int COMPACT_NODE_LENGTH = 26;
-
     /** DHTProtocolHandler Logger. */
     private static final Logger LOGGER = Logger
             .getLogger(DHTProtocolHandler.class);
@@ -79,11 +73,14 @@ public final class DHTProtocolHandler extends
         Map<String, Object> response = new HashMap<String, Object>();
 
         try {
-
+            InetSocketAddress addr = packet.sender();
             Map<String, Object> request = bdecode(packet.content());
 
             response.put("y", "r");
             response.put("t", request.get("t"));
+            response.put("ip",
+                    BEncoder.compactAddress(addr.getAddress().getAddress(),
+                            addr.getPort()));
 
             String action = new String((byte[]) request.get("q"));
 
@@ -108,7 +105,6 @@ public final class DHTProtocolHandler extends
                 addAnnouncePeerResponse(arguments, response, packet);
 
             } else {
-
                 addMethodUnknownResponse(response);
             }
 
@@ -191,7 +187,8 @@ public final class DHTProtocolHandler extends
         } else {
 
             List<DHTNode> nodes = routingTable.findClosestNodes(infoHash);
-            byte[] transformNodes = transformNodes(nodes);
+
+            byte[] transformNodes = Arrays.toByteArray(nodes);
             responseParameter.put("nodes", transformNodes);
         }
 
@@ -221,29 +218,14 @@ public final class DHTProtocolHandler extends
             final Map<String, Object> response,
             final DatagramPacket packet) throws IOException {
 
-        addSenderIpResponse(response, packet);
-
         Map<String, Object> responseParameter = new HashMap<String, Object>();
         response.put("r", responseParameter);
         responseParameter.put("id", arguments.getId());
 
         List<DHTNode> nodes = findClosestNodes(arguments.getTarget());
 
-        byte[] transformNodes = transformNodes(nodes);
+        byte[] transformNodes = Arrays.toByteArray(nodes);
         responseParameter.put("nodes", transformNodes);
-    }
-
-    /**
-     * Adds Send's IP to response.
-     * @param response  Map<String, Object>
-     * @param packet DatagramPacket
-     */
-    private void addSenderIpResponse(final Map<String, Object> response,
-            final DatagramPacket packet) {
-        InetSocketAddress addr = packet.sender();
-        response.put(
-                "ip", BEncoder.compactAddress(addr.getAddress().getAddress(),
-                        addr.getPort()));
     }
 
     /**
@@ -279,27 +261,6 @@ public final class DHTProtocolHandler extends
     }
 
     /**
-     * Transforms Nodes to "compact node info" mode.
-     * @param nodes  Collection of DHTNode objects
-     * @return byte[]
-     * @throws IOException  IOException
-     */
-    private byte[] transformNodes(final Collection<DHTNode> nodes)
-            throws IOException {
-
-        byte[] bytes = new byte[nodes.size() * COMPACT_NODE_LENGTH];
-
-        int pos = 0;
-        for (DHTNode node : nodes) {
-            byte[] nodeBytes = transform(node);
-            System.arraycopy(nodeBytes, 0, bytes, pos, nodeBytes.length);
-            pos += nodeBytes.length;
-        }
-
-        return bytes;
-    }
-
-    /**
      * Find the closest X nodes to the target.
      * @param targetBytes  ID of the target node to find
      * @return List<DHTNode>
@@ -308,35 +269,6 @@ public final class DHTProtocolHandler extends
 
         BigInteger target = Arrays.toBigInteger(targetBytes);
         return routingTable.findClosestNodes(target);
-    }
-
-    /**
-     * Transform DHTNode into 26-byte string. Known as "Compact node info" the
-     * 20-byte Node ID in network byte order has the compact IP-address/port
-     * info concatenated to the end.
-     *
-     * @param node  DHTNode
-     * @return byte[]
-     * @throws IOException  IOException
-     */
-    private byte[] transform(final DHTNode node) throws IOException {
-
-        int max = NODE_ID_LENGTH;
-        byte[] bytes = new byte[COMPACT_NODE_LENGTH];
-        byte[] id = Arrays.toByte(node.getId());
-
-        int start = id.length > max ? id.length - max : 0;
-        int len = id.length > max ? max : id.length;
-        int destPos = max > id.length ? max - id.length : 0;
-        System.arraycopy(id, start, bytes, destPos, len);
-
-        byte[] addrBytes = Arrays.toByteArray(node.getAddress());
-        System.arraycopy(addrBytes,
-                addrBytes.length - COMPACT_NODE_LENGTH + NODE_ID_LENGTH, bytes,
-                max, COMPACT_NODE_LENGTH
-                - NODE_ID_LENGTH);
-
-        return bytes;
     }
 
     @Override

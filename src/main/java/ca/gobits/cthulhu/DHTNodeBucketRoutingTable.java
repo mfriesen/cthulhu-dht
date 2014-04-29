@@ -19,6 +19,11 @@ package ca.gobits.cthulhu;
 import java.math.BigInteger;
 import java.util.List;
 
+import org.apache.log4j.Logger;
+
+import ca.gobits.dht.Arrays;
+import ca.gobits.dht.BDecoder;
+
 /**
  * Implementation of DHT Bucket Routing Table.
  *
@@ -26,6 +31,10 @@ import java.util.List;
  *
  */
 public final class DHTNodeBucketRoutingTable implements DHTNodeRoutingTable {
+
+    /** LOGGER. */
+    private static final Logger LOGGER = Logger
+            .getLogger(DHTNodeBucketRoutingTable.class);
 
     /** root node of the routing table. */
     private final SortedList<DHTNode> nodes;
@@ -45,7 +54,16 @@ public final class DHTNodeBucketRoutingTable implements DHTNodeRoutingTable {
     public synchronized void addNode(final DHTNode node) {
 
         if (nodes.size() < MAX_NUMBER_OF_NODES) {
+            if (LOGGER.isDebugEnabled()) {
+                LOGGER.debug("adding node " + node.getId() + " "
+                    + BDecoder.decodeCompactAddressToString(Arrays
+                        .toByteArray(node.getAddress())));
+            }
+
             nodes.add(node);
+        } else {
+            LOGGER.warn("MAXIMUM number of noded reached "
+                    + MAX_NUMBER_OF_NODES);
         }
     }
 
@@ -83,7 +101,7 @@ public final class DHTNodeBucketRoutingTable implements DHTNodeRoutingTable {
                 : getTotalNodeCount();
         int count = toIndex - fromIndex;
 
-        while (count < returnCount) {
+        while (count < returnCount && count < nodes.size()) {
 
             if (fromIndex > 0) {
                 fromIndex--;

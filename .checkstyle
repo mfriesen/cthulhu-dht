@@ -7,11 +7,11 @@
   <local-check-config name="checkstyle-tests" location="checkstyle-tests.xml" type="project" description="">
     <additional-data name="protect-config-file" value="false"/>
   </local-check-config>
+  <fileset name="tests" enabled="true" check-config-name="checkstyle-tests" local="true">
+    <file-match-pattern match-pattern=".Test.java$" include-pattern="true"/>
+  </fileset>
   <fileset name="all" enabled="true" check-config-name="checkstyle" local="true">
     <file-match-pattern match-pattern=".java" include-pattern="true"/>
     <file-match-pattern match-pattern=".Test.java" include-pattern="false"/>
-  </fileset>
-  <fileset name="tests" enabled="true" check-config-name="checkstyle-tests" local="true">
-    <file-match-pattern match-pattern=".Test.java$" include-pattern="true"/>
   </fileset>
 </fileset-config>

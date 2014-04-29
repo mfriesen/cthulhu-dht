@@ -46,7 +46,21 @@ public final class BDecoder {
      * @param bytes  compact IP-address/port info
      * @return String <ipadress>:<port>
      */
-    public static String decodeCompactIP(final byte[] bytes) {
+    public static String decodeCompactAddressToString(final byte[] bytes) {
+
+        String ip = decodeCompactAddress(bytes);
+
+        int port = decodeCompactAddressPort(bytes);
+
+        return ip + ":" + port;
+    }
+
+    /**
+     * Decodes a compact IP-address/port info".
+     * @param bytes  compact IP-address/port info
+     * @return String <ipaddress>
+     */
+    public static String decodeCompactAddress(final byte[] bytes) {
 
         int i = 0;
         int len = bytes.length;
@@ -59,11 +73,20 @@ public final class BDecoder {
             ip.append(bytes[i] & Arrays.BYTE_TO_INT);
             i++;
         }
+        return ip.toString();
+    }
 
+    /**
+     * Decodes a compact IP-address/port info" and returns the port.
+     * @param bytes  compact IP-address/port info
+     * @return int
+     */
+    public static int decodeCompactAddressPort(final byte[] bytes) {
+        int len = bytes.length;
         int port = (bytes[len - 2] & Arrays.BYTE_TO_INT) << BIT_COUNT
                 | (bytes[len - 1] & Arrays.BYTE_TO_INT);
 
-        return ip + ":" + port;
+        return port;
     }
 
     /**

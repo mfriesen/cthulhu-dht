@@ -118,11 +118,9 @@ public final class DHTServerUnitTest {
         result.start();
 
         // then
-        Thread.sleep(4000);
+        Thread.sleep(2000);
 
         assertConnectedToServer(port);
-
-        DHTServer.shutdown();
     }
 
     /**
@@ -140,11 +138,9 @@ public final class DHTServerUnitTest {
         result.start();
 
         // then
-        Thread.sleep(4000);
+        Thread.sleep(2000);
 
         assertConnectedToServer(port);
-
-        DHTServer.shutdown();
     }
 
     /**
