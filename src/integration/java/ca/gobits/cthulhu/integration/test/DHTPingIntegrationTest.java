@@ -1,7 +1,7 @@
 package ca.gobits.cthulhu.integration.test;
 
-import static ca.gobits.cthulhu.integration.test.DHTServerIntegrationHelper.runDHTServerInNewThread;
 import static ca.gobits.cthulhu.integration.test.DHTServerIntegrationHelper.sendUDPPacket;
+import static ca.gobits.cthulhu.test.DHTTestHelper.runDHTServerInNewThread;
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
@@ -17,8 +17,8 @@ import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 
 import ca.gobits.cthulhu.DHTConfiguration;
-import ca.gobits.cthulhu.DHTNodeRoutingTable;
 import ca.gobits.cthulhu.DHTServer;
+import ca.gobits.cthulhu.DHTServerConfig;
 import ca.gobits.dht.BDecoder;
 import ca.gobits.dht.BEncoder;
 
@@ -26,22 +26,15 @@ import ca.gobits.dht.BEncoder;
  * DHT Ping Integration Test.
  *
  */
-//@RunWith(SpringJUnit4ClassRunner.class)
-//@ContextConfiguration(classes = DHTConfiguration.class)
 public final class DHTPingIntegrationTest {
 
     /** Flag to indicate whether Server has been started. */
     private static boolean started = false;
 
-//    @Autowired
-
     /** Application Context. */
     private final ConfigurableApplicationContext ac =
             new AnnotationConfigApplicationContext(
                     DHTConfiguration.class);
-
-    /** Reference to DHTNodeRoutingTable. */
-    private final DHTNodeRoutingTable nodeRoutingTable = ac.getBean(DHTNodeRoutingTable.class);
 
     /**
      *before().
@@ -51,11 +44,14 @@ public final class DHTPingIntegrationTest {
     public void before() throws Exception {
 
         if (!started) {
-            runDHTServerInNewThread(ac);
+            runDHTServerInNewThread(ac, DHTServerConfig.DEFAULT_PORT);
             started = true;
         }
     }
 
+    /**
+     * after().
+     */
     @After
     public void after() {
         ac.getBean(DHTServer.class).shutdown();

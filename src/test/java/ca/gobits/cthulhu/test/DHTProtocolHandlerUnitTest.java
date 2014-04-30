@@ -16,6 +16,7 @@
 
 package ca.gobits.cthulhu.test;
 
+import static ca.gobits.cthulhu.test.DHTTestHelper.assertNodesEquals;
 import static org.easymock.EasyMock.aryEq;
 import static org.easymock.EasyMock.capture;
 import static org.easymock.EasyMock.eq;
@@ -239,46 +240,6 @@ public final class DHTProtocolHandlerUnitTest extends EasyMockSupport {
                 (byte[]) mapB1.get("nodes"));
 
         os.close();
-    }
-
-    /**
-     * Assert two "nodes" results are equal.
-     * @param a  byte[]
-     * @param b  byte[]
-     */
-    private void assertNodesEquals(final byte[] a, final byte[] b) {
-        assertEquals(a.length, b.length);
-
-        Map<BigInteger, String> mapA = buildNodeMap(a);
-        Map<BigInteger, String> mapB = buildNodeMap(b);
-
-        for (Map.Entry<BigInteger, String> e : mapA.entrySet()) {
-            assertTrue(mapB.containsKey(e.getKey()));
-            assertTrue(mapB.containsValue(e.getValue()));
-        }
-
-    }
-
-    /**
-     * Build a Map from a node list.
-     * @param a  byte[]
-     * @return Map<BigInteger, String>
-     */
-    private Map<BigInteger, String> buildNodeMap(final byte[] a) {
-        Map<BigInteger, String> map = new HashMap<BigInteger, String>();
-
-        int i = 0;
-        while (i < a.length) {
-            byte[] key = Arrays.copyOfRange(a, i, i + 20);
-            i += 20;
-            byte[] ipBytes = Arrays.copyOfRange(a, i, i + 6);
-            String addr = BDecoder.decodeCompactAddressToString(ipBytes);
-            i += 6;
-
-            map.put(new BigInteger(key), addr);
-        }
-
-        return map;
     }
 
     /**

@@ -23,10 +23,7 @@ import java.net.InetAddress;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.springframework.context.ApplicationContext;
-
 import ca.gobits.cthulhu.DHTNode;
-import ca.gobits.cthulhu.DHTServer;
 import ca.gobits.cthulhu.DHTServerConfig;
 import ca.gobits.dht.BEncoder;
 
@@ -39,36 +36,10 @@ public final class DHTServerIntegrationHelper {
     /** DATA PACKET LENGTH. */
     public static final int DATA_PACKET_LENGTH = 1024;
 
-    /** Delay to wait afte starting DHT Server. */
-    private static final int START_DELAY_MILLIS = 3000;
-
     /**
      * private constructor.
      */
     private DHTServerIntegrationHelper() {
-    }
-
-    /**
-     * Runs DHT Server in new thread.
-     * @param ac ApplicationContext.
-     * @throws Exception  Exception
-     */
-    public static void runDHTServerInNewThread(final ApplicationContext ac)
-            throws Exception {
-        Thread thread = new Thread(new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    ac.getBean(DHTServer.class)
-                        .run(DHTServerConfig.DEFAULT_PORT);
-                } catch (Exception e) {
-                    throw new RuntimeException(e);
-                }
-            }
-        });
-
-        thread.start();
-        Thread.sleep(START_DELAY_MILLIS);
     }
 
     /**

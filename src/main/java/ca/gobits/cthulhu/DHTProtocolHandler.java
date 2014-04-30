@@ -35,7 +35,6 @@ import java.util.Random;
 
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
 import ca.gobits.dht.Arrays;
@@ -46,7 +45,6 @@ import ca.gobits.dht.BEncoder;
  * DHTProtocolHandler  implementation of the BitTorrent protocol.
  * http://www.bittorrent.org/beps/bep_0005.html
  */
-@Service
 public final class DHTProtocolHandler extends
         SimpleChannelInboundHandler<DatagramPacket> {
 

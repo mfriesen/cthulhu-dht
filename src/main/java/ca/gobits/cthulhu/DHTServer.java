@@ -16,6 +16,7 @@
 
 package ca.gobits.cthulhu;
 import io.netty.bootstrap.Bootstrap;
+import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelOption;
 import io.netty.channel.EventLoopGroup;
 import io.netty.channel.nio.NioEventLoopGroup;
@@ -28,7 +29,6 @@ import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
-import org.springframework.stereotype.Service;
 
 import ca.gobits.dht.DHTIdentifier;
 
@@ -36,8 +36,7 @@ import ca.gobits.dht.DHTIdentifier;
 /**
  * DHTServer implementation.
  */
-@Service
-public class DHTServer {
+public final class DHTServer {
 
     /** DHT Server Logger. */
     private static final Logger LOGGER = Logger.getLogger(DHTServer.class);
@@ -67,7 +66,7 @@ public class DHTServer {
      * @param port port to run server on
      * @throws Exception  Exception
      */
-    public final void run(final int port) throws Exception {
+    public void run(final int port) throws Exception {
 
         LOGGER.info("starting cthulhu on " + port);
 
@@ -78,12 +77,17 @@ public class DHTServer {
              .option(ChannelOption.SO_BROADCAST, SO_BROADCAST)
              .handler(dhtHandler);
 
-            b.bind(port).sync().channel().closeFuture().await();
+            ChannelFuture cf = b.bind(port).sync().channel().closeFuture();
+            cf.await();
+
         } finally {
-            group.shutdownGracefully();
+            shutdown();
         }
     }
 
+    /**
+     * Shutdown server.
+     */
     public void shutdown() {
         group.shutdownGracefully();
     }

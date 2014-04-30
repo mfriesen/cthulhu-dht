@@ -16,14 +16,14 @@
 
 package ca.gobits.cthulhu.integration.test;
 
-import static ca.gobits.cthulhu.integration.test.DHTServerIntegrationHelper.runDHTServerInNewThread;
 import static ca.gobits.cthulhu.integration.test.DHTServerIntegrationHelper.sendUDPPacket;
+import static ca.gobits.cthulhu.test.DHTTestHelper.assertNodesEquals;
+import static ca.gobits.cthulhu.test.DHTTestHelper.runDHTServerInNewThread;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 import java.io.IOException;
-import java.math.BigInteger;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
@@ -38,16 +38,16 @@ import org.springframework.context.annotation.AnnotationConfigApplicationContext
 import ca.gobits.cthulhu.DHTConfiguration;
 import ca.gobits.cthulhu.DHTNode;
 import ca.gobits.cthulhu.DHTNodeRoutingTable;
+import ca.gobits.cthulhu.DHTServerConfig;
 import ca.gobits.dht.Arrays;
 import ca.gobits.dht.BDecoder;
 import ca.gobits.dht.BEncoder;
+
 
 /**
  * Integration Test for "get_peers" requests.
  *
  */
-//@RunWith(SpringJUnit4ClassRunner.class)
-//@ContextConfiguration(classes = DHTConfiguration.class)
 public final class DHTGetPeersIntegrationTest {
 
     /** LOGGER. */
@@ -57,16 +57,14 @@ public final class DHTGetPeersIntegrationTest {
     /** Flag to indicate whether Server has been started. */
     private static boolean started = false;
 
-//    @Autowired
-
     /** Application Context. */
-//    @Autowired
     private final ConfigurableApplicationContext ac =
             new AnnotationConfigApplicationContext(
                     DHTConfiguration.class);
 
     /** Reference to DHTNodeRoutingTable. */
-    private final DHTNodeRoutingTable nodeRoutingTable = ac.getBean(DHTNodeRoutingTable.class);
+    private final DHTNodeRoutingTable nodeRoutingTable = ac
+            .getBean(DHTNodeRoutingTable.class);
 
     /**
      *before().
@@ -76,7 +74,7 @@ public final class DHTGetPeersIntegrationTest {
     public void before() throws Exception {
 
         if (!started) {
-            runDHTServerInNewThread(ac);
+            runDHTServerInNewThread(ac, DHTServerConfig.DEFAULT_PORT);
             started = true;
         }
     }
@@ -129,47 +127,6 @@ public final class DHTGetPeersIntegrationTest {
         assertEquals(416, nodes.length);
 
         assertNodesEquals(nodes, realnodes);
-    }
-
-    /**
-     * Assert two "nodes" results are equal.
-     * @param a  byte[]
-     * @param b  byte[]
-     */
-    // TODO fix duplicate method
-    private void assertNodesEquals(final byte[] a, final byte[] b) {
-        assertEquals(a.length, b.length);
-
-        Map<BigInteger, String> mapA = buildNodeMap(a);
-        Map<BigInteger, String> mapB = buildNodeMap(b);
-
-        for (Map.Entry<BigInteger, String> e : mapA.entrySet()) {
-            assertTrue(mapB.containsValue(e.getValue()));
-            assertTrue(mapB.containsKey(e.getKey()));
-        }
-
-    }
-
-    /**
-     * Build a Map from a node list.
-     * @param a  byte[]
-     * @return Map<BigInteger, String>
-     */
-    private Map<BigInteger, String> buildNodeMap(final byte[] a) {
-        Map<BigInteger, String> map = new HashMap<BigInteger, String>();
-
-        int i = 0;
-        while (i < a.length) {
-            byte[] key = java.util.Arrays.copyOfRange(a, i, i + 20);
-            i += 20;
-            byte[] ipBytes = java.util.Arrays.copyOfRange(a, i, i + 6);
-            String addr = BDecoder.decodeCompactAddressToString(ipBytes);
-            i += 6;
-
-            map.put(Arrays.toBigInteger(key), addr);
-        }
-
-        return map;
     }
 
     /**

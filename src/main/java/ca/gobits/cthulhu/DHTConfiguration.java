@@ -17,14 +17,14 @@
 package ca.gobits.cthulhu;
 
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.scheduling.annotation.EnableAsync;
 
 /**
  * DHT Configuration class.
  */
 @Configuration
-@ComponentScan({"ca.gobits.cthulhu" })
+@EnableAsync
 public class DHTConfiguration {
 
     //CHECKSTYLE:OFF
@@ -42,6 +42,22 @@ public class DHTConfiguration {
     @Bean
     public DHTInfoHashRoutingTable infoHashRoutingTable() {
         return new DHTInfoHashRoutingTableBasic();
+    }
+
+    /**
+     * @return DHTServer
+     */
+    @Bean
+    public DHTServer dhtServer() {
+        return new DHTServer();
+    }
+
+    /**
+     * @return DHTProtocolHandler
+     */
+    @Bean
+    public DHTProtocolHandler dhtProtocolHandler() {
+        return new DHTProtocolHandler();
     }
     //CHECKSTYLE:ON
 }

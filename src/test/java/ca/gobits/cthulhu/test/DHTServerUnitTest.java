@@ -16,6 +16,7 @@
 
 package ca.gobits.cthulhu.test;
 
+import static ca.gobits.cthulhu.test.DHTTestHelper.runDHTServerInNewThread;
 import static org.junit.Assert.assertTrue;
 
 import java.io.ByteArrayOutputStream;
@@ -25,8 +26,11 @@ import java.net.DatagramSocket;
 import java.net.InetAddress;
 
 import org.junit.Test;
+import org.springframework.context.ConfigurableApplicationContext;
+import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.test.util.ReflectionTestUtils;
 
+import ca.gobits.cthulhu.DHTConfiguration;
 import ca.gobits.cthulhu.DHTServer;
 
 /**
@@ -110,37 +114,45 @@ public final class DHTServerUnitTest {
     @Test(timeout = 10000)
     public void testMain05() throws Exception {
         // given
+        ConfigurableApplicationContext ac =
+                new AnnotationConfigApplicationContext(
+                        DHTConfiguration.class);
         int port = 8000;
-        final String[] args = new String[] {"-p", "" + port};
 
-        // when
-        Thread result = runDHTServerInNewThread(args);
-        result.start();
+        try {
+            // when
+            runDHTServerInNewThread(ac, port);
 
-        // then
-        Thread.sleep(2000);
-
-        assertConnectedToServer(port);
+            // then
+            assertConnectedToServer(port);
+        } finally {
+            ac.close();
+        }
     }
 
     /**
-     * testMain05() default port.
+     * testMain06() default port.
      * @throws Exception Exception
      */
     @Test(timeout = 10000)
     public void testMain06() throws Exception {
         // given
         int port = 8080;
-        final String[] args = new String[] {};
+
+        ConfigurableApplicationContext ac =
+                new AnnotationConfigApplicationContext(
+                        DHTConfiguration.class);
 
         // when
-        Thread result = runDHTServerInNewThread(args);
-        result.start();
+        try {
+            // when
+            runDHTServerInNewThread(ac, port);
 
-        // then
-        Thread.sleep(2000);
-
-        assertConnectedToServer(port);
+            // then
+            assertConnectedToServer(port);
+        } finally {
+            ac.close();
+        }
     }
 
     /**
@@ -180,19 +192,4 @@ public final class DHTServerUnitTest {
 
         assertTrue(bo.toString().contains(expected));
     }
-
-    /**
-     * Runs DHT Server in new thread.
-     * @param args argument parameters.
-     * @return Runnable
-     */
-    private Thread runDHTServerInNewThread(final String[] args) {
-        return new Thread(new Runnable() {
-            @Override
-            public void run() {
-                DHTServer.main(args);
-            }
-        });
-    }
-
 }
