@@ -43,27 +43,10 @@ public final class DHTServerUnitTest {
     private static final int DATA_PACKET_LENGTH = 1024;
 
     /**
-     * testMain01() unknown parameter.
+     * testMain01() -?.
      */
     @Test
     public void testMain01() {
-        // given
-        String[] args = new String[] {"-t"};
-        ByteArrayOutputStream bo = new ByteArrayOutputStream();
-        ReflectionTestUtils.setField(System.out, "out", bo);
-
-        // when
-        DHTServer.main(args);
-
-        // then
-        assertUsage(bo);
-    }
-
-    /**
-     * testMain02() -?.
-     */
-    @Test
-    public void testMain02() {
         // given
         String[] args = new String[] {"-?"};
         ByteArrayOutputStream bo = new ByteArrayOutputStream();
@@ -76,43 +59,11 @@ public final class DHTServerUnitTest {
     }
 
     /**
-     * testMain03() -p with port missing.
-     */
-    @Test
-    public void testMain03() {
-        // given
-        String[] args = new String[] {"-p"};
-        ByteArrayOutputStream bo = new ByteArrayOutputStream();
-        ReflectionTestUtils.setField(System.out, "out", bo);
-
-        // when
-        DHTServer.main(args);
-
-        assertUsage(bo);
-    }
-
-    /**
-     * testMain04() -p with invalid port.
-     */
-    @Test
-    public void testMain04() {
-        // given
-        String[] args = new String[] {"-p", "SDASDA"};
-        ByteArrayOutputStream bo = new ByteArrayOutputStream();
-        ReflectionTestUtils.setField(System.out, "out", bo);
-
-        // when
-        DHTServer.main(args);
-
-        assertUsage(bo);
-    }
-
-    /**
-     * testMain05() -p with port.
+     * testMain02() -p with port.
      * @throws Exception Exception
      */
     @Test(timeout = 10000)
-    public void testMain05() throws Exception {
+    public void testMain02() throws Exception {
         // given
         ConfigurableApplicationContext ac =
                 new AnnotationConfigApplicationContext(
@@ -131,11 +82,11 @@ public final class DHTServerUnitTest {
     }
 
     /**
-     * testMain06() default port.
+     * testMain03() default port.
      * @throws Exception Exception
      */
     @Test(timeout = 10000)
-    public void testMain06() throws Exception {
+    public void testMain03() throws Exception {
         // given
         int port = 8080;
 

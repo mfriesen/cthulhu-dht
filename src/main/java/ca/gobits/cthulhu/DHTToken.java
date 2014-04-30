@@ -43,7 +43,7 @@ public final class DHTToken implements Serializable {
     /** cached hashCode value. */
     private final int hashCode;
     /** Date the node was last pinged. */
-    private Date addedDate;
+    private final Date addedDate;
 
     /**
      * constructor.
@@ -116,13 +116,5 @@ public final class DHTToken implements Serializable {
      */
     public Date getAddedDate() {
         return addedDate;
-    }
-
-    /**
-     * Sets the Added Date.
-     * @param date  Date
-     */
-    public void setAddedDate(final Date date) {
-        this.addedDate = date;
     }
 }

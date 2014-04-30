@@ -23,6 +23,8 @@ import static org.junit.Assert.assertNull;
 import java.math.BigInteger;
 import java.util.List;
 
+import org.apache.log4j.Level;
+import org.apache.log4j.Logger;
 import org.junit.Test;
 
 import ca.gobits.cthulhu.DHTNode;
@@ -61,6 +63,7 @@ public final class DHTNodeBucketRoutingTableUnitTest {
     @Test
     public void testAddNode01() {
         // given
+        Logger.getLogger(DHTNodeBucketRoutingTable.class).setLevel(Level.DEBUG);
         DHTNodeBucketRoutingTable rt = new DHTNodeBucketRoutingTable();
         DHTNode node = new DHTNode(new BigInteger("1"), addr, port);
 
@@ -72,6 +75,8 @@ public final class DHTNodeBucketRoutingTableUnitTest {
         SortedList<DHTNode> root = rt.getNodes();
         assertEquals(1, root.size());
         assertEquals(node, root.get(0));
+
+        Logger.getLogger(DHTNodeBucketRoutingTable.class).setLevel(Level.INFO);
     }
 
     /**

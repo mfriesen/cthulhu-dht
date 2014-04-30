@@ -14,7 +14,7 @@
 // limitations under the License.
 //
 
-package ca.gobits.cthulhu;
+package ca.gobits.cthulhu.test;
 
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
@@ -25,6 +25,11 @@ import java.net.InetSocketAddress;
 import java.util.Calendar;
 
 import org.junit.Test;
+import org.springframework.test.util.ReflectionTestUtils;
+
+import ca.gobits.cthulhu.DHTToken;
+import ca.gobits.cthulhu.DHTTokenTable;
+import ca.gobits.cthulhu.DHTTokenTableBasic;
 
 /**
  * DHTTokenTableBasicTest.
@@ -111,7 +116,7 @@ public final class DHTTokenTableBasicTest {
         c.setTime(token.getAddedDate());
         c.add(Calendar.MINUTE, -1 * DHTTokenTable.TOKEN_EXPIRY_IN_MINUTES - 1);
 
-        token.setAddedDate(c.getTime());
+        ReflectionTestUtils.setField(token, "addedDate", c.getTime());
 
         // when
         boolean result = tt.valid(addr, secret.getBytes());

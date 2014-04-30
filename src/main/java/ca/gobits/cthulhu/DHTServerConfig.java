@@ -46,11 +46,9 @@ public final class DHTServerConfig {
                 this.showHelp = true;
             } else {
 
-                if (cmd.hasOption("p")) {
+                String portStr = cmd.getOptionValue("p");
+                this.port = Integer.parseInt(portStr);
 
-                    String portStr = cmd.getOptionValue("p");
-                    this.port = Integer.parseInt(portStr);
-                }
             }
         } catch (UnrecognizedOptionException e) {
             this.showHelp = true;
