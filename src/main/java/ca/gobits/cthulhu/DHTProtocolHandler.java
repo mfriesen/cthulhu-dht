@@ -63,6 +63,10 @@ public final class DHTProtocolHandler extends
     @Autowired
     private DHTInfoHashRoutingTable peerRoutingTable;
 
+    /** DHT Token Table. */
+    @Autowired
+    private DHTTokenTable tokenTable;
+
     @Override
     public void channelRead0(final ChannelHandlerContext ctx,
             final DatagramPacket packet)
@@ -130,19 +134,26 @@ public final class DHTProtocolHandler extends
     private void addAnnouncePeerResponse(final DHTArgumentRequest arguments,
             final Map<String, Object> response, final DatagramPacket packet) {
 
-        // TODO add token validation -> byte[] token = arguments.getToken();
-        BigInteger infoHash = Arrays.toBigInteger(arguments.getInfoHash());
+        if (tokenTable.valid(packet.sender(), arguments.getToken())) {
 
-        InetSocketAddress addr = packet.sender();
-        byte[] address = addr.getAddress().getAddress();
-        int port = isImpliedPort(arguments) ? addr.getPort()
-                : arguments.getPort().intValue();
+            BigInteger infoHash = Arrays.toBigInteger(arguments.getInfoHash());
 
-        peerRoutingTable.addPeer(infoHash, address, port);
+            InetSocketAddress addr = packet.sender();
+            byte[] address = addr.getAddress().getAddress();
+            int port = isImpliedPort(arguments) ? addr.getPort()
+                    : arguments.getPort().intValue();
 
-        Map<String, Object> responseParameter = new HashMap<String, Object>();
-        responseParameter.put("id", arguments.getInfoHash());
-        response.put("r", responseParameter);
+            peerRoutingTable.addPeer(infoHash, address, port);
+
+            Map<String, Object> rp = new HashMap<String, Object>();
+            rp.put("id", arguments.getInfoHash());
+            response.put("r", rp);
+
+        } else {
+
+            response.put("y", "e");
+            response.put("r", map("203", "Bad Token"));
+        }
     }
 
     /**

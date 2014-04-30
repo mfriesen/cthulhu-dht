@@ -45,6 +45,14 @@ public class DHTConfiguration {
     }
 
     /**
+     * @return DHTTokenTable
+     */
+    @Bean
+    public DHTTokenTable dhtTokenTable() {
+        return new DHTTokenTableBasic();
+    }
+
+    /**
      * @return DHTServer
      */
     @Bean
