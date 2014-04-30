@@ -20,6 +20,8 @@ import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Collection;
 
+import org.apache.log4j.Logger;
+
 import ca.gobits.dht.Arrays;
 
 /**
@@ -28,6 +30,10 @@ import ca.gobits.dht.Arrays;
  */
 public final class DHTInfoHashRoutingTableBasic implements
         DHTInfoHashRoutingTable {
+
+    /** Logger. */
+    private static final Logger LOGGER = Logger
+            .getLogger(DHTInfoHashRoutingTableBasic.class);
 
     /** list of peers. */
     private final SortedList<DHTInfoHash> infoHashes;
@@ -43,15 +49,23 @@ public final class DHTInfoHashRoutingTableBasic implements
     @Override
     public Collection<byte[]> findPeers(final BigInteger infoHash) {
 
+        LOGGER.debug("findPeers: looking for peers for " + infoHash);
+
         Collection<byte[]> nodes = null;
         DHTInfoHash peer = this.infoHashes.get(new DHTInfoHash(infoHash));
+
         if (peer != null) {
+
             Collection<Long> peers = peer.getPeers();
+            LOGGER.debug("found " + peers.size() + " peers");
             nodes = new ArrayList<byte[]>(peers.size());
 
             for (Long l : peers) {
+                LOGGER.debug("returning " + l);
                 nodes.add(Arrays.toByteArray(l.longValue()));
             }
+        } else {
+            LOGGER.info("found 0 peers");
         }
 
         return nodes;
@@ -61,14 +75,21 @@ public final class DHTInfoHashRoutingTableBasic implements
     public void addPeer(final BigInteger infoHashId, final byte[] address,
             final int port) {
 
+        LOGGER.debug("addPeer: " + infoHashId + " "
+                + java.util.Arrays.toString(address) + " port " + port);
 
         DHTInfoHash infoHash = new DHTInfoHash(infoHashId);
         DHTInfoHash result = this.infoHashes.get(new DHTInfoHash(infoHashId));
 
         if (result == null) {
+            LOGGER.debug("InfoHash " + infoHashId
+                    + " not found..... adding to list");
             result = infoHash;
             this.infoHashes.add(result);
         }
+
+        LOGGER.debug("adding peer " + java.util.Arrays.toString(address)
+                + " port " + port + " to info hash " + infoHashId);
 
         result.addPeer(address, port);
     }

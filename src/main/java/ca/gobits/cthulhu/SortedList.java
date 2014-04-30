@@ -161,7 +161,6 @@ public final class SortedList<E> implements Serializable {
      * @return int
      */
     public int indexOf(final E o) {
-        // TODO shouldn't this use the duplicates class variable?
         return indexOf(o, true);
     }
 
