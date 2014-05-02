@@ -27,7 +27,6 @@ import java.io.IOException;
 import java.math.BigInteger;
 import java.net.InetSocketAddress;
 import java.util.Collection;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -247,26 +246,7 @@ public final class DHTProtocolHandler extends
             final Map<String, Object> response,
             final DatagramPacket packet) {
 
-        byte[] id = arguments.getId();
-        ping(Arrays.toBigInteger(id), packet.sender());
-
         response.put("r", map("id", DHTServer.NODE_ID));
-    }
-
-    /**
-     * Ping a node in the routing table.
-     * @param nodeId the nodeId to ping
-     * @param addr sender of the ping
-     */
-    private void ping(final BigInteger nodeId, final InetSocketAddress addr) {
-        DHTNode node = routingTable.findExactNode(nodeId);
-        if (node == null) {
-            node = new DHTNode(nodeId, addr.getAddress().getAddress(),
-                    addr.getPort());
-            routingTable.addNode(node);
-        }
-
-        node.setLastUpdated(new Date());
     }
 
     /**

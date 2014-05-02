@@ -23,7 +23,6 @@ import static org.easymock.EasyMock.eq;
 import static org.easymock.EasyMock.expect;
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.ChannelHandlerContext;
@@ -91,9 +90,6 @@ public final class DHTProtocolHandlerUnitTest extends EasyMockSupport {
     private final Capture<DatagramPacket> capturedPacket =
             new Capture<DatagramPacket>();
 
-    /** Capture DHTNode. */
-    private final Capture<DHTNode> captureNode = new Capture<DHTNode>();
-
     /** InetSocketAddress. */
     private InetSocketAddress iaddr;
 
@@ -110,14 +106,12 @@ public final class DHTProtocolHandlerUnitTest extends EasyMockSupport {
     }
 
     /**
-     * testChannelRead001() - test first "ping" request.
+     * testChannelRead001() - "ping" request.
      * @throws Exception  Exception
      */
     @Test
     public void testChannelRead001() throws Exception {
         // given
-        DHTNode node = null;
-        BigInteger nodeId = new BigInteger("abcdefghij0123456789".getBytes());
         String dat = "d1:ad2:id20:abcdefghij0123456789e1:q4:ping1:t2:aa1:y1:qe";
 
         DatagramPacket packet = new DatagramPacket(
@@ -125,8 +119,6 @@ public final class DHTProtocolHandlerUnitTest extends EasyMockSupport {
                 iaddr);
 
         // when
-        expect(routingTable.findExactNode(nodeId)).andReturn(node);
-        routingTable.addNode(capture(captureNode));
         expect(ctx.write(capture(capturedPacket))).andReturn(null);
 
         replayAll();
@@ -148,41 +140,7 @@ public final class DHTProtocolHandlerUnitTest extends EasyMockSupport {
                 + "wuQVw4idejCIEqBeXEPQFlMTp0MjphYTE6eTE6cmU=",
                 Base64.encodeBase64String(os.toByteArray()));
 
-        assertEquals(55284123565112L, captureNode.getValue().getAddress());
-        assertNotNull(captureNode.getValue().getLastUpdated());
-
         os.close();
-    }
-
-    /**
-     * testChannelRead001() - test second "ping" request
-     * Last Updated Date is changed.
-     * @throws Exception  Exception
-     */
-    @Test
-    public void testChannelRead002() throws Exception {
-        // given
-        BigInteger nodeId = new BigInteger("abcdefghij0123456789".getBytes());
-        DHTNode node = new DHTNode(nodeId, (byte[]) null, 0);
-        node.setLastUpdated(null);
-
-        String dat = "d1:ad2:id20:abcdefghij0123456789e1:q4:ping1:t2:aa1:y1:qe";
-
-        DatagramPacket packet = new DatagramPacket(
-                Unpooled.copiedBuffer(dat.getBytes()), iaddr,
-                iaddr);
-
-        // when
-        expect(routingTable.findExactNode(nodeId)).andReturn(node);
-        expect(ctx.write(capture(capturedPacket))).andReturn(null);
-
-        replayAll();
-        handler.channelRead0(ctx , packet);
-
-        // then
-        verifyAll();
-
-        assertNotNull(node.getLastUpdated());
     }
 
     /**
