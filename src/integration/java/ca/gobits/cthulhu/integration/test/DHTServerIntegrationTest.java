@@ -22,14 +22,13 @@ import static ca.gobits.cthulhu.test.DHTTestHelper.runDHTServerInNewThread;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
-import org.junit.After;
-import org.junit.Before;
+import org.junit.AfterClass;
+import org.junit.BeforeClass;
 import org.junit.Test;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 
 import ca.gobits.cthulhu.DHTConfiguration;
-import ca.gobits.cthulhu.DHTServer;
 import ca.gobits.cthulhu.DHTServerConfig;
 
 /**
@@ -39,32 +38,25 @@ import ca.gobits.cthulhu.DHTServerConfig;
 public final class DHTServerIntegrationTest {
 
     /** Aplication Context. */
-    private final ConfigurableApplicationContext ac =
+    private static final ConfigurableApplicationContext AC =
             new AnnotationConfigApplicationContext(
                     DHTConfiguration.class);
 
-    /** Flag to indicate whether Server has been started. */
-    private boolean started = false;
-
     /**
-     *before().
+     * start server.
      * @throws Exception  Exception
      */
-    @Before
-    public void before() throws Exception {
-
-        if (!started) {
-            runDHTServerInNewThread(ac, DHTServerConfig.DEFAULT_PORT);
-            started = true;
-        }
+    @BeforeClass
+    public static void beforeClass() throws Exception {
+        runDHTServerInNewThread(AC, DHTServerConfig.DEFAULT_PORT);
     }
 
     /**
-     * after().
+     * Shutdown server.
      */
-    @After
-    public void after() {
-        ac.getBean(DHTServer.class).shutdown();
+    @AfterClass
+    public static void afterClass() {
+        AC.close();
     }
 
     /**

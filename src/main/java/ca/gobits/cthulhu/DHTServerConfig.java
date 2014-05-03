@@ -44,7 +44,7 @@ public final class DHTServerConfig {
 
             if (cmd.hasOption("?")) {
                 this.showHelp = true;
-            } else {
+            } else if (cmd.hasOption("p")) {
 
                 String portStr = cmd.getOptionValue("p");
                 this.port = Integer.parseInt(portStr);

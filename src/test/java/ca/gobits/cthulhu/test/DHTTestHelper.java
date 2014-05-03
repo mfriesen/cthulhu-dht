@@ -20,11 +20,13 @@ import static ca.gobits.dht.Arrays.COMPACT_ADDR_LENGTH;
 import static ca.gobits.dht.Arrays.NODE_ID_LENGTH;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 import java.math.BigInteger;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.apache.log4j.Logger;
 import org.springframework.context.ApplicationContext;
 
 import ca.gobits.cthulhu.DHTServer;
@@ -35,6 +37,10 @@ import ca.gobits.dht.BDecoder;
  * Test Helper Class.
  */
 public final class DHTTestHelper {
+
+    /** Logger. */
+    private static final Logger LOGGER = Logger
+            .getLogger(DHTTestHelper.class);
 
     /** Delay to wait afte starting DHT Server. */
     private static final int START_DELAY_MILLIS = 3000;
@@ -61,7 +67,8 @@ public final class DHTTestHelper {
                     ac.getBean(DHTServer.class)
                         .run(port);
                 } catch (Exception e) {
-                    throw new RuntimeException(e);
+                    LOGGER.fatal(e, e);
+                    fail();
                 }
             }
         });

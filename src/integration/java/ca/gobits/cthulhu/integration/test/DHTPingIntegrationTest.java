@@ -10,8 +10,8 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.apache.commons.codec.binary.Base64;
-import org.junit.After;
-import org.junit.Before;
+import org.junit.AfterClass;
+import org.junit.BeforeClass;
 import org.junit.Test;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
@@ -28,33 +28,26 @@ import ca.gobits.dht.BEncoder;
  */
 public final class DHTPingIntegrationTest {
 
-    /** Flag to indicate whether Server has been started. */
-    private static boolean started = false;
-
     /** Application Context. */
-    private final ConfigurableApplicationContext ac =
+    private static final ConfigurableApplicationContext AC =
             new AnnotationConfigApplicationContext(
                     DHTConfiguration.class);
 
     /**
-     *before().
+     * start server.
      * @throws Exception  Exception
      */
-    @Before
-    public void before() throws Exception {
-
-        if (!started) {
-            runDHTServerInNewThread(ac, DHTServerConfig.DEFAULT_PORT);
-            started = true;
-        }
+    @BeforeClass
+    public static void beforeClass() throws Exception {
+        runDHTServerInNewThread(AC, DHTServerConfig.DEFAULT_PORT);
     }
 
     /**
-     * after().
+     * Shutdown server.
      */
-    @After
-    public void after() {
-        ac.getBean(DHTServer.class).shutdown();
+    @AfterClass
+    public static void afterClass() {
+        AC.close();
     }
 
     /**

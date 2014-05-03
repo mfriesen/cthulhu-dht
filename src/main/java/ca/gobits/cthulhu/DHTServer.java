@@ -28,6 +28,7 @@ import org.apache.commons.cli.HelpFormatter;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ConfigurableApplicationContext;
+import org.springframework.context.Lifecycle;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 
 import ca.gobits.dht.DHTIdentifier;
@@ -36,7 +37,7 @@ import ca.gobits.dht.DHTIdentifier;
 /**
  * DHTServer implementation.
  */
-public final class DHTServer {
+public class DHTServer implements Lifecycle {
 
     /** DHT Server Logger. */
     private static final Logger LOGGER = Logger.getLogger(DHTServer.class);
@@ -66,8 +67,9 @@ public final class DHTServer {
      * @param port port to run server on
      * @throws Exception  Exception
      */
+    // CHECKSTYLE:OFF
     public void run(final int port) throws Exception {
-
+    // CHECKSTYLE:ON
         LOGGER.info("starting cthulhu on " + port);
 
         try {
@@ -81,14 +83,14 @@ public final class DHTServer {
             cf.await();
 
         } finally {
-            shutdown();
+            shutdownGracefully();
         }
     }
 
     /**
-     * Shutdown server.
+     * Gracefully shutdown server.
      */
-    public void shutdown() {
+    public final void shutdownGracefully() {
         group.shutdownGracefully();
     }
 
@@ -97,6 +99,23 @@ public final class DHTServer {
      * @param args argument parameters.
      */
     public static void main(final String[] args) {
+        ConfigurableApplicationContext ac =
+                new AnnotationConfigApplicationContext(DHTConfiguration.class);
+
+        try {
+            main(args, ac);
+        } finally {
+            ac.close();
+        }
+    }
+
+    /**
+     * Mainline to run DHTServer.
+     * @param args argument parameters.
+     * @param ac ApplicationContext
+     */
+    public static void main(final String[] args,
+            final ConfigurableApplicationContext ac) {
 
         DHTServerConfig config = new DHTServerConfig(args);
 
@@ -105,10 +124,6 @@ public final class DHTServer {
             showUsage();
 
         } else {
-
-            ConfigurableApplicationContext ac =
-                    new AnnotationConfigApplicationContext(
-                            DHTConfiguration.class);
 
             try {
 
@@ -135,5 +150,21 @@ public final class DHTServer {
         usageFormatter.printHelp("java -jar dht.jar", "Parameters",
                 DHTServerConfig.DHTSERVER_OPTIONS, "");
         writer.close();
+    }
+
+    @Override
+    public void start() {
+    }
+
+    @Override
+    public final void stop() {
+        shutdownGracefully();
+    }
+
+    @Override
+    public final boolean isRunning() {
+        return !group.isShutdown()
+                && !group.isShuttingDown()
+                && !group.isTerminated();
     }
 }

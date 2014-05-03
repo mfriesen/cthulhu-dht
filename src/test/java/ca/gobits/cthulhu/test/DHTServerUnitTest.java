@@ -16,31 +16,32 @@
 
 package ca.gobits.cthulhu.test;
 
-import static ca.gobits.cthulhu.test.DHTTestHelper.runDHTServerInNewThread;
+import static org.easymock.EasyMock.expect;
 import static org.junit.Assert.assertTrue;
 
 import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.net.DatagramPacket;
-import java.net.DatagramSocket;
-import java.net.InetAddress;
 
+import org.easymock.EasyMockRunner;
+import org.easymock.EasyMockSupport;
+import org.easymock.Mock;
 import org.junit.Test;
-import org.springframework.context.ConfigurableApplicationContext;
+import org.junit.runner.RunWith;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.test.util.ReflectionTestUtils;
 
-import ca.gobits.cthulhu.DHTConfiguration;
 import ca.gobits.cthulhu.DHTServer;
+import ca.gobits.cthulhu.DHTServerConfig;
 
 /**
  * DHTServer UnitTests.
  *
  */
-public final class DHTServerUnitTest {
+@RunWith(EasyMockRunner.class)
+public final class DHTServerUnitTest extends EasyMockSupport {
 
-    /** DATA PACKET LENGTH. */
-    private static final int DATA_PACKET_LENGTH = 1024;
+    /** Mock ApplicationContext. */
+    @Mock
+    private AnnotationConfigApplicationContext mockAc;
 
     /**
      * testMain01() -?.
@@ -59,77 +60,45 @@ public final class DHTServerUnitTest {
     }
 
     /**
-     * testMain02() -p with port.
+     * testMain02().
      * @throws Exception Exception
      */
-    @Test(timeout = 10000)
+    @Test
     public void testMain02() throws Exception {
         // given
-        ConfigurableApplicationContext ac =
-                new AnnotationConfigApplicationContext(
-                        DHTConfiguration.class);
-        int port = 8000;
+        final String[] args = new String[]{};
 
-        try {
-            // when
-            runDHTServerInNewThread(ac, port);
-
-            // then
-            assertConnectedToServer(port);
-        } finally {
-            ac.close();
-        }
-    }
-
-    /**
-     * testMain03() default port.
-     * @throws Exception Exception
-     */
-    @Test(timeout = 10000)
-    public void testMain03() throws Exception {
-        // given
-        int port = 8080;
-
-        ConfigurableApplicationContext ac =
-                new AnnotationConfigApplicationContext(
-                        DHTConfiguration.class);
+        DHTServer mockServer = createMock(DHTServer.class);
 
         // when
-        try {
-            // when
-            runDHTServerInNewThread(ac, port);
+        expect(mockAc.getBean(DHTServer.class)).andReturn(mockServer);
+        mockServer.run(DHTServerConfig.DEFAULT_PORT);
+        mockAc.close();
+        replayAll();
+        DHTServer.main(args, mockAc);
 
-            // then
-            assertConnectedToServer(port);
-        } finally {
-            ac.close();
-        }
+        // verify
+        verifyAll();
     }
 
     /**
-     * Assert can connect to server.
-     * @param port Port to Send to
-     * @throws IOException  IOException
+     * testMain03() - server throws exception.
+     * @throws Exception Exception
      */
-    private void assertConnectedToServer(final int port) throws IOException {
+    @Test
+    public void testMain03() throws Exception {
+        // given
+        final String[] args = new String[]{};
 
-        byte[] sendData = new byte[DATA_PACKET_LENGTH];
-        byte[] receiveData = new byte[DATA_PACKET_LENGTH];
+        // when
+        expect(mockAc.getBean(DHTServer.class))
+                .andThrow(new RuntimeException());
+        mockAc.close();
+        replayAll();
+        DHTServer.main(args, mockAc);
 
-        sendData = "test msg".getBytes();
-        InetAddress ipAddress = InetAddress.getByName("localhost");
-
-        DatagramSocket clientSocket = new DatagramSocket();
-        DatagramPacket sendPacket = new DatagramPacket(sendData,
-                sendData.length, ipAddress, port);
-        clientSocket.send(sendPacket);
-        DatagramPacket receivePacket = new DatagramPacket(receiveData,
-                receiveData.length);
-        clientSocket.receive(receivePacket);
-
-        String response = new String(receivePacket.getData());
-        assertTrue(response.startsWith("d1:rd3:20212:Server Errore1:y1:ee"));
-        clientSocket.close();
+        // verify
+        verifyAll();
     }
 
     /**

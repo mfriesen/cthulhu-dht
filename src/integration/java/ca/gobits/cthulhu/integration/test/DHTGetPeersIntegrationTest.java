@@ -30,7 +30,8 @@ import java.util.Map;
 
 import org.apache.commons.codec.binary.Base64;
 import org.apache.log4j.Logger;
-import org.junit.Before;
+import org.junit.AfterClass;
+import org.junit.BeforeClass;
 import org.junit.Test;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
@@ -54,29 +55,30 @@ public final class DHTGetPeersIntegrationTest {
     private static final Logger LOGGER = Logger
             .getLogger(DHTGetPeersIntegrationTest.class);
 
-    /** Flag to indicate whether Server has been started. */
-    private static boolean started = false;
-
     /** Application Context. */
-    private final ConfigurableApplicationContext ac =
+    private static final ConfigurableApplicationContext AC =
             new AnnotationConfigApplicationContext(
                     DHTConfiguration.class);
 
     /** Reference to DHTNodeRoutingTable. */
-    private final DHTNodeRoutingTable nodeRoutingTable = ac
+    private final DHTNodeRoutingTable nodeRoutingTable = AC
             .getBean(DHTNodeRoutingTable.class);
 
     /**
-     *before().
+     * start server.
      * @throws Exception  Exception
      */
-    @Before
-    public void before() throws Exception {
+    @BeforeClass
+    public static void beforeClass() throws Exception {
+        runDHTServerInNewThread(AC, DHTServerConfig.DEFAULT_PORT);
+    }
 
-        if (!started) {
-            runDHTServerInNewThread(ac, DHTServerConfig.DEFAULT_PORT);
-            started = true;
-        }
+    /**
+     * Shutdown server.
+     */
+    @AfterClass
+    public static void afterClass() {
+        AC.close();
     }
 
     /**
