@@ -16,34 +16,45 @@
 
 package ca.gobits.cthulhu.domain;
 
-import java.io.Serializable;
 import java.math.BigInteger;
 import java.util.Date;
 
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.builder.ToStringBuilder;
+import org.springframework.data.neo4j.annotation.GraphId;
+import org.springframework.data.neo4j.annotation.NodeEntity;
 
 import ca.gobits.dht.Arrays;
+import ca.gobits.dht.BDecoder;
 import ca.gobits.dht.BEncoder;
 
 /**
  * DHTToken - holder for an Address / Token combination.
  *
  */
-public final class DHTToken implements Serializable {
+@NodeEntity
+public final class DHTToken {
 
-    /** serialVersionUID. */
-    private static final long serialVersionUID = -8800987894634792790L;
+    /** DHTToken identifier. */
+    @GraphId
+    private Long id;
 
     /** Node identifier. */
-    private final BigInteger id;
+    private BigInteger infoHash;
+
     /** "Compact IP-address/port info". */
-    private final long address;
-    /** cached hashCode value. */
-    private final int hashCode;
+    private long address;
+
     /** Date the node was last pinged. */
-    private final Date addedDate;
+    private Date addedDate;
+
+    /**
+     * constructor.
+     */
+    public DHTToken() {
+        this.addedDate = new Date();
+    }
 
     /**
      * constructor.
@@ -53,42 +64,29 @@ public final class DHTToken implements Serializable {
      */
     public DHTToken(final BigInteger nodeId, final byte[] addr,
             final int port) {
-        this.id = nodeId;
+        this();
+        this.infoHash = nodeId;
 
         byte[] bytes = BEncoder.compactAddress(addr, port);
         this.address = Arrays.toLong(bytes);
-        this.addedDate = new Date();
-
-        this.hashCode = new HashCodeBuilder()
-        .append(id)
-        .toHashCode();
-    }
-
-    /**
-     * @return BigInteger
-     */
-    public BigInteger getId() {
-        return id;
-    }
-
-    /**
-     * @return long
-     */
-    public long getAddress() {
-        return address;
     }
 
     @Override
     public String toString() {
         ToStringBuilder builder = new ToStringBuilder(this);
         builder.append("id", id);
-        builder.append("address", address);
+        builder.append("infohash", infoHash);
+        builder.append("address", BDecoder.decodeCompactAddressToString(Arrays
+                .toByteArray(address)));
+        builder.append("addedDate", addedDate);
         return builder.toString();
     }
 
     @Override
     public int hashCode() {
-        return this.hashCode;
+        return new HashCodeBuilder()
+            .append(infoHash)
+            .toHashCode();
     }
 
     @Override
@@ -107,8 +105,38 @@ public final class DHTToken implements Serializable {
 
         DHTToken rhs = (DHTToken) obj;
         return new EqualsBuilder()
-            .append(id, rhs.id)
+            .append(infoHash, rhs.infoHash)
             .isEquals();
+    }
+
+    /**
+     * @return BigInteger
+     */
+    public BigInteger getInfoHash() {
+        return infoHash;
+    }
+
+    /**
+     * Sets InfoHash.
+     * @param infoHashId  infoHash
+     */
+    public void setInfoHash(final BigInteger infoHashId) {
+        this.infoHash = infoHashId;
+    }
+
+    /**
+     * @return long
+     */
+    public long getAddress() {
+        return address;
+    }
+
+    /**
+     * Set the address.
+     * @param addr address
+     */
+    public void setAddress(final long addr) {
+        this.address = addr;
     }
 
     /**
@@ -116,5 +144,28 @@ public final class DHTToken implements Serializable {
      */
     public Date getAddedDate() {
         return addedDate;
+    }
+
+    /**
+     * Sets Added Date.
+     * @param date  Added Date
+     */
+    public void setAddedDate(final Date date) {
+        this.addedDate = date;
+    }
+
+    /**
+     * @return Long
+     */
+    public Long getId() {
+        return id;
+    }
+
+    /**
+     * Sets the ID.
+     * @param ident  ID
+     */
+    public void setId(final Long ident) {
+        this.id = ident;
     }
 }

@@ -198,7 +198,7 @@ public final class Arrays {
 
         byte[] dest = new byte[COMPACT_NODE_LENGTH];
 
-        byte[] ids = node.getId().toByteArray();
+        byte[] ids = node.getInfoHash().toByteArray();
         int len = ids.length;
         int length = Math.min(len, NODE_ID_LENGTH);
         int srcpos = len > NODE_ID_LENGTH ? len - NODE_ID_LENGTH : 0;

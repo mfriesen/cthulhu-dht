@@ -6,10 +6,13 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
 import java.math.BigInteger;
+import java.util.Date;
 
 import org.junit.Test;
 
 import ca.gobits.cthulhu.domain.DHTToken;
+import ca.gobits.dht.Arrays;
+import ca.gobits.dht.BEncoder;
 
 /**
  * DHTToken Unit Test.
@@ -23,19 +26,49 @@ public final class DHTTokenUnitTest {
     @Test
     public void testConstructor01() {
         // given
-        BigInteger id = new BigInteger("1");
+        BigInteger nodeId = new BigInteger("1");
         byte[] addr = new byte[] {12, 12, 12, 12 };
         int port = 80;
 
         // when
-        DHTToken result = new DHTToken(id, addr, port);
+        DHTToken result = new DHTToken(nodeId, addr, port);
 
         // then
-        assertEquals(id, result.getId());
+        assertEquals(nodeId, result.getInfoHash());
         assertEquals(13245881253968L, result.getAddress());
         assertEquals(630, result.hashCode());
         assertNotNull(result.getAddedDate());
-        assertTrue(result.toString().endsWith("[id=1,address=13245881253968]"));
+        assertTrue(result.toString().contains(
+                "[id=<null>,infohash=1,address=12.12.12.12:80,addedDate="));
+    }
+
+    /**
+     * testConstructor02.
+     */
+    @Test
+    public void testConstructor02() {
+        // given
+        BigInteger nodeId = new BigInteger("1");
+        byte[] addr = new byte[] {12, 12, 12, 12 };
+        int port = 80;
+        Date addedDate = new Date();
+        Long id = Long.valueOf(234);
+
+        // when
+        DHTToken result = new DHTToken();
+        result.setInfoHash(nodeId);
+        result.setAddress(Arrays.toLong(BEncoder.compactAddress(addr, port)));
+        result.setAddedDate(addedDate);
+        result.setId(id);
+
+        // then
+        assertEquals(nodeId, result.getInfoHash());
+        assertEquals(13245881253968L, result.getAddress());
+        assertEquals(630, result.hashCode());
+        assertNotNull(result.getAddedDate());
+        assertEquals(id, result.getId());
+        assertTrue(result.toString().contains(
+                "[id=234,infohash=1,address=12.12.12.12:80,addedDate="));
     }
 
     /**

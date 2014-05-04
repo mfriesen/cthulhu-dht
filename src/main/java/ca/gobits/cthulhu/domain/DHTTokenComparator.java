@@ -43,6 +43,6 @@ public final class DHTTokenComparator implements Comparator<DHTToken> {
 
     @Override
     public int compare(final DHTToken o1, final DHTToken o2) {
-        return o1.getId().compareTo(o2.getId());
+        return o1.getInfoHash().compareTo(o2.getInfoHash());
     }
 }

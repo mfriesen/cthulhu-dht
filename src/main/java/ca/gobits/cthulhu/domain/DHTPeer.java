@@ -20,6 +20,7 @@ import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.springframework.data.neo4j.annotation.GraphId;
+import org.springframework.data.neo4j.annotation.NodeEntity;
 
 import ca.gobits.dht.Arrays;
 import ca.gobits.dht.BDecoder;
@@ -29,9 +30,10 @@ import ca.gobits.dht.BEncoder;
  * DHTPeer - holder for information about a DHT Peer.
  *
  */
+@NodeEntity
 public final class DHTPeer {
 
-    /** DHTInfoHash identifier. */
+    /** DHTPeer identifier. */
     @GraphId
     private Long id;
 

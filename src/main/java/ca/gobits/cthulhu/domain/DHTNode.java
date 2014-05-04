@@ -16,13 +16,14 @@
 
 package ca.gobits.cthulhu.domain;
 
-import java.io.Serializable;
 import java.math.BigInteger;
 import java.util.Date;
 
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.builder.ToStringBuilder;
+import org.springframework.data.neo4j.annotation.GraphId;
+import org.springframework.data.neo4j.annotation.NodeEntity;
 
 import ca.gobits.dht.Arrays;
 import ca.gobits.dht.BEncoder;
@@ -30,18 +31,28 @@ import ca.gobits.dht.BEncoder;
 /**
  * DHTNode - holder for information about a DHT Node.
  */
-public final class DHTNode implements Serializable {
+@NodeEntity
+public final class DHTNode {
 
-    /** serialVersionUID. */
-    private static final long serialVersionUID = -32412433909683955L;
+    /** DHTNode identifier. */
+    @GraphId
+    private Long id;
+
     /** Node identifier. */
-    private final BigInteger id;
+    private BigInteger infoHash;
+
     /** "Compact IP-address/port info". */
-    private final long address;
-    /** cached hashCode value. */
-    private final int hashCode;
+    private long address;
+
     /** Date the node was last pinged. */
     private Date lastUpdated;
+
+    /**
+     * constructor.
+     */
+    public DHTNode() {
+        this.lastUpdated = new Date();
+    }
 
     /**
      * constructor.
@@ -51,7 +62,9 @@ public final class DHTNode implements Serializable {
      */
     public DHTNode(final BigInteger nodeId, final byte[] addr,
             final int port) {
-        this.id = nodeId;
+        this();
+
+        this.infoHash = nodeId;
 
         if (addr != null) {
             byte[] bytes = BEncoder.compactAddress(addr, port);
@@ -59,39 +72,23 @@ public final class DHTNode implements Serializable {
         } else {
             this.address = 0;
         }
-
-        this.lastUpdated = new Date();
-
-        this.hashCode = new HashCodeBuilder()
-        .append(id)
-        .toHashCode();
-    }
-
-    /**
-     * @return BigInteger
-     */
-    public BigInteger getId() {
-        return id;
-    }
-
-    /**
-     * @return long
-     */
-    public long getAddress() {
-        return address;
     }
 
     @Override
     public String toString() {
         ToStringBuilder builder = new ToStringBuilder(this);
         builder.append("id", id);
+        builder.append("infohash", infoHash);
         builder.append("address", address);
+        builder.append("lastUpdated", lastUpdated);
         return builder.toString();
     }
 
     @Override
     public int hashCode() {
-        return this.hashCode;
+        return new HashCodeBuilder()
+            .append(infoHash)
+            .toHashCode();
     }
 
     @Override
@@ -127,5 +124,50 @@ public final class DHTNode implements Serializable {
      */
     public void setLastUpdated(final Date date) {
         this.lastUpdated = date;
+    }
+
+    /**
+     * @return Long
+     */
+    public Long getId() {
+        return id;
+    }
+
+    /**
+     * Set Id.
+     * @param ident  id
+     */
+    public void setId(final Long ident) {
+        this.id = ident;
+    }
+
+    /**
+     * @return BigInteger
+     */
+    public BigInteger getInfoHash() {
+        return infoHash;
+    }
+
+    /**
+     * Sets Info Hash.
+     * @param infoHashId  InfoHash
+     */
+    public void setInfoHash(final BigInteger infoHashId) {
+        this.infoHash = infoHashId;
+    }
+
+    /**
+     * @return long
+     */
+    public long getAddress() {
+        return address;
+    }
+
+    /**
+     * Sets DHTNode's IP/Port address in Compact format.
+     * @param addr  compact address
+     */
+    public void setAddress(final long addr) {
+        this.address = addr;
     }
 }

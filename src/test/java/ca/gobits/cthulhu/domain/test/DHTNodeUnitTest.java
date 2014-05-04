@@ -27,6 +27,8 @@ import java.util.Date;
 import org.junit.Test;
 
 import ca.gobits.cthulhu.domain.DHTNode;
+import ca.gobits.dht.Arrays;
+import ca.gobits.dht.BEncoder;
 
 /**
  * Unit Test for DHTNode.
@@ -47,7 +49,7 @@ public final class DHTNodeUnitTest {
         DHTNode result = new DHTNode(nodeId, address, nodePort);
 
         // then
-        assertEquals(nodeId, result.getId());
+        assertEquals(nodeId, result.getInfoHash());
         assertEquals(139637976793191L, result.getAddress());
         assertEquals(752, result.hashCode());
         assertNotNull(result.getLastUpdated());
@@ -67,7 +69,7 @@ public final class DHTNodeUnitTest {
         DHTNode result = new DHTNode(nodeId, address, nodePort);
 
         // then
-        assertEquals(nodeId, result.getId());
+        assertEquals(nodeId, result.getInfoHash());
         assertEquals(0L, result.getAddress());
         assertEquals(752, result.hashCode());
         assertNotNull(result.getLastUpdated());
@@ -79,18 +81,48 @@ public final class DHTNodeUnitTest {
     @Test
     public void testToString01() {
         // given
+        Long id = Long.valueOf(12);
         BigInteger nodeId = new BigInteger("123");
         byte[] address = new byte[] {127, 0, 0, 1 };
         int nodePort = 103;
+        DHTNode node = new DHTNode(nodeId, address, nodePort);
+        node.setId(id);
 
         // when
-        DHTNode result = new DHTNode(nodeId, address, nodePort);
+        String result = node.toString();
 
         // then
-        assertTrue(result.toString().startsWith(
+        assertTrue(result.startsWith(
                 "ca.gobits.cthulhu.domain.DHTNode"));
-        assertTrue(result.toString().endsWith(
-                "[id=123,address=139637976793191]"));
+        assertTrue(result.contains(
+           "[id=12,infohash=123,address=139637976793191,lastUpdated="));
+        assertEquals(id, node.getId());
+    }
+
+    /**
+     * testToString02().
+     */
+    @Test
+    public void testToString02() {
+        // given
+        Long id = Long.valueOf(12);
+        BigInteger nodeId = new BigInteger("123");
+        byte[] addr = new byte[] {127, 0, 0, 1 };
+        int port = 103;
+        DHTNode node = new DHTNode();
+        node.setId(id);
+        node.setInfoHash(nodeId);
+        node.setAddress(Arrays.toLong(BEncoder.compactAddress(addr, port)));
+
+        // when
+        String result = node.toString();
+
+        // then
+        assertTrue(result.startsWith(
+                "ca.gobits.cthulhu.domain.DHTNode"));
+        assertTrue(result.contains(
+           "[id=12,infohash=123,address=139637976793191,lastUpdated="));
+        assertEquals(id, node.getId());
     }
 
     /**

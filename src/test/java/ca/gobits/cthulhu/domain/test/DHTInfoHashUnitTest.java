@@ -52,24 +52,6 @@ public final class DHTInfoHashUnitTest {
     }
 
     /**
-     * testConstructor02().
-     */
-    @Test
-    public void testConstructor02() {
-        // given
-        BigInteger nodeId = new BigInteger("123");
-        byte[] addr = new byte[] {12, 43, 65, 4 };
-        int port = 8000;
-
-        // when
-        DHTInfoHash result = new DHTInfoHash(nodeId, addr, port);
-
-        // then
-        assertEquals(nodeId, result.getInfoHash());
-        assertEquals(13379913916224L, result.getAddress());
-    }
-
-    /**
      * testConstructor03().
      */
     @Test
@@ -95,27 +77,9 @@ public final class DHTInfoHashUnitTest {
     public void testToString01() {
         // given
         BigInteger nodeId = new BigInteger("123");
-        DHTInfoHash infohash = new DHTInfoHash(nodeId);
-
-        // when
-        String result = infohash.toString();
-
-        // then
-        assertTrue(result
-                .startsWith("ca.gobits.cthulhu.domain.DHTInfoHash"));
-        assertTrue(result.toString().endsWith(
-                "[id=<null>,infoHash=123]"));
-    }
-
-    /**
-     * testToString02().
-     */
-    @Test
-    public void testToString02() {
-        // given
-        BigInteger nodeId = new BigInteger("123");
         DHTInfoHash infoHash = new DHTInfoHash(nodeId);
-        infoHash.setAddress(13379913916224L);
+        infoHash.setLongitude(1.0);
+        infoHash.setLatitude(2.0);
 
         // when
         String result = infoHash.toString();
@@ -123,8 +87,10 @@ public final class DHTInfoHashUnitTest {
         // then
         assertTrue(result
                 .startsWith("ca.gobits.cthulhu.domain.DHTInfoHash"));
-        assertTrue(result.toString().endsWith(
-                "[id=<null>,infoHash=123,address=12.43.65.4:8000]"));
+        assertTrue(result.endsWith(
+           "[id=<null>,infoHash=123,latitude=2.0,longitude=1.0]"));
+        assertEquals(2, infoHash.getLatitude(), 0);
+        assertEquals(1, infoHash.getLongitude(), 0);
     }
 
     /**

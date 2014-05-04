@@ -91,7 +91,7 @@ public final class DHTServerIntegrationHelper {
         request.put("q", "ping");
 
         Map<String, Object> a = new HashMap<String, Object>();
-        a.put("id", node.getId().toByteArray());
+        a.put("id", node.getInfoHash().toByteArray());
         request.put("a", a);
 
         return BEncoder.bencoding(request).toByteArray();

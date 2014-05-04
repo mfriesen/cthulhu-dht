@@ -28,13 +28,8 @@ import org.springframework.data.neo4j.annotation.GraphId;
 import org.springframework.data.neo4j.annotation.NodeEntity;
 import org.springframework.data.neo4j.annotation.RelatedTo;
 
-import ca.gobits.dht.Arrays;
-import ca.gobits.dht.BDecoder;
-import ca.gobits.dht.BEncoder;
-
 /**
  * DHTInfoHash - holder of information about a InfoHash record.
- * @author slycer
  *
  */
 @NodeEntity
@@ -47,12 +42,15 @@ public final class DHTInfoHash {
     /** InfoHash identifier. */
     private BigInteger infoHash;
 
+    /** Info hash latitude. */
+    private double latitude;
+
+    /** Info hash longitude. */
+    private double longitude;
+
     /** Collection of Peers that "announced" to the InfoHash. */
     @RelatedTo(type = "peer", direction = Direction.OUTGOING)
     private Set<DHTPeer> peers;
-
-    /** "Compact IP-address/port info". */
-    private long address;
 
     /**
      * default constructor.
@@ -67,20 +65,6 @@ public final class DHTInfoHash {
     public DHTInfoHash(final BigInteger hashInfoId) {
         this();
         this.infoHash = hashInfoId;
-    }
-
-    /**
-     * constructor.
-     * @param hashInfo Identifier
-     * @param addr IP address
-     * @param port listening port
-     */
-    public DHTInfoHash(final BigInteger hashInfo, final byte[] addr,
-            final int port) {
-        this(hashInfo);
-
-        byte[] bytes = BEncoder.compactAddress(addr, port);
-        this.address = Arrays.toLong(bytes);
     }
 
     /**
@@ -117,28 +101,9 @@ public final class DHTInfoHash {
         ToStringBuilder builder = new ToStringBuilder(this);
         builder.append("id", id);
         builder.append("infoHash", infoHash);
-
-        if (address > 0) {
-            builder.append("address", BDecoder.decodeCompactAddressToString(
-                Arrays.toByteArray(address)));
-        }
-
+        builder.append("latitude", latitude);
+        builder.append("longitude", longitude);
         return builder.toString();
-    }
-
-    /**
-     * @return long
-     */
-    public long getAddress() {
-        return address;
-    }
-
-    /**
-     * Sets Address.
-     * @param addr address
-     */
-    public void setAddress(final long addr) {
-        this.address = addr;
     }
 
     /**
@@ -158,7 +123,7 @@ public final class DHTInfoHash {
     @Override
     public int hashCode() {
         return new HashCodeBuilder()
-            .append(id)
+            .append(infoHash)
             .toHashCode();
     }
 
@@ -195,5 +160,35 @@ public final class DHTInfoHash {
      */
     public void setInfoHash(final BigInteger infoHashId) {
         this.infoHash = infoHashId;
+    }
+
+    /**
+     * @return double
+     */
+    public double getLatitude() {
+        return latitude;
+    }
+
+    /**
+     * Set Latitude.
+     * @param latitudeCoordinate  latitude
+     */
+    public void setLatitude(final double latitudeCoordinate) {
+        this.latitude = latitudeCoordinate;
+    }
+
+    /**
+     * @return double
+     */
+    public double getLongitude() {
+        return longitude;
+    }
+
+    /**
+     * Sets Longitude.
+     * @param longitudeCoordinate  longitude
+     */
+    public void setLongitude(final double longitudeCoordinate) {
+        this.longitude = longitudeCoordinate;
     }
 }
