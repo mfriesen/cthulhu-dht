@@ -14,7 +14,7 @@
 // limitations under the License.
 //
 
-package ca.gobits.cthulhu.test;
+package ca.gobits.cthulhu.domain.test;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -23,10 +23,13 @@ import static org.junit.Assert.assertTrue;
 
 import java.math.BigInteger;
 import java.util.Collection;
+import java.util.HashSet;
+import java.util.Set;
 
 import org.junit.Test;
 
-import ca.gobits.cthulhu.DHTInfoHash;
+import ca.gobits.cthulhu.domain.DHTInfoHash;
+import ca.gobits.cthulhu.domain.DHTPeer;
 
 /**
  * Unit Test for DHTInfoHash.
@@ -45,8 +48,44 @@ public final class DHTInfoHashUnitTest {
         DHTInfoHash result = new DHTInfoHash(nodeId);
 
         // then
-        assertEquals(nodeId, result.getId());
-        assertEquals(752, result.hashCode());
+        assertEquals(nodeId, result.getInfoHash());
+    }
+
+    /**
+     * testConstructor02().
+     */
+    @Test
+    public void testConstructor02() {
+        // given
+        BigInteger nodeId = new BigInteger("123");
+        byte[] addr = new byte[] {12, 43, 65, 4 };
+        int port = 8000;
+
+        // when
+        DHTInfoHash result = new DHTInfoHash(nodeId, addr, port);
+
+        // then
+        assertEquals(nodeId, result.getInfoHash());
+        assertEquals(13379913916224L, result.getAddress());
+    }
+
+    /**
+     * testConstructor03().
+     */
+    @Test
+    public void testConstructor03() {
+        // given
+        Long id = Long.valueOf(234);
+        BigInteger nodeId = new BigInteger("123");
+        DHTInfoHash result = new DHTInfoHash();
+
+        // when
+        result.setId(id);
+        result.setInfoHash(nodeId);
+
+        // then
+        assertEquals(id, result.getId());
+        assertEquals(nodeId, result.getInfoHash());
     }
 
     /**
@@ -56,15 +95,36 @@ public final class DHTInfoHashUnitTest {
     public void testToString01() {
         // given
         BigInteger nodeId = new BigInteger("123");
+        DHTInfoHash infohash = new DHTInfoHash(nodeId);
 
         // when
-        DHTInfoHash result = new DHTInfoHash(nodeId);
+        String result = infohash.toString();
 
         // then
-        assertTrue(result.toString()
-                .startsWith("ca.gobits.cthulhu.DHTInfoHash"));
+        assertTrue(result
+                .startsWith("ca.gobits.cthulhu.domain.DHTInfoHash"));
         assertTrue(result.toString().endsWith(
-                "[id=123]"));
+                "[id=<null>,infoHash=123]"));
+    }
+
+    /**
+     * testToString02().
+     */
+    @Test
+    public void testToString02() {
+        // given
+        BigInteger nodeId = new BigInteger("123");
+        DHTInfoHash infoHash = new DHTInfoHash(nodeId);
+        infoHash.setAddress(13379913916224L);
+
+        // when
+        String result = infoHash.toString();
+
+        // then
+        assertTrue(result
+                .startsWith("ca.gobits.cthulhu.domain.DHTInfoHash"));
+        assertTrue(result.toString().endsWith(
+                "[id=<null>,infoHash=123,address=12.43.65.4:8000]"));
     }
 
     /**
@@ -147,11 +207,11 @@ public final class DHTInfoHashUnitTest {
 
         // when
         node.addPeer(address, port);
-        Collection<Long> result = node.getPeers();
+        Collection<DHTPeer> result = node.getPeers();
 
         // then
         assertEquals(1, result.size());
-        assertEquals(139637976793191L, result.iterator().next().longValue());
+        assertEquals(139637976793191L, result.iterator().next().getAddress());
     }
 
     /**
@@ -170,9 +230,34 @@ public final class DHTInfoHashUnitTest {
         // when
         node.addPeer(address, port);
         node.addPeer(address, port);
-        Collection<Long> result = node.getPeers();
+        Collection<DHTPeer> result = node.getPeers();
 
         // then
         assertEquals(1, result.size());
+    }
+
+    /**
+     * testAddPeer03().
+     */
+    @Test
+    public void testAddPeer03() {
+        // given
+        BigInteger nodeId = new BigInteger("123");
+        DHTInfoHash node = new DHTInfoHash(nodeId);
+        byte[] address = new byte[] {127, 0, 0, 1 };
+        int port = 103;
+        DHTPeer peer = new DHTPeer(address, port);
+        Set<DHTPeer> peers = new HashSet<DHTPeer>();
+        peers.add(peer);
+
+        assertNull(node.getPeers());
+
+        // when
+        node.setPeers(peers);
+
+        // then
+        assertEquals(1, node.getPeers().size());
+        assertEquals(139637976793191L, node.getPeers().iterator().next()
+                .getAddress());
     }
 }

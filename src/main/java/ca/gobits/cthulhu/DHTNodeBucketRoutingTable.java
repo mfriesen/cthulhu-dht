@@ -21,6 +21,8 @@ import java.util.List;
 
 import org.apache.log4j.Logger;
 
+import ca.gobits.cthulhu.domain.DHTNode;
+import ca.gobits.cthulhu.domain.DHTNodeComparator;
 import ca.gobits.dht.Arrays;
 import ca.gobits.dht.BDecoder;
 

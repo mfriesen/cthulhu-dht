@@ -19,6 +19,8 @@ package ca.gobits.cthulhu;
 import java.math.BigInteger;
 import java.util.Collection;
 
+import ca.gobits.cthulhu.domain.DHTInfoHash;
+
 /**
  * DHT Peer Routing table interface.
  */

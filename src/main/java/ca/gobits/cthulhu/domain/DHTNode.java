@@ -14,12 +14,11 @@
 // limitations under the License.
 //
 
-package ca.gobits.cthulhu;
+package ca.gobits.cthulhu.domain;
 
 import java.io.Serializable;
 import java.math.BigInteger;
-import java.util.Collection;
-import java.util.HashSet;
+import java.util.Date;
 
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
@@ -29,54 +28,65 @@ import ca.gobits.dht.Arrays;
 import ca.gobits.dht.BEncoder;
 
 /**
- * DHTInfoHash - holder of information about a InfoHash record.
- * @author slycer
- *
+ * DHTNode - holder for information about a DHT Node.
  */
-public final class DHTInfoHash implements Serializable {
+public final class DHTNode implements Serializable {
 
     /** serialVersionUID. */
-    private static final long serialVersionUID = 6478991759756312268L;
+    private static final long serialVersionUID = -32412433909683955L;
     /** Node identifier. */
     private final BigInteger id;
+    /** "Compact IP-address/port info". */
+    private final long address;
     /** cached hashCode value. */
     private final int hashCode;
-    /** Collection of Nodes "announced" to the peer. */
-    private Collection<Long> peers;
+    /** Date the node was last pinged. */
+    private Date lastUpdated;
 
     /**
      * constructor.
-     * @param ident Info hash identifier
+     * @param nodeId Identifier
+     * @param addr IP address
+     * @param port listening port
      */
-    public DHTInfoHash(final BigInteger ident) {
+    public DHTNode(final BigInteger nodeId, final byte[] addr,
+            final int port) {
+        this.id = nodeId;
 
-        this.id = ident;
+        if (addr != null) {
+            byte[] bytes = BEncoder.compactAddress(addr, port);
+            this.address = Arrays.toLong(bytes);
+        } else {
+            this.address = 0;
+        }
+
+        this.lastUpdated = new Date();
+
         this.hashCode = new HashCodeBuilder()
         .append(id)
         .toHashCode();
     }
 
     /**
-     * Peers are "<compact node info>" format.
-     * @return Collection<Long>
+     * @return BigInteger
      */
-    public Collection<Long> getPeers() {
-        return peers;
+    public BigInteger getId() {
+        return id;
     }
 
     /**
-     * Adds a peer.
-     * @param address  IP Address of peer
-     * @param port   listening port of peer
+     * @return long
      */
-    public void addPeer(final byte[] address, final int port) {
-        if (this.peers == null) {
-            this.peers = new HashSet<Long>();
-        }
+    public long getAddress() {
+        return address;
+    }
 
-        byte[] bytes = BEncoder.compactAddress(address, port);
-        long addr = Arrays.toLong(bytes);
-        this.peers.add(Long.valueOf(addr));
+    @Override
+    public String toString() {
+        ToStringBuilder builder = new ToStringBuilder(this);
+        builder.append("id", id);
+        builder.append("address", address);
+        return builder.toString();
     }
 
     @Override
@@ -94,27 +104,28 @@ public final class DHTInfoHash implements Serializable {
             return true;
         }
 
-        if (!(obj instanceof DHTInfoHash)) {
+        if (!(obj instanceof DHTNode)) {
             return false;
         }
 
-        DHTInfoHash rhs = (DHTInfoHash) obj;
+        DHTNode rhs = (DHTNode) obj;
         return new EqualsBuilder()
             .append(id, rhs.id)
             .isEquals();
     }
 
-    @Override
-    public String toString() {
-        ToStringBuilder builder = new ToStringBuilder(this);
-        builder.append("id", id);
-        return builder.toString();
+    /**
+     * @return Date
+     */
+    public Date getLastUpdated() {
+        return lastUpdated;
     }
 
     /**
-     * @return BigInteger
+     * Sets the Last Updated Date.
+     * @param date sets Last Updated Date
      */
-    public BigInteger getId() {
-        return id;
+    public void setLastUpdated(final Date date) {
+        this.lastUpdated = date;
     }
 }

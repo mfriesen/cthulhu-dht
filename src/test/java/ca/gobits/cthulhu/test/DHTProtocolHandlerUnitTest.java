@@ -51,11 +51,11 @@ import org.junit.runner.RunWith;
 import org.springframework.test.util.ReflectionTestUtils;
 
 import ca.gobits.cthulhu.DHTInfoHashRoutingTable;
-import ca.gobits.cthulhu.DHTNode;
 import ca.gobits.cthulhu.DHTNodeRoutingTable;
 import ca.gobits.cthulhu.DHTProtocolHandler;
 import ca.gobits.cthulhu.DHTServer;
 import ca.gobits.cthulhu.DHTTokenTable;
+import ca.gobits.cthulhu.domain.DHTNode;
 import ca.gobits.dht.BDecoder;
 import ca.gobits.dht.BEncoder;
 

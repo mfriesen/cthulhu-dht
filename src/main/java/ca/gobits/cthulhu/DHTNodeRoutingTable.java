@@ -19,6 +19,8 @@ package ca.gobits.cthulhu;
 import java.math.BigInteger;
 import java.util.List;
 
+import ca.gobits.cthulhu.domain.DHTNode;
+
 /**
  * DHTNodeRoutingTable interface.
  *

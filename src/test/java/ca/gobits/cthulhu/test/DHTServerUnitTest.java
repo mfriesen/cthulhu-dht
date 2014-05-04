@@ -73,7 +73,6 @@ public final class DHTServerUnitTest extends EasyMockSupport {
         // when
         expect(mockAc.getBean(DHTServer.class)).andReturn(mockServer);
         mockServer.run(DHTServerConfig.DEFAULT_PORT);
-        mockAc.close();
         replayAll();
         DHTServer.main(args, mockAc);
 
@@ -93,7 +92,6 @@ public final class DHTServerUnitTest extends EasyMockSupport {
         // when
         expect(mockAc.getBean(DHTServer.class))
                 .andThrow(new RuntimeException());
-        mockAc.close();
         replayAll();
         DHTServer.main(args, mockAc);
 

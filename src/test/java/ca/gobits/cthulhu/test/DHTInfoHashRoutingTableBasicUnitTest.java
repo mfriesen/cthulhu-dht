@@ -10,9 +10,10 @@ import java.util.Iterator;
 
 import org.junit.Test;
 
-import ca.gobits.cthulhu.DHTInfoHash;
 import ca.gobits.cthulhu.DHTInfoHashRoutingTable;
 import ca.gobits.cthulhu.DHTInfoHashRoutingTableBasic;
+import ca.gobits.cthulhu.domain.DHTInfoHash;
+import ca.gobits.cthulhu.domain.DHTPeer;
 
 /**
  * DHTInfoHashRoutingTableBasic Unit Tests.
@@ -84,8 +85,8 @@ public final class DHTInfoHashRoutingTableBasicUnitTest {
         // then
         assertNotNull(result);
         assertEquals(1, result.getPeers().size());
-        Long l = result.getPeers().iterator().next();
-        assertEquals(139637976794322L, l.longValue());
+        DHTPeer l = result.getPeers().iterator().next();
+        assertEquals(139637976794322L, l.getAddress());
     }
 
     /**
@@ -107,7 +108,7 @@ public final class DHTInfoHashRoutingTableBasicUnitTest {
         // then
         assertNotNull(result);
         assertEquals(1, result.getPeers().size());
-        Iterator<Long> itr = result.getPeers().iterator();
-        assertEquals(139637976794322L, itr.next().longValue());
+        Iterator<DHTPeer> itr = result.getPeers().iterator();
+        assertEquals(139637976794322L, itr.next().getAddress());
     }
 }

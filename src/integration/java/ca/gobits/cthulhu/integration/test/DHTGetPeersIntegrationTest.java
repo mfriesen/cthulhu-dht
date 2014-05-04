@@ -37,9 +37,9 @@ import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 
 import ca.gobits.cthulhu.DHTConfiguration;
-import ca.gobits.cthulhu.DHTNode;
 import ca.gobits.cthulhu.DHTNodeRoutingTable;
 import ca.gobits.cthulhu.DHTServerConfig;
+import ca.gobits.cthulhu.domain.DHTNode;
 import ca.gobits.dht.Arrays;
 import ca.gobits.dht.BDecoder;
 import ca.gobits.dht.BEncoder;

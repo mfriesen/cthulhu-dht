@@ -22,6 +22,9 @@ import java.util.Collection;
 
 import org.apache.log4j.Logger;
 
+import ca.gobits.cthulhu.domain.DHTInfoHash;
+import ca.gobits.cthulhu.domain.DHTInfoHashComparator;
+import ca.gobits.cthulhu.domain.DHTPeer;
 import ca.gobits.dht.Arrays;
 
 /**
@@ -56,13 +59,13 @@ public final class DHTInfoHashRoutingTableBasic implements
 
         if (peer != null) {
 
-            Collection<Long> peers = peer.getPeers();
+            Collection<DHTPeer> peers = peer.getPeers();
             LOGGER.debug("found " + peers.size() + " peers");
             nodes = new ArrayList<byte[]>(peers.size());
 
-            for (Long l : peers) {
+            for (DHTPeer l : peers) {
                 LOGGER.debug("returning " + l);
-                nodes.add(Arrays.toByteArray(l.longValue()));
+                nodes.add(Arrays.toByteArray(l.getAddress()));
             }
         } else {
             LOGGER.info("found 0 peers");

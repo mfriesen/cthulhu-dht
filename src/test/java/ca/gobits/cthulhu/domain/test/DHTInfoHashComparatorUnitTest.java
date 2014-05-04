@@ -14,7 +14,7 @@
 // limitations under the License.
 //
 
-package ca.gobits.cthulhu.test;
+package ca.gobits.cthulhu.domain.test;
 
 import static org.junit.Assert.assertEquals;
 
@@ -22,13 +22,13 @@ import java.math.BigInteger;
 
 import org.junit.Test;
 
-import ca.gobits.cthulhu.DHTNode;
-import ca.gobits.cthulhu.DHTNodeComparator;
+import ca.gobits.cthulhu.domain.DHTInfoHash;
+import ca.gobits.cthulhu.domain.DHTInfoHashComparator;
 
 /**
- * DHTNodeComparator Unit Tests.
+ * DHTInfoHashComparator Unit Tests.
  */
-public final class DHTNodeComparatorUnitTest {
+public final class DHTInfoHashComparatorUnitTest {
 
     /**
      * testCompare01() IDs are equal.
@@ -36,11 +36,11 @@ public final class DHTNodeComparatorUnitTest {
     @Test
     public void testCompare01() {
         // given
-        DHTNode node0 = new DHTNode(new BigInteger("2"), (byte[]) null, 0);
-        DHTNode node1 = new DHTNode(new BigInteger("2"), (byte[]) null, 0);
+        DHTInfoHash node0 = new DHTInfoHash(new BigInteger("2"));
+        DHTInfoHash node1 = new DHTInfoHash(new BigInteger("2"));
 
         // when
-        int result = DHTNodeComparator.getInstance().compare(node0, node1);
+        int result = DHTInfoHashComparator.getInstance().compare(node0, node1);
 
         // then
         assertEquals(0, result);
@@ -52,11 +52,11 @@ public final class DHTNodeComparatorUnitTest {
     @Test
     public void testCompare02() {
         // given
-        DHTNode node0 = new DHTNode(new BigInteger("2"), (byte[]) null, 0);
-        DHTNode node1 = new DHTNode(new BigInteger("5"), (byte[]) null, 0);
+        DHTInfoHash node0 = new DHTInfoHash(new BigInteger("2"));
+        DHTInfoHash node1 = new DHTInfoHash(new BigInteger("5"));
 
         // when
-        int result = DHTNodeComparator.getInstance().compare(node0, node1);
+        int result = DHTInfoHashComparator.getInstance().compare(node0, node1);
 
         // then
         assertEquals(-1, result);
@@ -68,11 +68,11 @@ public final class DHTNodeComparatorUnitTest {
     @Test
     public void testCompare03() {
         // given
-        DHTNode node0 = new DHTNode(new BigInteger("5"), (byte[]) null, 0);
-        DHTNode node1 = new DHTNode(new BigInteger("2"), (byte[]) null, 0);
+        DHTInfoHash node0 = new DHTInfoHash(new BigInteger("5"));
+        DHTInfoHash node1 = new DHTInfoHash(new BigInteger("2"));
 
         // when
-        int result = DHTNodeComparator.getInstance().compare(node0, node1);
+        int result = DHTInfoHashComparator.getInstance().compare(node0, node1);
 
         // then
         assertEquals(1, result);

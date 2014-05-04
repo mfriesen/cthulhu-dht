@@ -22,7 +22,7 @@ import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Collection;
 
-import ca.gobits.cthulhu.DHTNode;
+import ca.gobits.cthulhu.domain.DHTNode;
 
 /**
  * Arrays Helper Methods.

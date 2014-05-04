@@ -1,4 +1,4 @@
-package ca.gobits.cthulhu.test;
+package ca.gobits.cthulhu.domain.test;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -9,7 +9,7 @@ import java.math.BigInteger;
 
 import org.junit.Test;
 
-import ca.gobits.cthulhu.DHTToken;
+import ca.gobits.cthulhu.domain.DHTToken;
 
 /**
  * DHTToken Unit Test.

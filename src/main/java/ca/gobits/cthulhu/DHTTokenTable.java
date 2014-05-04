@@ -18,6 +18,8 @@ package ca.gobits.cthulhu;
 
 import java.net.InetSocketAddress;
 
+import ca.gobits.cthulhu.domain.DHTToken;
+
 /**
  * DHTTokenTable - maintain a list of secrets / ip addresses.
  */

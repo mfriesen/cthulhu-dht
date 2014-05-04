@@ -27,9 +27,9 @@ import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 import org.junit.Test;
 
-import ca.gobits.cthulhu.DHTNode;
 import ca.gobits.cthulhu.DHTNodeBucketRoutingTable;
 import ca.gobits.cthulhu.SortedList;
+import ca.gobits.cthulhu.domain.DHTNode;
 
 /**
  * DHTBucketRoutingTableTest.

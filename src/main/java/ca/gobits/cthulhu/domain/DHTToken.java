@@ -14,7 +14,7 @@
 // limitations under the License.
 //
 
-package ca.gobits.cthulhu;
+package ca.gobits.cthulhu.domain;
 
 import java.io.Serializable;
 import java.math.BigInteger;

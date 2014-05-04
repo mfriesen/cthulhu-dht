@@ -14,35 +14,35 @@
 // limitations under the License.
 //
 
-package ca.gobits.cthulhu;
+package ca.gobits.cthulhu.domain;
 
 import java.util.Comparator;
 
 /**
- * DHTInfoHash Comparator.
+ * DHTToken Comparator.
  *
  */
-public final class DHTInfoHashComparator implements Comparator<DHTInfoHash> {
+public final class DHTTokenComparator implements Comparator<DHTToken> {
 
     /** static comparator instance. */
-    private static DHTInfoHashComparator comparator =
-            new DHTInfoHashComparator();
+    private static DHTTokenComparator comparator =
+            new DHTTokenComparator();
 
     /**
-     * @return Comparator<DHTInfoHash>
+     * @return Comparator<DHTToken>
      */
-    public static Comparator<DHTInfoHash> getInstance() {
+    public static Comparator<DHTToken> getInstance() {
         return comparator;
     }
 
     /**
      * private constructor.
      */
-    private DHTInfoHashComparator() {
+    private DHTTokenComparator() {
     }
 
     @Override
-    public int compare(final DHTInfoHash o1, final DHTInfoHash o2) {
+    public int compare(final DHTToken o1, final DHTToken o2) {
         return o1.getId().compareTo(o2.getId());
     }
 }

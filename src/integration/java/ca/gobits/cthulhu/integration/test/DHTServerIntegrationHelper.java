@@ -23,8 +23,8 @@ import java.net.InetAddress;
 import java.util.HashMap;
 import java.util.Map;
 
-import ca.gobits.cthulhu.DHTNode;
 import ca.gobits.cthulhu.DHTServerConfig;
+import ca.gobits.cthulhu.domain.DHTNode;
 import ca.gobits.dht.BEncoder;
 
 /**

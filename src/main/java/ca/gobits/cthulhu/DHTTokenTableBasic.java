@@ -23,6 +23,8 @@ import java.util.Date;
 
 import org.apache.log4j.Logger;
 
+import ca.gobits.cthulhu.domain.DHTToken;
+import ca.gobits.cthulhu.domain.DHTTokenComparator;
 import ca.gobits.dht.Arrays;
 import ca.gobits.dht.BEncoder;
 

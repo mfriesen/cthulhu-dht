@@ -36,6 +36,7 @@ import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.util.CollectionUtils;
 
+import ca.gobits.cthulhu.domain.DHTNode;
 import ca.gobits.dht.Arrays;
 import ca.gobits.dht.BDecoder;
 import ca.gobits.dht.BEncoder;

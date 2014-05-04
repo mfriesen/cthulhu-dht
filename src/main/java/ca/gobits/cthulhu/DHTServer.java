@@ -134,8 +134,6 @@ public class DHTServer implements Lifecycle {
 
                 LOGGER.fatal(e, e);
 
-            } finally {
-                ac.close();
             }
         }
     }

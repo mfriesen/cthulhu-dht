@@ -27,9 +27,9 @@ import java.util.Calendar;
 import org.junit.Test;
 import org.springframework.test.util.ReflectionTestUtils;
 
-import ca.gobits.cthulhu.DHTToken;
 import ca.gobits.cthulhu.DHTTokenTable;
 import ca.gobits.cthulhu.DHTTokenTableBasic;
+import ca.gobits.cthulhu.domain.DHTToken;
 
 /**
  * DHTTokenTableBasicTest.

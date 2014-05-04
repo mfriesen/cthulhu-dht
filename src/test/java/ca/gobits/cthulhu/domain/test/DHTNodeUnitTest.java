@@ -14,7 +14,7 @@
 // limitations under the License.
 //
 
-package ca.gobits.cthulhu.test;
+package ca.gobits.cthulhu.domain.test;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -26,7 +26,7 @@ import java.util.Date;
 
 import org.junit.Test;
 
-import ca.gobits.cthulhu.DHTNode;
+import ca.gobits.cthulhu.domain.DHTNode;
 
 /**
  * Unit Test for DHTNode.
@@ -87,7 +87,8 @@ public final class DHTNodeUnitTest {
         DHTNode result = new DHTNode(nodeId, address, nodePort);
 
         // then
-        assertTrue(result.toString().startsWith("ca.gobits.cthulhu.DHTNode"));
+        assertTrue(result.toString().startsWith(
+                "ca.gobits.cthulhu.domain.DHTNode"));
         assertTrue(result.toString().endsWith(
                 "[id=123,address=139637976793191]"));
     }
