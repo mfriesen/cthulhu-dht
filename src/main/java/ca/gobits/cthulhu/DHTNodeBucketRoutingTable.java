@@ -83,7 +83,7 @@ public final class DHTNodeBucketRoutingTable implements DHTNodeRoutingTable {
 
         if (index >= 0 && index < this.nodes.size()) {
             DHTNode foundNode = this.nodes.get(index);
-            if (foundNode.getId().equals(nodeId)) {
+            if (foundNode.getInfoHash().equals(nodeId)) {
                 nodeMatch = foundNode;
             }
         }

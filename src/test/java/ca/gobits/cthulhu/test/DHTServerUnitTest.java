@@ -54,7 +54,7 @@ public final class DHTServerUnitTest extends EasyMockSupport {
         ReflectionTestUtils.setField(System.out, "out", bo);
 
         // when
-        DHTServer.main(args);
+        DHTServer.main(args, mockAc);
 
         assertUsage(bo);
     }

@@ -30,6 +30,7 @@ import org.springframework.context.annotation.AnnotationConfigApplicationContext
 
 import ca.gobits.cthulhu.DHTConfiguration;
 import ca.gobits.cthulhu.DHTServerConfig;
+import ca.gobits.cthulhu.test.DHTTestHelper;
 
 /**
  * DHTServer UnitTests.
@@ -38,9 +39,7 @@ import ca.gobits.cthulhu.DHTServerConfig;
 public final class DHTServerIntegrationTest {
 
     /** Aplication Context. */
-    private static final ConfigurableApplicationContext AC =
-            new AnnotationConfigApplicationContext(
-                    DHTConfiguration.class);
+    private static ConfigurableApplicationContext ac;
 
     /**
      * start server.
@@ -48,7 +47,9 @@ public final class DHTServerIntegrationTest {
      */
     @BeforeClass
     public static void beforeClass() throws Exception {
-        runDHTServerInNewThread(AC, DHTServerConfig.DEFAULT_PORT);
+        DHTTestHelper.deleteDatabase(DHTConfiguration.DATABASE_FILE);
+        ac = new AnnotationConfigApplicationContext(DHTConfiguration.class);
+        runDHTServerInNewThread(ac, DHTServerConfig.DEFAULT_PORT);
     }
 
     /**
@@ -56,7 +57,7 @@ public final class DHTServerIntegrationTest {
      */
     @AfterClass
     public static void afterClass() {
-        AC.close();
+        ac.close();
     }
 
     /**

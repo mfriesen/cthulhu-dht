@@ -29,6 +29,7 @@ import java.util.Set;
 import org.junit.Test;
 
 import ca.gobits.cthulhu.domain.DHTInfoHash;
+import ca.gobits.cthulhu.domain.DHTInfoHashSource;
 import ca.gobits.cthulhu.domain.DHTPeer;
 
 /**
@@ -80,6 +81,7 @@ public final class DHTInfoHashUnitTest {
         DHTInfoHash infoHash = new DHTInfoHash(nodeId);
         infoHash.setLongitude(1.0);
         infoHash.setLatitude(2.0);
+        infoHash.setSource(DHTInfoHashSource.SELF);
 
         // when
         String result = infoHash.toString();
@@ -88,9 +90,10 @@ public final class DHTInfoHashUnitTest {
         assertTrue(result
                 .startsWith("ca.gobits.cthulhu.domain.DHTInfoHash"));
         assertTrue(result.endsWith(
-           "[id=<null>,infoHash=123,latitude=2.0,longitude=1.0]"));
+           "[id=<null>,infoHash=123,source=SELF,latitude=2.0,longitude=1.0]"));
         assertEquals(2, infoHash.getLatitude(), 0);
         assertEquals(1, infoHash.getLongitude(), 0);
+        assertEquals(DHTInfoHashSource.SELF, infoHash.getSource());
     }
 
     /**

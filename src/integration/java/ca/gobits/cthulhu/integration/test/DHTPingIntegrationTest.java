@@ -19,6 +19,7 @@ import org.springframework.context.annotation.AnnotationConfigApplicationContext
 import ca.gobits.cthulhu.DHTConfiguration;
 import ca.gobits.cthulhu.DHTServer;
 import ca.gobits.cthulhu.DHTServerConfig;
+import ca.gobits.cthulhu.test.DHTTestHelper;
 import ca.gobits.dht.BDecoder;
 import ca.gobits.dht.BEncoder;
 
@@ -29,9 +30,7 @@ import ca.gobits.dht.BEncoder;
 public final class DHTPingIntegrationTest {
 
     /** Application Context. */
-    private static final ConfigurableApplicationContext AC =
-            new AnnotationConfigApplicationContext(
-                    DHTConfiguration.class);
+    private static ConfigurableApplicationContext ac;
 
     /**
      * start server.
@@ -39,7 +38,9 @@ public final class DHTPingIntegrationTest {
      */
     @BeforeClass
     public static void beforeClass() throws Exception {
-        runDHTServerInNewThread(AC, DHTServerConfig.DEFAULT_PORT);
+        DHTTestHelper.deleteDatabase(DHTConfiguration.DATABASE_FILE);
+        ac = new AnnotationConfigApplicationContext(DHTConfiguration.class);
+        runDHTServerInNewThread(ac, DHTServerConfig.DEFAULT_PORT);
     }
 
     /**
@@ -47,7 +48,7 @@ public final class DHTPingIntegrationTest {
      */
     @AfterClass
     public static void afterClass() {
-        AC.close();
+        ac.close();
     }
 
     /**

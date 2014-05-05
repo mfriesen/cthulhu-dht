@@ -48,6 +48,9 @@ public final class DHTInfoHash {
     /** Info hash longitude. */
     private double longitude;
 
+    /** Source of DHTInfoHash. */
+    private DHTInfoHashSource source;
+
     /** Collection of Peers that "announced" to the InfoHash. */
     @RelatedTo(type = "peer", direction = Direction.OUTGOING)
     private Set<DHTPeer> peers;
@@ -101,6 +104,7 @@ public final class DHTInfoHash {
         ToStringBuilder builder = new ToStringBuilder(this);
         builder.append("id", id);
         builder.append("infoHash", infoHash);
+        builder.append("source", source);
         builder.append("latitude", latitude);
         builder.append("longitude", longitude);
         return builder.toString();
@@ -190,5 +194,20 @@ public final class DHTInfoHash {
      */
     public void setLongitude(final double longitudeCoordinate) {
         this.longitude = longitudeCoordinate;
+    }
+
+    /**
+     * @return DHTInfoHashSource
+     */
+    public DHTInfoHashSource getSource() {
+        return source;
+    }
+
+    /**
+     * Sets the Source.
+     * @param s source of DHTInfoHash
+     */
+    public void setSource(final DHTInfoHashSource s) {
+        this.source = s;
     }
 }

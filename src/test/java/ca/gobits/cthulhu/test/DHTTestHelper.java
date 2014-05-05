@@ -22,11 +22,14 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
+import java.io.File;
+import java.io.IOException;
 import java.math.BigInteger;
 import java.util.HashMap;
 import java.util.Map;
 
 import org.apache.log4j.Logger;
+import org.neo4j.kernel.impl.util.FileUtils;
 import org.springframework.context.ApplicationContext;
 
 import ca.gobits.cthulhu.DHTServer;
@@ -49,6 +52,15 @@ public final class DHTTestHelper {
      * private constructor.
      */
     private DHTTestHelper() {
+    }
+
+    /**
+     * Deletes database.
+     * @param file  database file to delete
+     * @throws IOException  IOException
+     */
+    public static void deleteDatabase(final String file) throws IOException {
+        FileUtils.deleteRecursively(new File(file));
     }
 
     /**

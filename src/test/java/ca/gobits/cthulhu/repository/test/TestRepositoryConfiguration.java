@@ -14,7 +14,7 @@
 // limitations under the License.
 //
 
-package ca.gobits.cthulhu;
+package ca.gobits.cthulhu.repository.test;
 
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.factory.GraphDatabaseFactory;
@@ -24,63 +24,23 @@ import org.springframework.data.neo4j.config.EnableNeo4jRepositories;
 import org.springframework.data.neo4j.config.Neo4jConfiguration;
 
 /**
- * DHT Configuration class.
+ * TestRepository Configuration class.
  */
 @Configuration
 @EnableNeo4jRepositories(basePackages = {"ca.gobits.cthulhu.repository" })
-public class DHTConfiguration extends Neo4jConfiguration {
+public class TestRepositoryConfiguration extends Neo4jConfiguration {
 
-    /** Default Database Filename. */
-    public static final String DATABASE_FILE = "cthulhu.db";
+    /** DATABASE FILE. */
+    static final String DATABASE_FILE = "test.db";
 
     /**
      * default constructor.
      */
-    public DHTConfiguration() {
+    public TestRepositoryConfiguration() {
         setBasePackage("ca.gobits.cthulhu.domain");
     }
 
     //CHECKSTYLE:OFF
-    /**
-     * @return DHTRoutingTable
-     */
-    @Bean
-    public DHTNodeRoutingTable routingTable() {
-        return new DHTNodeBucketRoutingTable();
-    }
-
-    /**
-     * @return DHTInfoHashRoutingTable
-     */
-    @Bean
-    public DHTInfoHashRoutingTable infoHashRoutingTable() {
-        return new DHTInfoHashRoutingTableBasic();
-    }
-
-    /**
-     * @return DHTTokenTable
-     */
-    @Bean
-    public DHTTokenTable dhtTokenTable() {
-        return new DHTTokenTableBasic();
-    }
-
-    /**
-     * @return DHTServer
-     */
-    @Bean
-    public DHTServer dhtServer() {
-        return new DHTServer();
-    }
-
-    /**
-     * @return DHTProtocolHandler
-     */
-    @Bean
-    public DHTProtocolHandler dhtProtocolHandler() {
-        return new DHTProtocolHandler();
-    }
-
     /**
      * @return GraphDatabaseService
      */

@@ -40,6 +40,7 @@ import ca.gobits.cthulhu.DHTConfiguration;
 import ca.gobits.cthulhu.DHTNodeRoutingTable;
 import ca.gobits.cthulhu.DHTServerConfig;
 import ca.gobits.cthulhu.domain.DHTNode;
+import ca.gobits.cthulhu.test.DHTTestHelper;
 import ca.gobits.dht.Arrays;
 import ca.gobits.dht.BDecoder;
 import ca.gobits.dht.BEncoder;
@@ -56,12 +57,10 @@ public final class DHTGetPeersIntegrationTest {
             .getLogger(DHTGetPeersIntegrationTest.class);
 
     /** Application Context. */
-    private static final ConfigurableApplicationContext AC =
-            new AnnotationConfigApplicationContext(
-                    DHTConfiguration.class);
+    private static ConfigurableApplicationContext ac;
 
     /** Reference to DHTNodeRoutingTable. */
-    private final DHTNodeRoutingTable nodeRoutingTable = AC
+    private final DHTNodeRoutingTable nodeRoutingTable = ac
             .getBean(DHTNodeRoutingTable.class);
 
     /**
@@ -70,7 +69,9 @@ public final class DHTGetPeersIntegrationTest {
      */
     @BeforeClass
     public static void beforeClass() throws Exception {
-        runDHTServerInNewThread(AC, DHTServerConfig.DEFAULT_PORT);
+        DHTTestHelper.deleteDatabase(DHTConfiguration.DATABASE_FILE);
+        ac = new AnnotationConfigApplicationContext(DHTConfiguration.class);
+        runDHTServerInNewThread(ac, DHTServerConfig.DEFAULT_PORT);
     }
 
     /**
@@ -78,7 +79,7 @@ public final class DHTGetPeersIntegrationTest {
      */
     @AfterClass
     public static void afterClass() {
-        AC.close();
+        ac.close();
     }
 
     /**

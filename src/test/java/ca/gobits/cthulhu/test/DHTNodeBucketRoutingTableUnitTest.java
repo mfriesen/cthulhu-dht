@@ -170,14 +170,14 @@ public final class DHTNodeBucketRoutingTableUnitTest {
 
         // then
         assertEquals(8, results.size());
-        assertEquals("4", results.get(0).getId().toString());
-        assertEquals("6", results.get(1).getId().toString());
-        assertEquals("8", results.get(2).getId().toString());
-        assertEquals("10", results.get(3).getId().toString());
-        assertEquals("12", results.get(4).getId().toString());
-        assertEquals("14", results.get(5).getId().toString());
-        assertEquals("16", results.get(6).getId().toString());
-        assertEquals("18", results.get(7).getId().toString());
+        assertEquals("4", results.get(0).getInfoHash().toString());
+        assertEquals("6", results.get(1).getInfoHash().toString());
+        assertEquals("8", results.get(2).getInfoHash().toString());
+        assertEquals("10", results.get(3).getInfoHash().toString());
+        assertEquals("12", results.get(4).getInfoHash().toString());
+        assertEquals("14", results.get(5).getInfoHash().toString());
+        assertEquals("16", results.get(6).getInfoHash().toString());
+        assertEquals("18", results.get(7).getInfoHash().toString());
     }
 
     /**
@@ -197,14 +197,14 @@ public final class DHTNodeBucketRoutingTableUnitTest {
 
         // then
         assertEquals(8, results.size());
-        assertEquals("0", results.get(0).getId().toString());
-        assertEquals("2", results.get(1).getId().toString());
-        assertEquals("4", results.get(2).getId().toString());
-        assertEquals("6", results.get(3).getId().toString());
-        assertEquals("8", results.get(4).getId().toString());
-        assertEquals("10", results.get(5).getId().toString());
-        assertEquals("12", results.get(6).getId().toString());
-        assertEquals("14", results.get(7).getId().toString());
+        assertEquals("0", results.get(0).getInfoHash().toString());
+        assertEquals("2", results.get(1).getInfoHash().toString());
+        assertEquals("4", results.get(2).getInfoHash().toString());
+        assertEquals("6", results.get(3).getInfoHash().toString());
+        assertEquals("8", results.get(4).getInfoHash().toString());
+        assertEquals("10", results.get(5).getInfoHash().toString());
+        assertEquals("12", results.get(6).getInfoHash().toString());
+        assertEquals("14", results.get(7).getInfoHash().toString());
     }
 
     /**
@@ -224,14 +224,14 @@ public final class DHTNodeBucketRoutingTableUnitTest {
 
         // then
         assertEquals(8, results.size());
-        assertEquals("24", results.get(0).getId().toString());
-        assertEquals("26", results.get(1).getId().toString());
-        assertEquals("28", results.get(2).getId().toString());
-        assertEquals("30", results.get(3).getId().toString());
-        assertEquals("32", results.get(4).getId().toString());
-        assertEquals("34", results.get(5).getId().toString());
-        assertEquals("36", results.get(6).getId().toString());
-        assertEquals("38", results.get(7).getId().toString());
+        assertEquals("24", results.get(0).getInfoHash().toString());
+        assertEquals("26", results.get(1).getInfoHash().toString());
+        assertEquals("28", results.get(2).getInfoHash().toString());
+        assertEquals("30", results.get(3).getInfoHash().toString());
+        assertEquals("32", results.get(4).getInfoHash().toString());
+        assertEquals("34", results.get(5).getInfoHash().toString());
+        assertEquals("36", results.get(6).getInfoHash().toString());
+        assertEquals("38", results.get(7).getInfoHash().toString());
     }
 
     /**
@@ -250,14 +250,14 @@ public final class DHTNodeBucketRoutingTableUnitTest {
 
         // then
         assertEquals(8, results.size());
-        assertEquals("14", results.get(0).getId().toString());
-        assertEquals("16", results.get(1).getId().toString());
-        assertEquals("18", results.get(2).getId().toString());
-        assertEquals("20", results.get(3).getId().toString());
-        assertEquals("22", results.get(4).getId().toString());
-        assertEquals("24", results.get(5).getId().toString());
-        assertEquals("26", results.get(6).getId().toString());
-        assertEquals("28", results.get(7).getId().toString());
+        assertEquals("14", results.get(0).getInfoHash().toString());
+        assertEquals("16", results.get(1).getInfoHash().toString());
+        assertEquals("18", results.get(2).getInfoHash().toString());
+        assertEquals("20", results.get(3).getInfoHash().toString());
+        assertEquals("22", results.get(4).getInfoHash().toString());
+        assertEquals("24", results.get(5).getInfoHash().toString());
+        assertEquals("26", results.get(6).getInfoHash().toString());
+        assertEquals("28", results.get(7).getInfoHash().toString());
     }
 
     /**
@@ -326,7 +326,7 @@ public final class DHTNodeBucketRoutingTableUnitTest {
 
         // then
         assertNotNull(result);
-        assertEquals(nodeId, result.getId());
+        assertEquals(nodeId, result.getInfoHash());
     }
 
     /**

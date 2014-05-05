@@ -14,34 +14,25 @@
 // limitations under the License.
 //
 
-package ca.gobits.cthulhu.domain;
+package ca.gobits.cthulhu.repository;
 
-import java.util.Comparator;
+import java.math.BigInteger;
+
+import org.springframework.data.neo4j.repository.GraphRepository;
+
+import ca.gobits.cthulhu.domain.DHTInfoHash;
 
 /**
- * DHTNode Comparator.
+ * DHTInfoHash Repository.
  *
  */
-public final class DHTNodeComparator implements Comparator<DHTNode> {
-
-    /** static comparator instance. */
-    private static DHTNodeComparator comparator = new DHTNodeComparator();
+public interface DHTInfoHashRepository extends GraphRepository<DHTInfoHash> {
 
     /**
-     * @return Comparator<DHTNode>
+     * Find by InfoHash.
+     * @param infoHash  infoHash
+     * @return DHTInfoHash
      */
-    public static Comparator<DHTNode> getInstance() {
-        return comparator;
-    }
+    DHTInfoHash findByInfoHash(BigInteger infoHash);
 
-    /**
-     * private constructor.
-     */
-    private DHTNodeComparator() {
-    }
-
-    @Override
-    public int compare(final DHTNode o1, final DHTNode o2) {
-        return o1.getInfoHash().compareTo(o2.getInfoHash());
-    }
 }

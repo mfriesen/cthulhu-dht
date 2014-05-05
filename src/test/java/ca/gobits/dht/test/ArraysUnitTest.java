@@ -273,7 +273,7 @@ public final class ArraysUnitTest {
 
         DHTNode node0 = itr.next();
         assertEquals("1461501637330902918203684832716283019655932542975",
-                node0.getId().toString());
+                node0.getInfoHash().toString());
 
         byte[] addr0 = Arrays.toByteArray(node0.getAddress());
 
@@ -282,7 +282,7 @@ public final class ArraysUnitTest {
 
         DHTNode node1 = itr.next();
         assertEquals("13242",
-                node1.getId().toString());
+                node1.getInfoHash().toString());
 
         byte[] addr1 = Arrays.toByteArray(node1.getAddress());
 
