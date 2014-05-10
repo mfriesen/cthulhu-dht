@@ -20,17 +20,15 @@ public final class DHTPeerUnitTest {
     @Test
     public void testConstructor01() {
         // given
-        Long id = Long.valueOf(342);
         byte[] addr = new byte[] {3, 4, 5, 6 };
         int port = 8000;
 
         // when
         DHTPeer result = new DHTPeer(addr, port);
-        result.setId(id);
 
         // then
-        assertEquals(id, result.getId());
-        assertEquals(3315799039808L, result.getAddress());
+        assertEquals(1, result.getAddress().length);
+        assertEquals(50595078L, result.getAddress()[0]);
     }
 
     /**
@@ -40,14 +38,16 @@ public final class DHTPeerUnitTest {
     public void testToString01() {
         // given
         DHTPeer peer = new DHTPeer();
-        peer.setAddress(3315799039808L);
+        peer.setAddress(new long[] {3315799039808L });
+        peer.setPort(123);
 
         // when
         String result = peer.toString();
 
         // then
         assertTrue(result.startsWith("ca.gobits.cthulhu.domain.DHTPeer"));
-        assertTrue(result.endsWith("[id=<null>,address=3.4.5.6:8000]"));
+        assertTrue(result.endsWith("address=5.6.31.64,port=123]"));
+        assertEquals(123, peer.getPort());
     }
 
     /**

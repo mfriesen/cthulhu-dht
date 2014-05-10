@@ -19,26 +19,20 @@ package ca.gobits.cthulhu.domain;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.builder.ToStringBuilder;
-import org.springframework.data.neo4j.annotation.GraphId;
-import org.springframework.data.neo4j.annotation.NodeEntity;
 
-import ca.gobits.dht.Arrays;
-import ca.gobits.dht.BDecoder;
-import ca.gobits.dht.BEncoder;
+import ca.gobits.dht.DHTConversion;
 
 /**
  * DHTPeer - holder for information about a DHT Peer.
  *
  */
-@NodeEntity
 public final class DHTPeer {
 
-    /** DHTPeer identifier. */
-    @GraphId
-    private Long id;
+    /** "Compact IP-address". */
+    private long[] address;
 
-    /** "Compact IP-address/port info". */
-    private long address;
+    /** Listening port. */
+    private int port;
 
     /**
      * default constructor.
@@ -49,13 +43,13 @@ public final class DHTPeer {
     /**
      * constructor.
      * @param addr IP address
-     * @param port listening port
+     * @param lport listening port
      */
-    public DHTPeer(final byte[] addr, final int port) {
+    public DHTPeer(final byte[] addr, final int lport) {
         this();
 
-        byte[] bytes = BEncoder.compactAddress(addr, port);
-        this.address = Arrays.toLong(bytes);
+        this.address = DHTConversion.toLongArray(addr);
+        this.port = lport;
     }
 
     @Override
@@ -88,31 +82,15 @@ public final class DHTPeer {
     @Override
     public String toString() {
         ToStringBuilder builder = new ToStringBuilder(this);
-        builder.append("id", id);
-        builder.append("address", BDecoder.decodeCompactAddressToString(Arrays
-                .toByteArray(address)));
+        builder.append("address", DHTConversion.toInetAddressString(address));
+        builder.append("port", port);
         return builder.toString();
     }
 
     /**
-     * @return Long
+     * @return long[]
      */
-    public Long getId() {
-        return id;
-    }
-
-    /**
-     * Sets Identifier.
-     * @param ident  ident
-     */
-    public void setId(final Long ident) {
-        this.id = ident;
-    }
-
-    /**
-     * @return long
-     */
-    public long getAddress() {
+    public long[] getAddress() {
         return address;
     }
 
@@ -120,7 +98,22 @@ public final class DHTPeer {
      * Sets the address.
      * @param addr address
      */
-    public void setAddress(final long addr) {
+    public void setAddress(final long[] addr) {
         this.address = addr;
+    }
+
+    /**
+     * @return int
+     */
+    public int getPort() {
+        return port;
+    }
+
+    /**
+     * Sets the port.
+     * @param lport  port
+     */
+    public void setPort(final int lport) {
+        this.port = lport;
     }
 }

@@ -16,28 +16,19 @@
 
 package ca.gobits.cthulhu;
 
-import org.neo4j.graphdb.GraphDatabaseService;
-import org.neo4j.graphdb.factory.GraphDatabaseFactory;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.data.neo4j.config.EnableNeo4jRepositories;
-import org.springframework.data.neo4j.config.Neo4jConfiguration;
 
 /**
  * DHT Configuration class.
  */
 @Configuration
-@EnableNeo4jRepositories(basePackages = {"ca.gobits.cthulhu.repository" })
-public class DHTConfiguration extends Neo4jConfiguration {
-
-    /** Default Database Filename. */
-    public static final String DATABASE_FILE = "cthulhu.db";
+public class DHTConfiguration {
 
     /**
      * default constructor.
      */
     public DHTConfiguration() {
-        setBasePackage("ca.gobits.cthulhu.domain");
     }
 
     //CHECKSTYLE:OFF
@@ -79,15 +70,6 @@ public class DHTConfiguration extends Neo4jConfiguration {
     @Bean
     public DHTProtocolHandler dhtProtocolHandler() {
         return new DHTProtocolHandler();
-    }
-
-    /**
-     * @return GraphDatabaseService
-     */
-    @Bean
-    public GraphDatabaseService graphDatabaseService() {
-        GraphDatabaseService db = new GraphDatabaseFactory().newEmbeddedDatabase(DATABASE_FILE);
-        return db;
     }
     //CHECKSTYLE:ON
 }

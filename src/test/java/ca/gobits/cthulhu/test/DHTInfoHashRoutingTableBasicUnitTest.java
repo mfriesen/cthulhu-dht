@@ -34,7 +34,7 @@ public final class DHTInfoHashRoutingTableBasicUnitTest {
         BigInteger infoHash = new BigInteger("123123");
 
         // when
-        Collection<byte[]> result = rt.findPeers(infoHash);
+        Collection<DHTPeer> result = rt.findPeers(infoHash);
 
         // then
         assertNull(result);
@@ -53,18 +53,14 @@ public final class DHTInfoHashRoutingTableBasicUnitTest {
         rt.addPeer(infoHash, address, port);
 
         // when
-        Collection<byte[]> result = rt.findPeers(infoHash);
+        Collection<DHTPeer> result = rt.findPeers(infoHash);
 
         // then
         assertEquals(1, result.size());
-        byte[] bytes = result.iterator().next();
-        assertEquals(6, bytes.length);
-        assertEquals(127, bytes[0]);
-        assertEquals(0, bytes[1]);
-        assertEquals(0, bytes[2]);
-        assertEquals(1, bytes[3]);
-        assertEquals(4, bytes[4]);
-        assertEquals(-46, bytes[5]);
+        DHTPeer peer = result.iterator().next();
+        assertEquals(1, peer.getAddress().length);
+        assertEquals(2130706433L, peer.getAddress()[0]);
+        assertEquals(port, peer.getPort());
     }
 
     /**
@@ -86,7 +82,7 @@ public final class DHTInfoHashRoutingTableBasicUnitTest {
         assertNotNull(result);
         assertEquals(1, result.getPeers().size());
         DHTPeer l = result.getPeers().iterator().next();
-        assertEquals(139637976794322L, l.getAddress());
+        assertEquals(2130706433L, l.getAddress()[0]);
     }
 
     /**
@@ -109,6 +105,6 @@ public final class DHTInfoHashRoutingTableBasicUnitTest {
         assertNotNull(result);
         assertEquals(1, result.getPeers().size());
         Iterator<DHTPeer> itr = result.getPeers().iterator();
-        assertEquals(139637976794322L, itr.next().getAddress());
+        assertEquals(2130706433L, itr.next().getAddress()[0]);
     }
 }

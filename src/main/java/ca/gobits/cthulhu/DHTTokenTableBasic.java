@@ -18,6 +18,7 @@ package ca.gobits.cthulhu;
 
 import java.math.BigInteger;
 import java.net.InetSocketAddress;
+import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
 
@@ -25,8 +26,7 @@ import org.apache.log4j.Logger;
 
 import ca.gobits.cthulhu.domain.DHTToken;
 import ca.gobits.cthulhu.domain.DHTTokenComparator;
-import ca.gobits.dht.Arrays;
-import ca.gobits.dht.BEncoder;
+import ca.gobits.dht.DHTConversion;
 
 /**
  * Basic implementation of DHTTokenTable.
@@ -72,12 +72,11 @@ public final class DHTTokenTableBasic implements DHTTokenTable {
             c.setTime(token.getAddedDate());
             c.add(Calendar.MINUTE, TOKEN_EXPIRY_IN_MINUTES);
 
-            byte[] addr0 = Arrays.toByteArray(token.getAddress());
-            byte[] addr1 = BEncoder.compactAddress(addr.getAddress()
-                    .getAddress(), addr.getPort());
+            byte[] addr0 = DHTConversion.toByteArray(token.getAddress());
 
             valid = now.before(c.getTime())
-                    && java.util.Arrays.equals(addr0, addr1);
+                    && Arrays.equals(addr0, addr.getAddress().getAddress())
+                    && token.getPort() == addr.getPort();
         }
 
         return valid;
@@ -91,7 +90,7 @@ public final class DHTTokenTableBasic implements DHTTokenTable {
      */
     private DHTToken createToken(final InetSocketAddress addr,
             final byte[] secret) {
-        BigInteger id = Arrays.toBigInteger(secret);
+        BigInteger id = DHTConversion.toBigInteger(secret);
         DHTToken dhtToken = new DHTToken(id, addr.getAddress().getAddress(),
                 addr.getPort());
         return dhtToken;

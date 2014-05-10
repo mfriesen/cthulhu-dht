@@ -19,155 +19,34 @@ package ca.gobits.cthulhu.domain;
 import java.math.BigInteger;
 import java.util.Date;
 
-import org.apache.commons.lang3.builder.EqualsBuilder;
-import org.apache.commons.lang3.builder.HashCodeBuilder;
-import org.apache.commons.lang3.builder.ToStringBuilder;
-import org.springframework.data.neo4j.annotation.GraphId;
-import org.springframework.data.neo4j.annotation.NodeEntity;
-
-import ca.gobits.dht.Arrays;
-import ca.gobits.dht.BEncoder;
-
 /**
  * DHTNode - holder for information about a DHT Node.
  */
-@NodeEntity
-public final class DHTNode {
-
-    /** DHTNode identifier. */
-    @GraphId
-    private Long id;
-
-    /** Node identifier. */
-    private BigInteger infoHash;
-
-    /** "Compact IP-address/port info". */
-    private long address;
-
-    /** Date the node was last pinged. */
-    private Date lastUpdated;
-
-    /**
-     * constructor.
-     */
-    public DHTNode() {
-        this.lastUpdated = new Date();
-    }
-
-    /**
-     * constructor.
-     * @param nodeId Identifier
-     * @param addr IP address
-     * @param port listening port
-     */
-    public DHTNode(final BigInteger nodeId, final byte[] addr,
-            final int port) {
-        this();
-
-        this.infoHash = nodeId;
-
-        if (addr != null) {
-            byte[] bytes = BEncoder.compactAddress(addr, port);
-            this.address = Arrays.toLong(bytes);
-        } else {
-            this.address = 0;
-        }
-    }
-
-    @Override
-    public String toString() {
-        ToStringBuilder builder = new ToStringBuilder(this);
-        builder.append("id", id);
-        builder.append("infohash", infoHash);
-        builder.append("address", address);
-        builder.append("lastUpdated", lastUpdated);
-        return builder.toString();
-    }
-
-    @Override
-    public int hashCode() {
-        return new HashCodeBuilder()
-            .append(infoHash)
-            .toHashCode();
-    }
-
-    @Override
-    public boolean equals(final Object obj) {
-        if (obj == null) {
-            return false;
-        }
-
-        if (obj == this) {
-            return true;
-        }
-
-        if (!(obj instanceof DHTNode)) {
-            return false;
-        }
-
-        DHTNode rhs = (DHTNode) obj;
-        return new EqualsBuilder()
-            .append(id, rhs.id)
-            .isEquals();
-    }
+public interface DHTNode {
 
     /**
      * @return Date
      */
-    public Date getLastUpdated() {
-        return lastUpdated;
-    }
+    Date getLastUpdated();
 
     /**
      * Sets the Last Updated Date.
      * @param date sets Last Updated Date
      */
-    public void setLastUpdated(final Date date) {
-        this.lastUpdated = date;
-    }
-
-    /**
-     * @return Long
-     */
-    public Long getId() {
-        return id;
-    }
-
-    /**
-     * Set Id.
-     * @param ident  id
-     */
-    public void setId(final Long ident) {
-        this.id = ident;
-    }
+    void setLastUpdated(final Date date);
 
     /**
      * @return BigInteger
      */
-    public BigInteger getInfoHash() {
-        return infoHash;
-    }
+    BigInteger getInfoHash();
 
     /**
-     * Sets Info Hash.
-     * @param infoHashId  InfoHash
+     * @return long[]
      */
-    public void setInfoHash(final BigInteger infoHashId) {
-        this.infoHash = infoHashId;
-    }
+    long[] getAddress();
 
     /**
-     * @return long
+     * @return int
      */
-    public long getAddress() {
-        return address;
-    }
-
-    /**
-     * Sets DHTNode's IP/Port address in Compact format.
-     * @param addr  compact address
-     */
-    public void setAddress(final long addr) {
-        this.address = addr;
-    }
+    int getPort();
 }

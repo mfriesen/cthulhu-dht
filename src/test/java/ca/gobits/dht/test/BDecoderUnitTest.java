@@ -25,6 +25,7 @@ import java.util.Map;
 import org.junit.Test;
 
 import ca.gobits.dht.BDecoder;
+import ca.gobits.dht.DHTConversion;
 
 
 /**
@@ -138,7 +139,7 @@ public final class BDecoderUnitTest {
         byte[] bytes = new byte[]{37, 76, -96, 28, -110, -114};
 
         // when
-        String result = BDecoder.decodeCompactAddressToString(bytes);
+        String result = DHTConversion.decodeCompactAddressToString(bytes);
 
         // then
         assertEquals("37.76.160.28:37518", result);
@@ -153,7 +154,7 @@ public final class BDecoderUnitTest {
         byte[] bytes = new byte[] {37, 76, -96, -96, 28, 28, -110, -114 };
 
         // when
-        String result = BDecoder.decodeCompactAddressToString(bytes);
+        String result = DHTConversion.decodeCompactAddressToString(bytes);
 
         // then
         assertEquals("37.76.160.160.28.28:37518", result);

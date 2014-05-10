@@ -23,6 +23,7 @@ import java.math.BigInteger;
 import org.junit.Test;
 
 import ca.gobits.cthulhu.domain.DHTInfoHash;
+import ca.gobits.cthulhu.domain.DHTInfoHashBasic;
 import ca.gobits.cthulhu.domain.DHTInfoHashComparator;
 
 /**
@@ -36,8 +37,8 @@ public final class DHTInfoHashComparatorUnitTest {
     @Test
     public void testCompare01() {
         // given
-        DHTInfoHash node0 = new DHTInfoHash(new BigInteger("2"));
-        DHTInfoHash node1 = new DHTInfoHash(new BigInteger("2"));
+        DHTInfoHash node0 = new DHTInfoHashBasic(new BigInteger("2"));
+        DHTInfoHash node1 = new DHTInfoHashBasic(new BigInteger("2"));
 
         // when
         int result = DHTInfoHashComparator.getInstance().compare(node0, node1);
@@ -52,8 +53,8 @@ public final class DHTInfoHashComparatorUnitTest {
     @Test
     public void testCompare02() {
         // given
-        DHTInfoHash node0 = new DHTInfoHash(new BigInteger("2"));
-        DHTInfoHash node1 = new DHTInfoHash(new BigInteger("5"));
+        DHTInfoHash node0 = new DHTInfoHashBasic(new BigInteger("2"));
+        DHTInfoHash node1 = new DHTInfoHashBasic(new BigInteger("5"));
 
         // when
         int result = DHTInfoHashComparator.getInstance().compare(node0, node1);
@@ -68,8 +69,8 @@ public final class DHTInfoHashComparatorUnitTest {
     @Test
     public void testCompare03() {
         // given
-        DHTInfoHash node0 = new DHTInfoHash(new BigInteger("5"));
-        DHTInfoHash node1 = new DHTInfoHash(new BigInteger("2"));
+        DHTInfoHash node0 = new DHTInfoHashBasic(new BigInteger("5"));
+        DHTInfoHash node1 = new DHTInfoHashBasic(new BigInteger("2"));
 
         // when
         int result = DHTInfoHashComparator.getInstance().compare(node0, node1);

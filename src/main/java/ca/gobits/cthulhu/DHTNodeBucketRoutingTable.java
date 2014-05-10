@@ -16,15 +16,20 @@
 
 package ca.gobits.cthulhu;
 
+import static ca.gobits.dht.DHTConversion.toByteArray;
+import static ca.gobits.dht.DHTConversion.toInetAddress;
+
 import java.math.BigInteger;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
+import java.util.Arrays;
 import java.util.List;
 
 import org.apache.log4j.Logger;
 
 import ca.gobits.cthulhu.domain.DHTNode;
+import ca.gobits.cthulhu.domain.DHTNodeBasic;
 import ca.gobits.cthulhu.domain.DHTNodeComparator;
-import ca.gobits.dht.Arrays;
-import ca.gobits.dht.BDecoder;
 
 /**
  * Implementation of DHT Bucket Routing Table.
@@ -56,16 +61,41 @@ public final class DHTNodeBucketRoutingTable implements DHTNodeRoutingTable {
     public synchronized void addNode(final DHTNode node) {
 
         if (nodes.size() < MAX_NUMBER_OF_NODES) {
-            if (LOGGER.isDebugEnabled()) {
-                LOGGER.debug("adding node " + node.getId() + " "
-                    + BDecoder.decodeCompactAddressToString(Arrays
-                        .toByteArray(node.getAddress())));
-            }
+
+            addNodeLoggerDebug(node);
 
             nodes.add(node);
+
         } else {
             LOGGER.warn("MAXIMUM number of noded reached "
                     + MAX_NUMBER_OF_NODES);
+        }
+    }
+
+    /**
+     * Print debug information on adding a node. (LOGGER.isDebugEnabled())
+     * @param node  DHTNode
+     */
+    private void addNodeLoggerDebug(final DHTNode node) {
+
+        if (LOGGER.isDebugEnabled()) {
+
+            String host = "unknown";
+
+            try {
+
+                InetAddress addr = toInetAddress(node.getAddress());
+                host = addr.getHostAddress();
+
+            } catch (UnknownHostException e) {
+
+                byte[] bytes = toByteArray(node.getAddress());
+                LOGGER.info("Unknown Host " + Arrays.toString(bytes));
+                LOGGER.info(e, e);
+            }
+
+            LOGGER.debug("adding node " + node.getInfoHash() + " "
+                + host + ":" + node.getPort());
         }
     }
 
@@ -78,7 +108,7 @@ public final class DHTNodeBucketRoutingTable implements DHTNodeRoutingTable {
     public DHTNode findExactNode(final BigInteger nodeId) {
 
         DHTNode nodeMatch = null;
-        DHTNode node = new DHTNode(nodeId, (byte[]) null, 0);
+        DHTNode node = new DHTNodeBasic(nodeId, (byte[]) null, 0);
         int index = this.nodes.indexOf(node);
 
         if (index >= 0 && index < this.nodes.size()) {
@@ -95,7 +125,7 @@ public final class DHTNodeBucketRoutingTable implements DHTNodeRoutingTable {
     public List<DHTNode> findClosestNodes(final BigInteger nodeId,
             final int returnCount) {
 
-        DHTNode node = new DHTNode(nodeId, (byte[]) null, 0);
+        DHTNode node = new DHTNodeBasic(nodeId, (byte[]) null, 0);
         int index = nodes.indexOf(node);
 
         int fromIndex = index > 0 ? index - 1 : 0;

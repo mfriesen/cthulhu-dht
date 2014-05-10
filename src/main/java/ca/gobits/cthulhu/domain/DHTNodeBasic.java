@@ -26,43 +26,48 @@ import org.apache.commons.lang3.builder.ToStringBuilder;
 import ca.gobits.dht.DHTConversion;
 
 /**
- * DHTToken - holder for an Address / Token combination.
- *
+ * DHTNodeBasic - basic implementation of the DHTNode.
  */
-public final class DHTToken {
+public final class DHTNodeBasic implements DHTNode {
 
     /** Node identifier. */
     private BigInteger infoHash;
 
-    /** "Compact IP-address". */
+    /** Compact IP-address. */
     private long[] address;
 
-    /** Port info. */
+    /** IP Port. */
     private int port;
 
     /** Date the node was last pinged. */
-    private Date addedDate;
+    private Date lastUpdated;
 
     /**
      * constructor.
      */
-    public DHTToken() {
-        this.addedDate = new Date();
+    public DHTNodeBasic() {
+        this.lastUpdated = new Date();
     }
 
     /**
      * constructor.
      * @param nodeId Identifier
      * @param addr IP address
-     * @param lport listening port
+     * @param addrPort listening port
      */
-    public DHTToken(final BigInteger nodeId, final byte[] addr,
-            final int lport) {
+    public DHTNodeBasic(final BigInteger nodeId, final byte[] addr,
+            final int addrPort) {
         this();
+
         this.infoHash = nodeId;
 
-        this.address = DHTConversion.toLongArray(addr);
-        this.port = lport;
+        if (addr != null) {
+            this.address = DHTConversion.toLongArray(addr);
+            this.port = addrPort;
+        } else {
+            this.address = null;
+            this.port = 0;
+        }
     }
 
     @Override
@@ -71,7 +76,7 @@ public final class DHTToken {
         builder.append("infohash", infoHash);
         builder.append("address", DHTConversion.toInetAddressString(address));
         builder.append("port", port);
-        builder.append("addedDate", addedDate);
+        builder.append("lastUpdated", lastUpdated);
         return builder.toString();
     }
 
@@ -92,70 +97,69 @@ public final class DHTToken {
             return true;
         }
 
-        if (!(obj instanceof DHTToken)) {
+        if (!(obj instanceof DHTNode)) {
             return false;
         }
 
-        DHTToken rhs = (DHTToken) obj;
+        DHTNode rhs = (DHTNode) obj;
         return new EqualsBuilder()
-            .append(infoHash, rhs.infoHash)
+            .append(infoHash, rhs.getInfoHash())
             .isEquals();
-    }
-
-    /**
-     * @return BigInteger
-     */
-    public BigInteger getInfoHash() {
-        return infoHash;
-    }
-
-    /**
-     * Sets InfoHash.
-     * @param infoHashId  infoHash
-     */
-    public void setInfoHash(final BigInteger infoHashId) {
-        this.infoHash = infoHashId;
-    }
-
-    /**
-     * @return long[]
-     */
-    public long[] getAddress() {
-        return address;
-    }
-
-    /**
-     * Set the address.
-     * @param addr address
-     */
-    public void setAddress(final long[] addr) {
-        this.address = addr;
     }
 
     /**
      * @return Date
      */
-    public Date getAddedDate() {
-        return addedDate;
+    @Override
+    public Date getLastUpdated() {
+        return lastUpdated;
     }
 
     /**
-     * Sets Added Date.
-     * @param date  Added Date
+     * Sets the Last Updated Date.
+     * @param date sets Last Updated Date
      */
-    public void setAddedDate(final Date date) {
-        this.addedDate = date;
+    @Override
+    public void setLastUpdated(final Date date) {
+        this.lastUpdated = date;
     }
 
     /**
-     * @return int
+     * @return BigInteger
      */
+    @Override
+    public BigInteger getInfoHash() {
+        return infoHash;
+    }
+
+    /**
+     * Sets Info Hash.
+     * @param infoHashId  InfoHash
+     */
+    public void setInfoHash(final BigInteger infoHashId) {
+        this.infoHash = infoHashId;
+    }
+
+    @Override
+    public long[] getAddress() {
+        return address;
+    }
+
+    /**
+     * Sets Address.
+     * @param addr  compact address
+     */
+    public void setAddress(final long[] addr) {
+        this.address = addr;
+    }
+
+    @Override
     public int getPort() {
         return port;
     }
 
     /**
-     * Sets the Port.
+     * sets port number.
      * @param lport  port
      */
     public void setPort(final int lport) {

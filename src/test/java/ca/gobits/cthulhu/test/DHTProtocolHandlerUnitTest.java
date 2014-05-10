@@ -35,6 +35,7 @@ import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.UnknownHostException;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -56,6 +57,8 @@ import ca.gobits.cthulhu.DHTProtocolHandler;
 import ca.gobits.cthulhu.DHTServer;
 import ca.gobits.cthulhu.DHTTokenTable;
 import ca.gobits.cthulhu.domain.DHTNode;
+import ca.gobits.cthulhu.domain.DHTNodeBasic;
+import ca.gobits.cthulhu.domain.DHTPeer;
 import ca.gobits.dht.BDecoder;
 import ca.gobits.dht.BEncoder;
 
@@ -282,17 +285,16 @@ public final class DHTProtocolHandlerUnitTest extends EasyMockSupport {
         String dat = "d1:ad2:id20:abcdefghij01234567899:info_hash20:"
                 + "mnopqrstuvwxyz123456e1:q9:get_peers1:t2:aa1:y1:qe";
 
-        byte[] compactAddr = BEncoder.compactAddress(
-                InetAddress.getByName("240.120.222.12")
-                .getAddress(), 23);
-
         DatagramPacket packet = new DatagramPacket(
                 Unpooled.copiedBuffer(dat.getBytes()), iaddr,
                 iaddr);
 
+        DHTPeer peer = new DHTPeer(InetAddress.getByName("240.120.222.12")
+                .getAddress(), 23);
+        Collection<DHTPeer> peers = Arrays.asList(peer);
+
         // when
-        expect(peerRoutingTable.findPeers(nodeId)).andReturn(
-                Arrays.asList(compactAddr));
+        expect(peerRoutingTable.findPeers(nodeId)).andReturn(peers);
         expect(ctx.write(capture(capturedPacket))).andReturn(null);
 
         replayAll();
@@ -635,7 +637,7 @@ public final class DHTProtocolHandlerUnitTest extends EasyMockSupport {
     private DHTNode createDHTNode(final String id, final String address,
             final int port) throws UnknownHostException {
         byte[] addr = InetAddress.getByName(address).getAddress();
-        return new DHTNode(new BigInteger(id), addr, port);
+        return new DHTNodeBasic(new BigInteger(id), addr, port);
     }
 
     /**

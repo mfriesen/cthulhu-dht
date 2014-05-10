@@ -20,6 +20,7 @@ import java.math.BigInteger;
 import java.util.Collection;
 
 import ca.gobits.cthulhu.domain.DHTInfoHash;
+import ca.gobits.cthulhu.domain.DHTPeer;
 
 /**
  * DHT Peer Routing table interface.
@@ -28,9 +29,9 @@ public interface DHTInfoHashRoutingTable {
 
     /** Finds peers given a info_hash.
      * @param infoHash  info_hash
-     * @return Collection<Long>
+     * @return Collection<DHTPeer>
      */
-    Collection<byte[]> findPeers(final BigInteger infoHash);
+    Collection<DHTPeer> findPeers(final BigInteger infoHash);
 
     /**
      * adds Peer to an info_hash.

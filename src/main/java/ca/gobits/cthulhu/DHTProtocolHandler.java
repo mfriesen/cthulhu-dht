@@ -16,6 +16,7 @@
 
 package ca.gobits.cthulhu;
 
+import static ca.gobits.dht.DHTConversion.toByteArrayFromDHTPeer;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.ChannelHandlerContext;
@@ -37,9 +38,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.util.CollectionUtils;
 
 import ca.gobits.cthulhu.domain.DHTNode;
-import ca.gobits.dht.Arrays;
+import ca.gobits.cthulhu.domain.DHTPeer;
 import ca.gobits.dht.BDecoder;
 import ca.gobits.dht.BEncoder;
+import ca.gobits.dht.DHTConversion;
 
 /**
  * DHTProtocolHandler  implementation of the BitTorrent protocol.
@@ -81,7 +83,7 @@ public final class DHTProtocolHandler extends
             response.put("y", "r");
             response.put("t", request.get("t"));
             response.put("ip",
-                    BEncoder.compactAddress(addr.getAddress().getAddress(),
+                    DHTConversion.compactAddress(addr.getAddress().getAddress(),
                             addr.getPort()));
 
             String action = new String((byte[]) request.get("q"));
@@ -136,7 +138,8 @@ public final class DHTProtocolHandler extends
 
         if (tokenTable.valid(packet.sender(), arguments.getToken())) {
 
-            BigInteger infoHash = Arrays.toBigInteger(arguments.getInfoHash());
+            BigInteger infoHash = DHTConversion.toBigInteger(arguments
+                    .getInfoHash());
 
             InetSocketAddress addr = packet.sender();
             byte[] address = addr.getAddress().getAddress();
@@ -185,19 +188,21 @@ public final class DHTProtocolHandler extends
 
         Map<String, Object> responseParameter = new HashMap<String, Object>();
 
-        BigInteger infoHash = Arrays.toBigInteger(arguments.getInfoHash());
+        BigInteger infoHash = DHTConversion.toBigInteger(arguments
+                .getInfoHash());
 
-        Collection<byte[]> peers = peerRoutingTable.findPeers(infoHash);
+        Collection<DHTPeer> peers = peerRoutingTable.findPeers(infoHash);
 
         if (!CollectionUtils.isEmpty(peers)) {
 
-            responseParameter.put("values", peers);
+            List<byte[]> bytes = toByteArrayFromDHTPeer(peers);
+            responseParameter.put("values", bytes);
 
         } else {
 
             List<DHTNode> nodes = routingTable.findClosestNodes(infoHash);
 
-            byte[] transformNodes = Arrays.toByteArray(nodes);
+            byte[] transformNodes = DHTConversion.toByteArrayFromDHTNode(nodes);
             responseParameter.put("nodes", transformNodes);
         }
 
@@ -233,7 +238,7 @@ public final class DHTProtocolHandler extends
 
         List<DHTNode> nodes = findClosestNodes(arguments.getTarget());
 
-        byte[] transformNodes = Arrays.toByteArray(nodes);
+        byte[] transformNodes = DHTConversion.toByteArrayFromDHTNode(nodes);
         responseParameter.put("nodes", transformNodes);
     }
 
@@ -257,7 +262,7 @@ public final class DHTProtocolHandler extends
      */
     private List<DHTNode> findClosestNodes(final byte[] targetBytes) {
 
-        BigInteger target = Arrays.toBigInteger(targetBytes);
+        BigInteger target = DHTConversion.toBigInteger(targetBytes);
         return routingTable.findClosestNodes(target);
     }
 

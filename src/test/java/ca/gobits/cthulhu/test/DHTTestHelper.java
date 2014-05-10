@@ -16,25 +16,21 @@
 
 package ca.gobits.cthulhu.test;
 
-import static ca.gobits.dht.Arrays.COMPACT_ADDR_LENGTH;
-import static ca.gobits.dht.Arrays.NODE_ID_LENGTH;
+import static ca.gobits.dht.DHTConversion.COMPACT_ADDR_LENGTH;
+import static ca.gobits.dht.DHTConversion.NODE_ID_LENGTH;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
-import java.io.File;
-import java.io.IOException;
 import java.math.BigInteger;
 import java.util.HashMap;
 import java.util.Map;
 
 import org.apache.log4j.Logger;
-import org.neo4j.kernel.impl.util.FileUtils;
 import org.springframework.context.ApplicationContext;
 
 import ca.gobits.cthulhu.DHTServer;
-import ca.gobits.dht.Arrays;
-import ca.gobits.dht.BDecoder;
+import ca.gobits.dht.DHTConversion;
 
 /**
  * Test Helper Class.
@@ -52,15 +48,6 @@ public final class DHTTestHelper {
      * private constructor.
      */
     private DHTTestHelper() {
-    }
-
-    /**
-     * Deletes database.
-     * @param file  database file to delete
-     * @throws IOException  IOException
-     */
-    public static void deleteDatabase(final String file) throws IOException {
-        FileUtils.deleteRecursively(new File(file));
     }
 
     /**
@@ -121,10 +108,10 @@ public final class DHTTestHelper {
             i += NODE_ID_LENGTH;
             byte[] ipBytes = java.util.Arrays.copyOfRange(a, i, i
                     + COMPACT_ADDR_LENGTH);
-            String addr = BDecoder.decodeCompactAddressToString(ipBytes);
+            String addr = DHTConversion.decodeCompactAddressToString(ipBytes);
             i += COMPACT_ADDR_LENGTH;
 
-            map.put(Arrays.toBigInteger(key), addr);
+            map.put(DHTConversion.toBigInteger(key), addr);
         }
 
         return map;

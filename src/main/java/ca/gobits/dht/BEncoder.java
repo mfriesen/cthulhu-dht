@@ -16,6 +16,8 @@
 
 package ca.gobits.dht;
 
+import static ca.gobits.dht.DHTConversion.BYTE_TO_INT;
+
 import java.io.ByteArrayOutputStream;
 import java.util.Collection;
 import java.util.Map;
@@ -28,9 +30,6 @@ import java.util.TreeMap;
  *
  */
 public final class BEncoder {
-
-    /** Number of bits per byte. */
-    private static final int BIT_COUNT = 8;
 
     /**
      * private constructor.
@@ -133,7 +132,7 @@ public final class BEncoder {
         os.write(len, 0, len.length);
         os.write(':');
         for (byte b : bytes) {
-            int i = b & Arrays.BYTE_TO_INT;
+            int i = b & BYTE_TO_INT;
             os.write(i);
         }
     }
@@ -165,23 +164,5 @@ public final class BEncoder {
         os.write('i');
         os.write(bytes, 0, bytes.length);
         os.write('e');
-    }
-
-    /**
-     * "Compact IP-address/port info" the 4-byte IP address is in network
-     * byte order with the 2 byte port in network byte order concatenated
-     * onto the end.
-     * @param address  IP Address
-     * @param port  port number
-     * @return byte[]
-     */
-    public static byte[] compactAddress(final byte[] address,
-            final int port) {
-        byte[] ret = new byte[address.length + 2];
-        System.arraycopy(address, 0, ret, 0, address.length);
-        System.arraycopy(new byte[] {(byte) (port >>> BIT_COUNT),
-                (byte) port }, 0, ret, address.length, 2);
-
-        return ret;
     }
 }

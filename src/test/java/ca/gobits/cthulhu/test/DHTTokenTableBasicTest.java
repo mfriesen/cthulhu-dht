@@ -126,7 +126,7 @@ public final class DHTTokenTableBasicTest {
     }
 
     /**
-     * testValid04() - token is valid, but wrong address.
+     * testValid04() - token is valid, but wrong port.
      * @throws Exception  Exception
      */
     @Test
@@ -138,6 +138,30 @@ public final class DHTTokenTableBasicTest {
                 InetAddress.getByName("50.71.214.139"), 64568);
         InetSocketAddress addr1 = new InetSocketAddress(
                 InetAddress.getByName("50.71.214.139"), 64569);
+
+        tt.add(addr0, secret.getBytes());
+
+        // when
+        boolean result = tt.valid(addr1, secret.getBytes());
+
+        // then
+        assertFalse(result);
+    }
+
+
+    /**
+     * testValid05() - token is valid, but wrong address.
+     * @throws Exception  Exception
+     */
+    @Test
+    public void testValid05() throws Exception {
+        // given
+        DHTTokenTable tt = new DHTTokenTableBasic();
+        String secret = "secret";
+        InetSocketAddress addr0 = new InetSocketAddress(
+                InetAddress.getByName("50.71.214.139"), 64568);
+        InetSocketAddress addr1 = new InetSocketAddress(
+                InetAddress.getByName("50.71.214.140"), 64568);
 
         tt.add(addr0, secret.getBytes());
 

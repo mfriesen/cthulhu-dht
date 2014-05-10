@@ -23,6 +23,7 @@ import java.math.BigInteger;
 import org.junit.Test;
 
 import ca.gobits.cthulhu.domain.DHTNode;
+import ca.gobits.cthulhu.domain.DHTNodeBasic;
 import ca.gobits.cthulhu.domain.DHTNodeComparator;
 
 /**
@@ -36,8 +37,8 @@ public final class DHTNodeComparatorUnitTest {
     @Test
     public void testCompare01() {
         // given
-        DHTNode node0 = new DHTNode(new BigInteger("2"), (byte[]) null, 0);
-        DHTNode node1 = new DHTNode(new BigInteger("2"), (byte[]) null, 0);
+        DHTNode node0 = new DHTNodeBasic(new BigInteger("2"), (byte[]) null, 0);
+        DHTNode node1 = new DHTNodeBasic(new BigInteger("2"), (byte[]) null, 0);
 
         // when
         int result = DHTNodeComparator.getInstance().compare(node0, node1);
@@ -52,8 +53,8 @@ public final class DHTNodeComparatorUnitTest {
     @Test
     public void testCompare02() {
         // given
-        DHTNode node0 = new DHTNode(new BigInteger("2"), (byte[]) null, 0);
-        DHTNode node1 = new DHTNode(new BigInteger("5"), (byte[]) null, 0);
+        DHTNode node0 = new DHTNodeBasic(new BigInteger("2"), (byte[]) null, 0);
+        DHTNode node1 = new DHTNodeBasic(new BigInteger("5"), (byte[]) null, 0);
 
         // when
         int result = DHTNodeComparator.getInstance().compare(node0, node1);
@@ -68,8 +69,8 @@ public final class DHTNodeComparatorUnitTest {
     @Test
     public void testCompare03() {
         // given
-        DHTNode node0 = new DHTNode(new BigInteger("5"), (byte[]) null, 0);
-        DHTNode node1 = new DHTNode(new BigInteger("2"), (byte[]) null, 0);
+        DHTNode node0 = new DHTNodeBasic(new BigInteger("5"), (byte[]) null, 0);
+        DHTNode node1 = new DHTNodeBasic(new BigInteger("2"), (byte[]) null, 0);
 
         // when
         int result = DHTNodeComparator.getInstance().compare(node0, node1);

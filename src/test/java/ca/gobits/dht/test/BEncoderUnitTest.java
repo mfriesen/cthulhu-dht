@@ -22,6 +22,8 @@ import static org.junit.Assert.assertTrue;
 import java.io.ByteArrayOutputStream;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Modifier;
+import java.net.Inet6Address;
+import java.net.InetAddress;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -31,6 +33,7 @@ import java.util.StringTokenizer;
 import org.junit.Test;
 
 import ca.gobits.dht.BEncoder;
+import ca.gobits.dht.DHTConversion;
 
 /**
  * Unit Test cases for BEncoder.
@@ -200,11 +203,11 @@ public final class BEncoderUnitTest {
     @Test
     public void testCompactAddress01() throws Exception {
         // given
-        byte[] addr = new byte[] {37, 76, -96, 28 };
+        InetAddress addr = InetAddress.getByName("37.76.160.28");
         int port = 37518;
 
         // when
-        byte[] result = BEncoder.compactAddress(addr, port);
+        byte[] result = DHTConversion.compactAddress(addr.getAddress(), port);
 
         // then
         assertEquals(6, result.length);
@@ -215,4 +218,42 @@ public final class BEncoderUnitTest {
         assertEquals(-110, result[4]);
         assertEquals(-114, result[5]);
     }
+
+    /**
+     * Tests changing an IPv6 / Port into
+     * 18 byte compact version.
+     * @throws Exception  Exception
+     */
+    @Test
+    public void testCompactAddress02() throws Exception {
+        // given
+        InetAddress addr = Inet6Address
+                .getByName("805b:2d9d:dc28:0000:0000:fc57:d4c8:1fff");
+        int port = 37518;
+
+        // when
+        byte[] result = DHTConversion.compactAddress(addr.getAddress(), port);
+
+        // then
+        assertEquals(18, result.length);
+        assertEquals(-128, result[0]);
+        assertEquals(91, result[1]);
+        assertEquals(45, result[2]);
+        assertEquals(-99, result[3]);
+        assertEquals(-36, result[4]);
+        assertEquals(40, result[5]);
+        assertEquals(0, result[6]);
+        assertEquals(0, result[7]);
+        assertEquals(0, result[8]);
+        assertEquals(0, result[9]);
+        assertEquals(-4, result[10]);
+        assertEquals(87, result[11]);
+        assertEquals(-44, result[12]);
+        assertEquals(-56, result[13]);
+        assertEquals(31, result[14]);
+        assertEquals(-1, result[15]);
+        assertEquals(-110, result[16]);
+        assertEquals(-114, result[17]);
+    }
+
 }

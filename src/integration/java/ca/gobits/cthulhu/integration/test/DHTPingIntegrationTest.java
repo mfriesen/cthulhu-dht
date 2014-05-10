@@ -19,9 +19,9 @@ import org.springframework.context.annotation.AnnotationConfigApplicationContext
 import ca.gobits.cthulhu.DHTConfiguration;
 import ca.gobits.cthulhu.DHTServer;
 import ca.gobits.cthulhu.DHTServerConfig;
-import ca.gobits.cthulhu.test.DHTTestHelper;
 import ca.gobits.dht.BDecoder;
 import ca.gobits.dht.BEncoder;
+import ca.gobits.dht.DHTConversion;
 
 /**
  * DHT Ping Integration Test.
@@ -38,7 +38,6 @@ public final class DHTPingIntegrationTest {
      */
     @BeforeClass
     public static void beforeClass() throws Exception {
-        DHTTestHelper.deleteDatabase(DHTConfiguration.DATABASE_FILE);
         ac = new AnnotationConfigApplicationContext(DHTConfiguration.class);
         runDHTServerInNewThread(ac, DHTServerConfig.DEFAULT_PORT);
     }
@@ -79,7 +78,7 @@ public final class DHTPingIntegrationTest {
                 new String((byte[]) response.get("t")));
         assertEquals(new String((byte[]) realResponse.get("y")),
                 new String((byte[]) response.get("y")));
-        assertTrue(BDecoder.decodeCompactAddressToString(
+        assertTrue(DHTConversion.decodeCompactAddressToString(
                 (byte[]) response.get("ip")).startsWith("127.0.0.1"));
 
         Map<String, Object> r = (Map<String, Object>) response.get("r");

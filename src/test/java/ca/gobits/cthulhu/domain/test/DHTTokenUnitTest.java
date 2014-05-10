@@ -11,8 +11,6 @@ import java.util.Date;
 import org.junit.Test;
 
 import ca.gobits.cthulhu.domain.DHTToken;
-import ca.gobits.dht.Arrays;
-import ca.gobits.dht.BEncoder;
 
 /**
  * DHTToken Unit Test.
@@ -35,11 +33,11 @@ public final class DHTTokenUnitTest {
 
         // then
         assertEquals(nodeId, result.getInfoHash());
-        assertEquals(13245881253968L, result.getAddress());
+        assertEquals(202116108L, result.getAddress()[0]);
         assertEquals(630, result.hashCode());
         assertNotNull(result.getAddedDate());
         assertTrue(result.toString().contains(
-                "[id=<null>,infohash=1,address=12.12.12.12:80,addedDate="));
+                "infohash=1,address=12.12.12.12,port=80,addedDate="));
     }
 
     /**
@@ -49,26 +47,25 @@ public final class DHTTokenUnitTest {
     public void testConstructor02() {
         // given
         BigInteger nodeId = new BigInteger("1");
-        byte[] addr = new byte[] {12, 12, 12, 12 };
+        long[] addr = new long[] {12 };
         int port = 80;
         Date addedDate = new Date();
-        Long id = Long.valueOf(234);
 
         // when
         DHTToken result = new DHTToken();
         result.setInfoHash(nodeId);
-        result.setAddress(Arrays.toLong(BEncoder.compactAddress(addr, port)));
+        result.setAddress(addr);
+        result.setPort(port);
         result.setAddedDate(addedDate);
-        result.setId(id);
 
         // then
         assertEquals(nodeId, result.getInfoHash());
-        assertEquals(13245881253968L, result.getAddress());
+        assertEquals(12L, result.getAddress()[0]);
         assertEquals(630, result.hashCode());
+        assertEquals(port, result.getPort());
         assertNotNull(result.getAddedDate());
-        assertEquals(id, result.getId());
         assertTrue(result.toString().contains(
-                "[id=234,infohash=1,address=12.12.12.12:80,addedDate="));
+                "infohash=1,address=0.0.0.12,port=80,addedDate="));
     }
 
     /**

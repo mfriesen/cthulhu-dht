@@ -4,7 +4,7 @@
   <artifactId>cthulhu</artifactId>
   <packaging>jar</packaging>
   <name>Cthulhu DHT Server</name>
-  <version>1.2-SNAPSHOT</version>
+  <version>0.1-SNAPSHOT</version>
   <description>Cthulhu DHT Server</description>
   <url>https://github.com/mfriesen/cthulhu-dht</url>
   <licenses>
@@ -32,30 +32,7 @@
       <name>Mike Friesen</name>
       <email>mike@gobits.ca</email>
     </developer>
-  </developers>
-  <repositories>
-    <repository>
-        <id>neo4j-contrib-releases</id>
-        <url>https://raw.github.com/neo4j-contrib/m2/master/releases</url>
-        <releases>
-            <enabled>true</enabled>
-        </releases>
-        <snapshots>
-            <enabled>false</enabled>
-        </snapshots>
-    </repository>
-    <repository>
-        <id>neo4j-contrib-snapshots</id>
-        <url>https://raw.github.com/neo4j-contrib/m2/master/snapshots</url>
-        <releases>
-            <enabled>false</enabled>
-        </releases>
-        <snapshots>
-            <enabled>true</enabled>
-        </snapshots>
-    </repository>
-  </repositories>
-  
+  </developers>  
   <dependencies>
     <dependency>
         <groupId>org.apache.commons</groupId>
@@ -97,22 +74,6 @@
 	    <artifactId>commons-codec</artifactId>
 	    <version>1.9</version>
 	</dependency>
-	<dependency>
-        <groupId>org.springframework.data</groupId>
-        <artifactId>spring-data-neo4j</artifactId>
-        <version>3.0.2.RELEASE</version>
-    </dependency>
-    <!-- JSR 303 Validation -->
-    <dependency>
-        <groupId>javax.validation</groupId>
-        <artifactId>validation-api</artifactId>
-        <version>1.1.0.Final</version>
-    </dependency>
-    <dependency>
-        <groupId>org.neo4j</groupId>
-        <artifactId>neo4j-spatial</artifactId>
-        <version>0.12-neo4j-2.0.2</version>
-    </dependency>
                     
     <!-- test-scoped dependencies -->
     <dependency>

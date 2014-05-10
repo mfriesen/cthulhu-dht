@@ -17,15 +17,14 @@
 package ca.gobits.cthulhu;
 
 import java.math.BigInteger;
-import java.util.ArrayList;
 import java.util.Collection;
 
 import org.apache.log4j.Logger;
 
 import ca.gobits.cthulhu.domain.DHTInfoHash;
+import ca.gobits.cthulhu.domain.DHTInfoHashBasic;
 import ca.gobits.cthulhu.domain.DHTInfoHashComparator;
 import ca.gobits.cthulhu.domain.DHTPeer;
-import ca.gobits.dht.Arrays;
 
 /**
  * Default implemenation of the DHTPeerRoutingTable.
@@ -50,28 +49,24 @@ public final class DHTInfoHashRoutingTableBasic implements
     }
 
     @Override
-    public Collection<byte[]> findPeers(final BigInteger infoHash) {
+    public Collection<DHTPeer> findPeers(final BigInteger infoHash) {
+
+        Collection<DHTPeer> peers = null;
 
         LOGGER.debug("findPeers: looking for peers for " + infoHash);
 
-        Collection<byte[]> nodes = null;
-        DHTInfoHash peer = this.infoHashes.get(new DHTInfoHash(infoHash));
+        DHTInfoHash peer = this.infoHashes.get(new DHTInfoHashBasic(infoHash));
 
         if (peer != null) {
 
-            Collection<DHTPeer> peers = peer.getPeers();
+            peers = peer.getPeers();
             LOGGER.debug("found " + peers.size() + " peers");
-            nodes = new ArrayList<byte[]>(peers.size());
 
-            for (DHTPeer l : peers) {
-                LOGGER.debug("returning " + l);
-                nodes.add(Arrays.toByteArray(l.getAddress()));
-            }
         } else {
             LOGGER.info("found 0 peers");
         }
 
-        return nodes;
+        return peers;
     }
 
     @Override
@@ -81,8 +76,9 @@ public final class DHTInfoHashRoutingTableBasic implements
         LOGGER.debug("addPeer: " + infoHashId + " "
                 + java.util.Arrays.toString(address) + " port " + port);
 
-        DHTInfoHash infoHash = new DHTInfoHash(infoHashId);
-        DHTInfoHash result = this.infoHashes.get(new DHTInfoHash(infoHashId));
+        DHTInfoHash infoHash = new DHTInfoHashBasic(infoHashId);
+        DHTInfoHash result = this.infoHashes.get(
+                new DHTInfoHashBasic(infoHashId));
 
         if (result == null) {
             LOGGER.debug("InfoHash " + infoHashId
@@ -99,6 +95,6 @@ public final class DHTInfoHashRoutingTableBasic implements
 
     @Override
     public DHTInfoHash findInfoHash(final BigInteger infoHash) {
-        return this.infoHashes.get(new DHTInfoHash(infoHash));
+        return this.infoHashes.get(new DHTInfoHashBasic(infoHash));
     }
 }

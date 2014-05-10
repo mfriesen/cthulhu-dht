@@ -40,10 +40,9 @@ import ca.gobits.cthulhu.DHTConfiguration;
 import ca.gobits.cthulhu.DHTNodeRoutingTable;
 import ca.gobits.cthulhu.DHTServerConfig;
 import ca.gobits.cthulhu.domain.DHTNode;
-import ca.gobits.cthulhu.test.DHTTestHelper;
-import ca.gobits.dht.Arrays;
 import ca.gobits.dht.BDecoder;
 import ca.gobits.dht.BEncoder;
+import ca.gobits.dht.DHTConversion;
 
 
 /**
@@ -69,7 +68,6 @@ public final class DHTGetPeersIntegrationTest {
      */
     @BeforeClass
     public static void beforeClass() throws Exception {
-        DHTTestHelper.deleteDatabase(DHTConfiguration.DATABASE_FILE);
         ac = new AnnotationConfigApplicationContext(DHTConfiguration.class);
         runDHTServerInNewThread(ac, DHTServerConfig.DEFAULT_PORT);
     }
@@ -118,7 +116,7 @@ public final class DHTGetPeersIntegrationTest {
                 new String((byte[]) response.get("t")));
         assertEquals(new String((byte[]) realResponse.get("y")),
                 new String((byte[]) response.get("y")));
-        assertTrue(BDecoder.decodeCompactAddressToString(
+        assertTrue(DHTConversion.decodeCompactAddressToString(
                 (byte[]) response.get("ip")).startsWith("127.0.0.1"));
 
         Map<String, Object> r = (Map<String, Object>) response.get("r");
@@ -138,7 +136,7 @@ public final class DHTGetPeersIntegrationTest {
      * @throws IOException  IOException
      */
     private void addNodesToRoutingTable(final byte[] bytes) throws IOException {
-        Collection<DHTNode> nodes = Arrays.toDHTNode(bytes);
+        Collection<DHTNode> nodes = DHTConversion.toDHTNode(bytes);
         LOGGER.debug("add " + nodes.size() + " nodes to DHTNode Routing Table");
         assertFalse(nodes.isEmpty());
         for (DHTNode node : nodes) {
