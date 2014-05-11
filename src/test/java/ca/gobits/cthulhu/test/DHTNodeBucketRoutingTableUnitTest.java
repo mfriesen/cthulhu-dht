@@ -156,6 +156,28 @@ public final class DHTNodeBucketRoutingTableUnitTest {
     }
 
     /**
+     * testAddNode05() - test add nodes to bucket, UnknownHostException.
+     */
+    @Test
+    public void testAddNode05() {
+        // given
+        Logger.getLogger(DHTNodeBucketRoutingTable.class).setLevel(Level.DEBUG);
+        DHTNodeBucketRoutingTable rt = new DHTNodeBucketRoutingTable();
+        DHTNode node = new DHTNodeBasic(new BigInteger("1"), null, port);
+
+        // when
+        rt.addNode(node);
+
+        // then
+        assertEquals(1, rt.getTotalNodeCount());
+        SortedList<DHTNode> root = rt.getNodes();
+        assertEquals(1, root.size());
+        assertEquals(node, root.get(0));
+
+        Logger.getLogger(DHTNodeBucketRoutingTable.class).setLevel(Level.INFO);
+    }
+
+    /**
      * testFindClosestNodes01() - find the closests 8 nodes.
      */
     @Test

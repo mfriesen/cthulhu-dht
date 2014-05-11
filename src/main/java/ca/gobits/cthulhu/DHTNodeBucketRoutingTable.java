@@ -16,13 +16,10 @@
 
 package ca.gobits.cthulhu;
 
-import static ca.gobits.dht.DHTConversion.toByteArray;
 import static ca.gobits.dht.DHTConversion.toInetAddress;
 
 import java.math.BigInteger;
 import java.net.InetAddress;
-import java.net.UnknownHostException;
-import java.util.Arrays;
 import java.util.List;
 
 import org.apache.log4j.Logger;
@@ -87,10 +84,8 @@ public final class DHTNodeBucketRoutingTable implements DHTNodeRoutingTable {
                 InetAddress addr = toInetAddress(node.getAddress());
                 host = addr.getHostAddress();
 
-            } catch (UnknownHostException e) {
+            } catch (Exception e) {
 
-                byte[] bytes = toByteArray(node.getAddress());
-                LOGGER.info("Unknown Host " + Arrays.toString(bytes));
                 LOGGER.info(e, e);
             }
 
