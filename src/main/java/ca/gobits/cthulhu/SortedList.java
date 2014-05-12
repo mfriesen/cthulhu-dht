@@ -28,7 +28,7 @@ import java.util.List;
  *
  * @param <E> - Type of Class
  */
-public final class SortedList<E> implements Serializable {
+public final class SortedList<E> implements SortedCollection<E>, Serializable {
 
     /** serialVersionUID. */
     private static final long serialVersionUID = -3438432973777683931L;
@@ -81,11 +81,7 @@ public final class SortedList<E> implements Serializable {
         addAll(c);
     }
 
-    /**
-     * Adds object to list.
-     * @param e  object to add
-     * @return boolean whether add was successful or not
-     */
+    @Override
     public boolean add(final E e) {
 
         int position = indexOf(e, allowDuplicates);
@@ -98,11 +94,7 @@ public final class SortedList<E> implements Serializable {
         return added;
     }
 
-    /**
-     * Adds collection of objects to list.
-     * @param c  collection of objects
-     * @return boolean whether add was successful or not
-     */
+    @Override
     public boolean addAll(final Collection<? extends E> c) {
 
         boolean added = false;
@@ -155,20 +147,12 @@ public final class SortedList<E> implements Serializable {
         return imin;
     }
 
-    /**
-     * Find the position of object in list.
-     * @param o object to find position of
-     * @return int
-     */
+    @Override
     public int indexOf(final E o) {
         return indexOf(o, true);
     }
 
-    /**
-     * Finds equals object from list.
-     * @param e  object to find
-     * @return E
-     */
+    @Override
     public E get(final E e) {
 
         E nodeMatch = null;
@@ -184,44 +168,48 @@ public final class SortedList<E> implements Serializable {
         return nodeMatch;
     }
 
-    /**
-     * size of list.
-     * @return int
-     */
+    @Override
     public int size() {
         return list.size();
     }
 
-    /**
-     * @return Object[]
-     */
+    @Override
     public Object[] toArray() {
         return list.toArray();
     }
 
-    /**
-     * Gets object at specific index.
-     * @param index  position to get object from
-     * @return E
-     */
+    @Override
     public E get(final int index) {
         return list.get(index);
     }
 
-    /**
-     * Returns sublist.
-     * @param fromIndex  start index
-     * @param toIndex  end index
-     * @return List<E>
-     */
+    @Override
     public List<E> subList(final int fromIndex, final int toIndex) {
         return list.subList(fromIndex, toIndex);
     }
 
-    /**
-     * @return Iterator<E>
-     */
+    @Override
     public Iterator<E> iterator() {
         return list.iterator();
+    }
+
+    @Override
+    public void clear() {
+        list.clear();
+    }
+
+    @Override
+    public boolean isEmpty() {
+        return list.isEmpty();
+    }
+
+    @Override
+    public boolean remove(final E o) {
+        return list.remove(o);
+    }
+
+    @Override
+    public boolean removeAll(final Collection<E> c) {
+        return list.removeAll(c);
     }
 }
