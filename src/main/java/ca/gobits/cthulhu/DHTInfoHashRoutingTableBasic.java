@@ -38,13 +38,13 @@ public final class DHTInfoHashRoutingTableBasic implements
             .getLogger(DHTInfoHashRoutingTableBasic.class);
 
     /** list of peers. */
-    private final SortedList<DHTInfoHash> infoHashes;
+    private final ConcurrentSortedList<DHTInfoHash> infoHashes;
 
     /**
      * constructor.
      */
     public DHTInfoHashRoutingTableBasic() {
-        this.infoHashes = new SortedList<DHTInfoHash>(
+        this.infoHashes = new ConcurrentSortedList<DHTInfoHash>(
                 DHTInfoHashComparator.getInstance(), false);
     }
 

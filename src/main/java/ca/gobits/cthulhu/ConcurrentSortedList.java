@@ -45,7 +45,7 @@ public final class ConcurrentSortedList<E> implements SortedCollection<E>,
     private final Lock writeLock = locking.writeLock();
 
     /** SortedList reference. */
-    private final SortedList<E> list;
+    private final SortedCollection<E> list;
 
     /**
      * Constructs an empty list with an initial capacity of ten.

@@ -39,8 +39,9 @@ public final class DHTTokenTableBasic implements DHTTokenTable {
             .getLogger(DHTTokenTableBasic.class);
 
     /** List of Tokens. */
-    private final SortedList<DHTToken> tokens = new SortedList<>(
-            DHTTokenComparator.getInstance(), false);
+    private final ConcurrentSortedList<DHTToken> tokens =
+            new ConcurrentSortedList<DHTToken>(
+                    DHTTokenComparator.getInstance(), false);
 
     @Override
     public void add(final InetSocketAddress addr, final byte[] secret) {

@@ -41,7 +41,7 @@ public final class DHTNodeBucketRoutingTable implements DHTNodeRoutingTable {
             .getLogger(DHTNodeBucketRoutingTable.class);
 
     /** root node of the routing table. */
-    private final SortedList<DHTNode> nodes;
+    private final ConcurrentSortedList<DHTNode> nodes;
 
     /** Maximum number of nodes Routing Table holds. */
     public static final int MAX_NUMBER_OF_NODES = 1000000;
@@ -50,8 +50,8 @@ public final class DHTNodeBucketRoutingTable implements DHTNodeRoutingTable {
      * constructor.
      */
     public DHTNodeBucketRoutingTable() {
-        this.nodes = new SortedList<DHTNode>(DHTNodeComparator.getInstance(),
-                false);
+        this.nodes = new ConcurrentSortedList<DHTNode>(
+                DHTNodeComparator.getInstance(), false);
     }
 
     @Override
@@ -148,7 +148,7 @@ public final class DHTNodeBucketRoutingTable implements DHTNodeRoutingTable {
     /**
      * @return DHTBucket
      */
-    public SortedList<DHTNode> getNodes() {
+    public SortedCollection<DHTNode> getNodes() {
         return nodes;
     }
 

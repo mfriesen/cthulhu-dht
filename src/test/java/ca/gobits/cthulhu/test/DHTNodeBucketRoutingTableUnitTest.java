@@ -28,7 +28,7 @@ import org.apache.log4j.Logger;
 import org.junit.Test;
 
 import ca.gobits.cthulhu.DHTNodeBucketRoutingTable;
-import ca.gobits.cthulhu.SortedList;
+import ca.gobits.cthulhu.SortedCollection;
 import ca.gobits.cthulhu.domain.DHTNode;
 import ca.gobits.cthulhu.domain.DHTNodeBasic;
 
@@ -52,7 +52,7 @@ public final class DHTNodeBucketRoutingTableUnitTest {
         DHTNodeBucketRoutingTable rt = new DHTNodeBucketRoutingTable();
 
         // when
-        SortedList<DHTNode> result = rt.getNodes();
+        SortedCollection<DHTNode> result = rt.getNodes();
 
         // then
         assertEquals(0, result.size());
@@ -73,7 +73,7 @@ public final class DHTNodeBucketRoutingTableUnitTest {
 
         // then
         assertEquals(1, rt.getTotalNodeCount());
-        SortedList<DHTNode> root = rt.getNodes();
+        SortedCollection<DHTNode> root = rt.getNodes();
         assertEquals(1, root.size());
         assertEquals(node, root.get(0));
 
@@ -117,7 +117,7 @@ public final class DHTNodeBucketRoutingTableUnitTest {
 
         // then
         assertEquals(1, rt.getTotalNodeCount());
-        SortedList<DHTNode> root = rt.getNodes();
+        SortedCollection<DHTNode> root = rt.getNodes();
         assertEquals(1, root.size());
         assertEquals(node, root.get(0));
     }
@@ -148,7 +148,7 @@ public final class DHTNodeBucketRoutingTableUnitTest {
 
         // then
         assertEquals(4, rt.getTotalNodeCount());
-        SortedList<DHTNode> nodes = rt.getNodes();
+        SortedCollection<DHTNode> nodes = rt.getNodes();
         assertEquals(node0, nodes.get(0));
         assertEquals(node1, nodes.get(1));
         assertEquals(node2, nodes.get(2));
@@ -170,7 +170,7 @@ public final class DHTNodeBucketRoutingTableUnitTest {
 
         // then
         assertEquals(1, rt.getTotalNodeCount());
-        SortedList<DHTNode> root = rt.getNodes();
+        SortedCollection<DHTNode> root = rt.getNodes();
         assertEquals(1, root.size());
         assertEquals(node, root.get(0));
 
