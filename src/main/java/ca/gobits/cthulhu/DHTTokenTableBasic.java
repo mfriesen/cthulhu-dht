@@ -18,11 +18,14 @@ package ca.gobits.cthulhu;
 
 import java.math.BigInteger;
 import java.net.InetSocketAddress;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.List;
 
 import org.apache.log4j.Logger;
+import org.springframework.scheduling.annotation.Scheduled;
 
 import ca.gobits.cthulhu.domain.DHTToken;
 import ca.gobits.cthulhu.domain.DHTTokenComparator;
@@ -30,9 +33,17 @@ import ca.gobits.dht.DHTConversion;
 
 /**
  * Basic implementation of DHTTokenTable.
- *
  */
 public final class DHTTokenTableBasic implements DHTTokenTable {
+
+    /** Default Token Expiry. */
+    private static final int DEFAULT_TOKEN_EXPIRY = 15;
+
+    /** How to Token stays valid. */
+    private int tokenExpiryInMinutes = DEFAULT_TOKEN_EXPIRY;
+
+    /** Check for Expired Tokens every 5 minutes. */
+    private static final int EXPIRED_TOKEN_TIMER = 1000 * 60 * 5;
 
     /** DHTTokenTableBasic Logger. */
     private static final Logger LOGGER = Logger
@@ -68,19 +79,58 @@ public final class DHTTokenTableBasic implements DHTTokenTable {
 
         if (token != null) {
 
-            Date now = new Date();
-            Calendar c = Calendar.getInstance();
-            c.setTime(token.getAddedDate());
-            c.add(Calendar.MINUTE, TOKEN_EXPIRY_IN_MINUTES);
-
             byte[] addr0 = DHTConversion.toByteArray(token.getAddress());
 
-            valid = now.before(c.getTime())
+            valid = isValid(token, new Date())
                     && Arrays.equals(addr0, addr.getAddress().getAddress())
                     && token.getPort() == addr.getPort();
         }
 
         return valid;
+    }
+
+    /**
+     * Checks whether DHTToken is valid.
+     * @param token  DHTToken
+     * @param now date
+     * @return boolean
+     */
+    private boolean isValid(final DHTToken token, final Date now) {
+
+        Calendar c = Calendar.getInstance();
+        c.setTime(token.getAddedDate());
+        c.add(Calendar.MINUTE, getTokenExpiryInMinutes());
+
+        return now.before(c.getTime());
+    }
+
+    /**
+     * Every 15 minutes check for expired Tokens.
+     */
+    @Scheduled(fixedDelay = EXPIRED_TOKEN_TIMER)
+    public void removeExpiredTokens() {
+
+        Date now = new Date();
+        LOGGER.debug("deleting expired tokens " + now);
+
+        List<DHTToken> removeTokens = new ArrayList<DHTToken>();
+
+        Object[] objs = tokens.toArray();
+
+        for (int i = 0; i < objs.length; i++) {
+
+            DHTToken token = (DHTToken) objs[i];
+            if (!isValid(token, now)) {
+                LOGGER.debug("removing expired token " + token.getInfoHash()
+                    + " added " + token.getAddedDate() + " now " + now);
+
+                removeTokens.add(token);
+            }
+        }
+
+        if (!removeTokens.isEmpty()) {
+            this.tokens.removeAll(removeTokens);
+        }
     }
 
     /**
@@ -95,5 +145,20 @@ public final class DHTTokenTableBasic implements DHTTokenTable {
         DHTToken dhtToken = new DHTToken(id, addr.getAddress().getAddress(),
                 addr.getPort());
         return dhtToken;
+    }
+
+    /**
+     * @return int
+     */
+    public int getTokenExpiryInMinutes() {
+        return tokenExpiryInMinutes;
+    }
+
+    /**
+     * Sets Token Expiry.
+     * @param timeout timeout in minutes
+     */
+    public void setTokenExpiryInMinutes(final int timeout) {
+        this.tokenExpiryInMinutes = timeout;
     }
 }

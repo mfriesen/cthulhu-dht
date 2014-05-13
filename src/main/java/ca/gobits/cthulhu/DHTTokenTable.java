@@ -25,9 +25,6 @@ import ca.gobits.cthulhu.domain.DHTToken;
  */
 public interface DHTTokenTable {
 
-    /** How to Token stays valid. */
-    int TOKEN_EXPIRY_IN_MINUTES = 15;
-
     /**
      * Adds Address / Token to Token.
      * @param addr  address

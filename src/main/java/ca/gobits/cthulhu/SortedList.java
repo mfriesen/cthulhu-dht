@@ -173,6 +173,7 @@ public final class SortedList<E> implements SortedCollection<E>, Serializable {
         return list.size();
     }
 
+    @SuppressWarnings("unchecked")
     @Override
     public Object[] toArray() {
         return list.toArray();
