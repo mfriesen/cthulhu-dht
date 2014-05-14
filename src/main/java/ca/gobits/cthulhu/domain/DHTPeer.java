@@ -16,104 +16,32 @@
 
 package ca.gobits.cthulhu.domain;
 
-import org.apache.commons.lang3.builder.EqualsBuilder;
-import org.apache.commons.lang3.builder.HashCodeBuilder;
-import org.apache.commons.lang3.builder.ToStringBuilder;
-
-import ca.gobits.dht.DHTConversion;
 
 /**
  * DHTPeer - holder for information about a DHT Peer.
  *
  */
-public final class DHTPeer {
-
-    /** "Compact IP-address". */
-    private long[] address;
-
-    /** Listening port. */
-    private int port;
-
-    /**
-     * default constructor.
-     */
-    public DHTPeer() {
-    }
-
-    /**
-     * constructor.
-     * @param addr IP address
-     * @param lport listening port
-     */
-    public DHTPeer(final byte[] addr, final int lport) {
-        this();
-
-        this.address = DHTConversion.toLongArray(addr);
-        this.port = lport;
-    }
-
-    @Override
-    public int hashCode() {
-        return new HashCodeBuilder()
-            .append(address)
-            .toHashCode();
-    }
-
-    @Override
-    public boolean equals(final Object obj) {
-        if (obj == null) {
-            return false;
-        }
-
-        if (obj == this) {
-            return true;
-        }
-
-        if (!(obj instanceof DHTPeer)) {
-            return false;
-        }
-
-        DHTPeer rhs = (DHTPeer) obj;
-        return new EqualsBuilder()
-            .append(address, rhs.getAddress())
-            .isEquals();
-    }
-
-    @Override
-    public String toString() {
-        ToStringBuilder builder = new ToStringBuilder(this);
-        builder.append("address", DHTConversion.toInetAddressString(address));
-        builder.append("port", port);
-        return builder.toString();
-    }
+public interface DHTPeer {
 
     /**
      * @return long[]
      */
-    public long[] getAddress() {
-        return address;
-    }
+    long[] getAddress();
 
     /**
      * Sets the address.
      * @param addr address
      */
-    public void setAddress(final long[] addr) {
-        this.address = addr;
-    }
+    void setAddress(final long[] addr);
 
     /**
      * @return int
      */
-    public int getPort() {
-        return port;
-    }
+    int getPort();
 
     /**
      * Sets the port.
-     * @param lport  port
+     * @param port  port
      */
-    public void setPort(final int lport) {
-        this.port = lport;
-    }
+    void setPort(final int port);
 }

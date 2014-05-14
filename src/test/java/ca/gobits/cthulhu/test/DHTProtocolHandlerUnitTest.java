@@ -59,6 +59,7 @@ import ca.gobits.cthulhu.DHTTokenTable;
 import ca.gobits.cthulhu.domain.DHTNode;
 import ca.gobits.cthulhu.domain.DHTNodeBasic;
 import ca.gobits.cthulhu.domain.DHTPeer;
+import ca.gobits.cthulhu.domain.DHTPeerBasic;
 import ca.gobits.dht.BDecoder;
 import ca.gobits.dht.BEncoder;
 
@@ -289,7 +290,7 @@ public final class DHTProtocolHandlerUnitTest extends EasyMockSupport {
                 Unpooled.copiedBuffer(dat.getBytes()), iaddr,
                 iaddr);
 
-        DHTPeer peer = new DHTPeer(InetAddress.getByName("240.120.222.12")
+        DHTPeer peer = new DHTPeerBasic(InetAddress.getByName("240.120.222.12")
                 .getAddress(), 23);
         Collection<DHTPeer> peers = Arrays.asList(peer);
 

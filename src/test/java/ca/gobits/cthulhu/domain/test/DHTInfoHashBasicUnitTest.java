@@ -31,6 +31,7 @@ import org.junit.Test;
 import ca.gobits.cthulhu.domain.DHTInfoHash;
 import ca.gobits.cthulhu.domain.DHTInfoHashBasic;
 import ca.gobits.cthulhu.domain.DHTPeer;
+import ca.gobits.cthulhu.domain.DHTPeerBasic;
 
 /**
  * Unit Test for DHTInfoHashBasic.
@@ -188,7 +189,7 @@ public final class DHTInfoHashBasicUnitTest {
         DHTInfoHash node = new DHTInfoHashBasic(nodeId);
         byte[] address = new byte[] {127, 0, 0, 1 };
         int port = 103;
-        DHTPeer peer = new DHTPeer(address, port);
+        DHTPeer peer = new DHTPeerBasic(address, port);
         Set<DHTPeer> peers = new HashSet<DHTPeer>();
         peers.add(peer);
 

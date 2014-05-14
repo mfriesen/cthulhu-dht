@@ -71,7 +71,7 @@ public final class DHTInfoHashBasic implements DHTInfoHash {
             this.peers = new HashSet<DHTPeer>();
         }
 
-        this.peers.add(new DHTPeer(addr, port));
+        this.peers.add(new DHTPeerBasic(addr, port));
     }
 
     @Override

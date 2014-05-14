@@ -19,6 +19,7 @@ import org.junit.Test;
 import ca.gobits.cthulhu.domain.DHTNode;
 import ca.gobits.cthulhu.domain.DHTNodeBasic;
 import ca.gobits.cthulhu.domain.DHTPeer;
+import ca.gobits.cthulhu.domain.DHTPeerBasic;
 import ca.gobits.dht.DHTConversion;
 
 /**
@@ -324,8 +325,8 @@ public final class DHTConversionUnitTest {
         byte[] addr0 = new byte[] {73, 54, 93, 12 };
         byte[] addr1 = new byte[] {34, 64, 43, 51 };
 
-        DHTPeer n0 = new DHTPeer(addr0, 123);
-        DHTPeer n1 = new DHTPeer(addr1, 8080);
+        DHTPeer n0 = new DHTPeerBasic(addr0, 123);
+        DHTPeer n1 = new DHTPeerBasic(addr1, 8080);
 
         List<DHTPeer> peers = java.util.Arrays.asList(n0, n1);
 

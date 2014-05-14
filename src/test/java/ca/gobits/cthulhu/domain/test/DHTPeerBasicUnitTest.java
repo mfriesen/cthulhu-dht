@@ -7,12 +7,13 @@ import static org.junit.Assert.assertTrue;
 import org.junit.Test;
 
 import ca.gobits.cthulhu.domain.DHTPeer;
+import ca.gobits.cthulhu.domain.DHTPeerBasic;
 
 /**
  * DHTPeer Unit Test.
  *
  */
-public final class DHTPeerUnitTest {
+public final class DHTPeerBasicUnitTest {
 
     /**
      * testConstructor01().
@@ -24,7 +25,7 @@ public final class DHTPeerUnitTest {
         int port = 8000;
 
         // when
-        DHTPeer result = new DHTPeer(addr, port);
+        DHTPeer result = new DHTPeerBasic(addr, port);
 
         // then
         assertEquals(1, result.getAddress().length);
@@ -37,7 +38,7 @@ public final class DHTPeerUnitTest {
     @Test
     public void testToString01() {
         // given
-        DHTPeer peer = new DHTPeer();
+        DHTPeer peer = new DHTPeerBasic();
         peer.setAddress(new long[] {3315799039808L });
         peer.setPort(123);
 
@@ -56,7 +57,7 @@ public final class DHTPeerUnitTest {
     @Test
     public void testEquals01() {
         // given
-        DHTPeer node = new DHTPeer();
+        DHTPeer node = new DHTPeerBasic();
 
         // when
         boolean result = node.equals(null);
@@ -71,7 +72,7 @@ public final class DHTPeerUnitTest {
     @Test
     public void testEquals02() {
         // given
-        DHTPeer node = new DHTPeer();
+        DHTPeer node = new DHTPeerBasic();
 
         // when
         boolean result = node.equals(node);
@@ -86,7 +87,7 @@ public final class DHTPeerUnitTest {
     @Test
     public void testEquals03() {
         // given
-        DHTPeer node = new DHTPeer();
+        DHTPeer node = new DHTPeerBasic();
 
         // when
         boolean result = node.equals("");
@@ -104,8 +105,8 @@ public final class DHTPeerUnitTest {
         byte[] addr = new byte[] {3, 4, 5, 6 };
         int port = 8000;
 
-        DHTPeer node = new DHTPeer(addr, port);
-        DHTPeer node1 = new DHTPeer(addr, port);
+        DHTPeer node = new DHTPeerBasic(addr, port);
+        DHTPeer node1 = new DHTPeerBasic(addr, port);
 
         // when
         boolean result = node.equals(node1);
