@@ -11,12 +11,13 @@ import java.util.Date;
 import org.junit.Test;
 
 import ca.gobits.cthulhu.domain.DHTToken;
+import ca.gobits.cthulhu.domain.DHTTokenBasic;
 
 /**
- * DHTToken Unit Test.
+ * DHTTokenBasic Unit Test.
  *
  */
-public final class DHTTokenUnitTest {
+public final class DHTTokenBasicUnitTest {
 
     /**
      * testConstructor01.
@@ -29,7 +30,7 @@ public final class DHTTokenUnitTest {
         int port = 80;
 
         // when
-        DHTToken result = new DHTToken(nodeId, addr, port);
+        DHTToken result = new DHTTokenBasic(nodeId, addr, port);
 
         // then
         assertEquals(nodeId, result.getInfoHash());
@@ -52,7 +53,7 @@ public final class DHTTokenUnitTest {
         Date addedDate = new Date();
 
         // when
-        DHTToken result = new DHTToken();
+        DHTToken result = new DHTTokenBasic();
         result.setInfoHash(nodeId);
         result.setAddress(addr);
         result.setPort(port);
@@ -77,7 +78,7 @@ public final class DHTTokenUnitTest {
         BigInteger id = new BigInteger("1");
         byte[] addr = new byte[] {12, 12, 12, 12 };
         int port = 80;
-        DHTToken token = new DHTToken(id, addr, port);
+        DHTToken token = new DHTTokenBasic(id, addr, port);
 
         // when
         boolean result = token.equals(null);
@@ -95,7 +96,7 @@ public final class DHTTokenUnitTest {
         BigInteger id = new BigInteger("1");
         byte[] addr = new byte[] {12, 12, 12, 12 };
         int port = 80;
-        DHTToken token = new DHTToken(id, addr, port);
+        DHTToken token = new DHTTokenBasic(id, addr, port);
 
         // when
         boolean result = token.equals(token);
@@ -113,7 +114,7 @@ public final class DHTTokenUnitTest {
         BigInteger id = new BigInteger("1");
         byte[] addr = new byte[] {12, 12, 12, 12 };
         int port = 80;
-        DHTToken token = new DHTToken(id, addr, port);
+        DHTToken token = new DHTTokenBasic(id, addr, port);
 
         // when
         boolean result = token.equals("");
@@ -131,8 +132,8 @@ public final class DHTTokenUnitTest {
         BigInteger id = new BigInteger("1");
         byte[] addr = new byte[] {12, 12, 12, 12 };
         int port = 80;
-        DHTToken token = new DHTToken(id, addr, port);
-        DHTToken token1 = new DHTToken(id, addr, port);
+        DHTToken token = new DHTTokenBasic(id, addr, port);
+        DHTToken token1 = new DHTTokenBasic(id, addr, port);
 
         // when
         boolean result = token.equals(token1);

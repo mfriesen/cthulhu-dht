@@ -28,6 +28,7 @@ import org.apache.log4j.Logger;
 import org.springframework.scheduling.annotation.Scheduled;
 
 import ca.gobits.cthulhu.domain.DHTToken;
+import ca.gobits.cthulhu.domain.DHTTokenBasic;
 import ca.gobits.cthulhu.domain.DHTTokenComparator;
 import ca.gobits.dht.DHTConversion;
 
@@ -142,8 +143,8 @@ public final class DHTTokenTableBasic implements DHTTokenTable {
     private DHTToken createToken(final InetSocketAddress addr,
             final byte[] secret) {
         BigInteger id = DHTConversion.toBigInteger(secret);
-        DHTToken dhtToken = new DHTToken(id, addr.getAddress().getAddress(),
-                addr.getPort());
+        DHTToken dhtToken = new DHTTokenBasic(id, addr.getAddress()
+                .getAddress(), addr.getPort());
         return dhtToken;
     }
 

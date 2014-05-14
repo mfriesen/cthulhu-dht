@@ -35,6 +35,7 @@ import ca.gobits.cthulhu.ConcurrentSortedList;
 import ca.gobits.cthulhu.DHTTokenTable;
 import ca.gobits.cthulhu.DHTTokenTableBasic;
 import ca.gobits.cthulhu.domain.DHTToken;
+import ca.gobits.cthulhu.domain.DHTTokenBasic;
 
 /**
  * DHTTokenTableBasicTest.
@@ -217,12 +218,12 @@ public final class DHTTokenTableBasicUnitTest {
 
         Calendar c = Calendar.getInstance();
         c.add(Calendar.MINUTE, -1 * tt.getTokenExpiryInMinutes() - 1);
-        DHTToken t0 = new DHTToken(new BigInteger("1"), addr, 10);
+        DHTToken t0 = new DHTTokenBasic(new BigInteger("1"), addr, 10);
         t0.setAddedDate(c.getTime());
 
-        DHTToken t1 = new DHTToken(new BigInteger("2"), addr, 10);
+        DHTToken t1 = new DHTTokenBasic(new BigInteger("2"), addr, 10);
 
-        DHTToken t2 = new DHTToken(new BigInteger("3"), addr, 10);
+        DHTToken t2 = new DHTTokenBasic(new BigInteger("3"), addr, 10);
 
         list.addAll(Arrays.asList(t0, t1, t2));
 
@@ -250,7 +251,7 @@ public final class DHTTokenTableBasicUnitTest {
 
         byte[] addr = InetAddress.getByName("50.71.214.139").getAddress();
 
-        DHTToken t0 = new DHTToken(new BigInteger("1"), addr, 10);
+        DHTToken t0 = new DHTTokenBasic(new BigInteger("1"), addr, 10);
 
         list.addAll(Arrays.asList(t0));
 
@@ -276,7 +277,7 @@ public final class DHTTokenTableBasicUnitTest {
 
         byte[] addr = InetAddress.getByName("50.71.214.139").getAddress();
 
-        DHTToken t0 = new DHTToken(new BigInteger("1"), addr, 10);
+        DHTToken t0 = new DHTTokenBasic(new BigInteger("1"), addr, 10);
 
         list.addAll(Arrays.asList(t0));
 
@@ -315,7 +316,7 @@ public final class DHTTokenTableBasicUnitTest {
             public void run() {
                 for (int i = 0; i < 100; i++) {
                     tt.add(addr, "secret".getBytes());
-                    DHTToken t0 = new DHTToken(new BigInteger("" + i), addr
+                    DHTToken t0 = new DHTTokenBasic(new BigInteger("" + i), addr
                             .getAddress().getAddress(), 10);
                     t0.setAddedDate(expired.getTime());
                     list.add(t0);
