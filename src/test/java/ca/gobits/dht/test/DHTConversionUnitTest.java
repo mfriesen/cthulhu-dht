@@ -17,7 +17,7 @@ import java.util.List;
 import org.junit.Test;
 
 import ca.gobits.cthulhu.domain.DHTNode;
-import ca.gobits.cthulhu.domain.DHTNodeBasic;
+import ca.gobits.cthulhu.domain.DHTNodeFactory;
 import ca.gobits.cthulhu.domain.DHTPeer;
 import ca.gobits.cthulhu.domain.DHTPeerBasic;
 import ca.gobits.dht.DHTConversion;
@@ -285,9 +285,12 @@ public final class DHTConversionUnitTest {
         byte[] addr0 = new byte[] {73, 54, 93, 12 };
         BigInteger bi0 = new BigInteger(
                 "FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF", 16);
-        DHTNode n0 = new DHTNodeBasic(bi0, addr0, 123);
+        DHTNode n0 = DHTNodeFactory.create(bi0, addr0, 123,
+                DHTNode.State.UNKNOWN);
+
         byte[] addr1 = new byte[] {34, 64, 43, 51 };
-        DHTNode n1 = new DHTNodeBasic(new BigInteger("13242"), addr1, 8080);
+        DHTNode n1 = DHTNodeFactory.create(new BigInteger("13242"), addr1, 8080,
+                DHTNode.State.UNKNOWN);
 
         List<DHTNode> nodes = java.util.Arrays.asList(n0, n1);
 

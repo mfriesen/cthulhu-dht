@@ -96,6 +96,10 @@ public final class DHTProtocolHandler extends
 
                 addPingResponse(arguments, response, packet);
 
+//                DHTNode node = DHTNodeFactory.create(arguments.getId(),
+//                        packet.sender(), DHTNode.State.UNKNOWN);
+//                routingTable.addNode(node);
+
             } else if (action.equals("find_node")) {
 
                 addFindNodeResponse(arguments, response, packet);

@@ -16,6 +16,7 @@
 
 package ca.gobits.cthulhu;
 
+import static ca.gobits.cthulhu.domain.DHTNodeFactory.create;
 import static ca.gobits.dht.DHTConversion.toInetAddress;
 
 import java.math.BigInteger;
@@ -25,7 +26,6 @@ import java.util.List;
 import org.apache.log4j.Logger;
 
 import ca.gobits.cthulhu.domain.DHTNode;
-import ca.gobits.cthulhu.domain.DHTNodeBasic;
 import ca.gobits.cthulhu.domain.DHTNodeComparator;
 
 /**
@@ -55,7 +55,7 @@ public final class DHTNodeBucketRoutingTable implements DHTNodeRoutingTable {
     }
 
     @Override
-    public synchronized void addNode(final DHTNode node) {
+    public void addNode(final DHTNode node) {
 
         if (nodes.size() < MAX_NUMBER_OF_NODES) {
 
@@ -103,7 +103,7 @@ public final class DHTNodeBucketRoutingTable implements DHTNodeRoutingTable {
     public DHTNode findExactNode(final BigInteger nodeId) {
 
         DHTNode nodeMatch = null;
-        DHTNode node = new DHTNodeBasic(nodeId, (byte[]) null, 0);
+        DHTNode node = create(nodeId, DHTNode.State.UNKNOWN);
         int index = this.nodes.indexOf(node);
 
         if (index >= 0 && index < this.nodes.size()) {
@@ -120,7 +120,7 @@ public final class DHTNodeBucketRoutingTable implements DHTNodeRoutingTable {
     public List<DHTNode> findClosestNodes(final BigInteger nodeId,
             final int returnCount) {
 
-        DHTNode node = new DHTNodeBasic(nodeId, (byte[]) null, 0);
+        DHTNode node = create(nodeId, DHTNode.State.UNKNOWN);
         int index = nodes.indexOf(node);
 
         int fromIndex = index > 0 ? index - 1 : 0;

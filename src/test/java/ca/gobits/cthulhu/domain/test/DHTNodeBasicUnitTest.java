@@ -16,6 +16,7 @@
 
 package ca.gobits.cthulhu.domain.test;
 
+import static ca.gobits.cthulhu.domain.DHTNodeFactory.create;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
@@ -23,7 +24,6 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
 import java.math.BigInteger;
-import java.util.Date;
 
 import org.junit.Test;
 
@@ -46,7 +46,8 @@ public final class DHTNodeBasicUnitTest {
         int nodePort = 103;
 
         // when
-        DHTNode result = new DHTNodeBasic(nodeId, address, nodePort);
+        DHTNode result = create(nodeId, address, nodePort,
+                DHTNode.State.UNKNOWN);
 
         // then
         assertEquals(nodeId, result.getInfoHash());
@@ -56,17 +57,15 @@ public final class DHTNodeBasicUnitTest {
     }
 
     /**
-     * testConstructor02().  Null address
+     * testConstructor02(). Null address
      */
     @Test
     public void testConstructor02() {
         // given
         BigInteger nodeId = new BigInteger("123");
-        byte[] address = null;
-        int nodePort = 0;
 
         // when
-        DHTNode result = new DHTNodeBasic(nodeId, address, nodePort);
+        DHTNode result = create(nodeId, DHTNode.State.UNKNOWN);
 
         // then
         assertEquals(nodeId, result.getInfoHash());
@@ -82,7 +81,7 @@ public final class DHTNodeBasicUnitTest {
     public void testConstructor03() {
         // given
         BigInteger nodeId = new BigInteger("123");
-        long[] address = new long[]{1L};
+        long[] address = new long[] {1L };
         int nodePort = 0;
 
         // when
@@ -106,20 +105,21 @@ public final class DHTNodeBasicUnitTest {
         BigInteger nodeId = new BigInteger("123");
         byte[] address = new byte[] {127, 0, 0, 1 };
         int nodePort = 103;
-        DHTNode node = new DHTNodeBasic(nodeId, address, nodePort);
+        DHTNode node = create(nodeId, address, nodePort,
+                DHTNode.State.UNKNOWN);
 
         // when
         String result = node.toString();
 
         // then
-        assertTrue(result.startsWith(
-                "ca.gobits.cthulhu.domain.DHTNode"));
-        assertTrue(result.contains(
-           "[infohash=123,address=127.0.0.1,port=103,lastUpdated="));
+        assertTrue(result.startsWith("ca.gobits.cthulhu.domain.DHTNode"));
+        assertTrue(result
+                .contains("[infohash=123,address=127.0.0.1,"
+                        + "port=103,state=UNKNOWN,lastUpdated="));
     }
 
     /**
-     * testEquals01()  null object.
+     * testEquals01() null object.
      */
     @Test
     public void testEquals01() {
@@ -127,7 +127,8 @@ public final class DHTNodeBasicUnitTest {
         BigInteger nodeId = new BigInteger("123");
         byte[] address = new byte[] {127, 0, 0, 1 };
         int nodePort = 103;
-        DHTNode node = new DHTNodeBasic(nodeId, address, nodePort);
+        DHTNode node = create(nodeId, address, nodePort,
+                DHTNode.State.UNKNOWN);
 
         // when
         boolean result = node.equals(null);
@@ -137,7 +138,7 @@ public final class DHTNodeBasicUnitTest {
     }
 
     /**
-     * testEquals02()  same object.
+     * testEquals02() same object.
      */
     @Test
     public void testEquals02() {
@@ -145,7 +146,8 @@ public final class DHTNodeBasicUnitTest {
         BigInteger nodeId = new BigInteger("123");
         byte[] address = new byte[] {127, 0, 0, 1 };
         int nodePort = 103;
-        DHTNode node = new DHTNodeBasic(nodeId, address, nodePort);
+        DHTNode node = create(nodeId, address, nodePort,
+                DHTNode.State.UNKNOWN);
 
         // when
         boolean result = node.equals(node);
@@ -155,7 +157,7 @@ public final class DHTNodeBasicUnitTest {
     }
 
     /**
-     * testEquals03()  non DHTNode object.
+     * testEquals03() non DHTNode object.
      */
     @Test
     public void testEquals03() {
@@ -163,7 +165,8 @@ public final class DHTNodeBasicUnitTest {
         BigInteger nodeId = new BigInteger("123");
         byte[] address = new byte[] {127, 0, 0, 1 };
         int nodePort = 103;
-        DHTNode node = new DHTNodeBasic(nodeId, address, nodePort);
+        DHTNode node = create(nodeId, address, nodePort,
+                DHTNode.State.UNKNOWN);
 
         // when
         boolean result = node.equals("");
@@ -173,7 +176,7 @@ public final class DHTNodeBasicUnitTest {
     }
 
     /**
-     * testEquals04()  equal DHTNode object.
+     * testEquals04() equal DHTNode object.
      */
     @Test
     public void testEquals04() {
@@ -181,29 +184,15 @@ public final class DHTNodeBasicUnitTest {
         BigInteger nodeId = new BigInteger("123");
         byte[] address = new byte[] {127, 0, 0, 1 };
         int nodePort = 103;
-        DHTNode node = new DHTNodeBasic(nodeId, address, nodePort);
-        DHTNode node1 = new DHTNodeBasic(nodeId, address, nodePort);
+        DHTNode node = create(nodeId, address, nodePort,
+                DHTNode.State.UNKNOWN);
+        DHTNode node1 = create(nodeId, address, nodePort,
+                DHTNode.State.UNKNOWN);
 
         // when
         boolean result = node.equals(node1);
 
         // then
         assertTrue(result);
-    }
-
-    /**
-     * testSetLastUpdated01().
-     */
-    @Test
-    public void testSetLastUpdated01() {
-        // given
-        Date date = new Date();
-        DHTNode node = new DHTNodeBasic(new BigInteger("1"), (byte[]) null, 0);
-
-        // when
-        node.setLastUpdated(date);
-
-        // then
-        assertEquals(date, node.getLastUpdated());
     }
 }

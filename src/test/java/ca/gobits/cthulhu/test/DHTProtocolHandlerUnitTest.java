@@ -57,7 +57,7 @@ import ca.gobits.cthulhu.DHTProtocolHandler;
 import ca.gobits.cthulhu.DHTServer;
 import ca.gobits.cthulhu.DHTTokenTable;
 import ca.gobits.cthulhu.domain.DHTNode;
-import ca.gobits.cthulhu.domain.DHTNodeBasic;
+import ca.gobits.cthulhu.domain.DHTNodeFactory;
 import ca.gobits.cthulhu.domain.DHTPeer;
 import ca.gobits.cthulhu.domain.DHTPeerBasic;
 import ca.gobits.dht.BDecoder;
@@ -638,7 +638,8 @@ public final class DHTProtocolHandlerUnitTest extends EasyMockSupport {
     private DHTNode createDHTNode(final String id, final String address,
             final int port) throws UnknownHostException {
         byte[] addr = InetAddress.getByName(address).getAddress();
-        return new DHTNodeBasic(new BigInteger(id), addr, port);
+        return DHTNodeFactory.create(new BigInteger(id), addr, port,
+                DHTNode.State.UNKNOWN);
     }
 
     /**

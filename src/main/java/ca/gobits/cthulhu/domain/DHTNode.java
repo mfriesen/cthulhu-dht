@@ -25,15 +25,21 @@ import java.util.Date;
 public interface DHTNode {
 
     /**
+     * State of DHTNode.
+     */
+    enum State {
+        /** Node has sent or responded to request last 15 minutes. */
+        GOOD,
+        /** Haven't heard from the Node for 15 minutes. */
+        QUESTIONABLE,
+        /** Unknown State. */
+        UNKNOWN
+    }
+
+    /**
      * @return Date
      */
     Date getLastUpdated();
-
-    /**
-     * Sets the Last Updated Date.
-     * @param date sets Last Updated Date
-     */
-    void setLastUpdated(final Date date);
 
     /**
      * @return BigInteger
@@ -49,4 +55,9 @@ public interface DHTNode {
      * @return int
      */
     int getPort();
+
+    /**
+     * @return State
+     */
+    State getState();
 }

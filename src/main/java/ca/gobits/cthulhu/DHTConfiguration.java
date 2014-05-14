@@ -71,5 +71,6 @@ public class DHTConfiguration {
     public DHTProtocolHandler dhtProtocolHandler() {
         return new DHTProtocolHandler();
     }
+
     //CHECKSTYLE:ON
 }

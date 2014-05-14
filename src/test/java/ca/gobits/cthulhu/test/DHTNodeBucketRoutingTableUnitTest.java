@@ -16,6 +16,7 @@
 
 package ca.gobits.cthulhu.test;
 
+import static ca.gobits.cthulhu.domain.DHTNodeFactory.create;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
@@ -30,7 +31,6 @@ import org.junit.Test;
 import ca.gobits.cthulhu.DHTNodeBucketRoutingTable;
 import ca.gobits.cthulhu.SortedCollection;
 import ca.gobits.cthulhu.domain.DHTNode;
-import ca.gobits.cthulhu.domain.DHTNodeBasic;
 
 /**
  * DHTBucketRoutingTableTest.
@@ -66,7 +66,8 @@ public final class DHTNodeBucketRoutingTableUnitTest {
         // given
         Logger.getLogger(DHTNodeBucketRoutingTable.class).setLevel(Level.DEBUG);
         DHTNodeBucketRoutingTable rt = new DHTNodeBucketRoutingTable();
-        DHTNode node = new DHTNodeBasic(new BigInteger("1"), addr, port);
+        DHTNode node = create(new BigInteger("1"), addr, port,
+                DHTNode.State.UNKNOWN);
 
         // when
         rt.addNode(node);
@@ -91,8 +92,8 @@ public final class DHTNodeBucketRoutingTableUnitTest {
 
         // when
         for (int i = 0; i < nodeCount; i++) {
-            DHTNode node = new DHTNodeBasic(new BigInteger("" + i),
-                    addr, port);
+            DHTNode node = create(new BigInteger("" + i),
+                    addr, port, DHTNode.State.UNKNOWN);
             rt.addNode(node);
         }
 
@@ -108,8 +109,8 @@ public final class DHTNodeBucketRoutingTableUnitTest {
     public void testAddNode03() {
         // given
         DHTNodeBucketRoutingTable rt = new DHTNodeBucketRoutingTable();
-        DHTNode node = new DHTNodeBasic(new BigInteger("1"),
-                addr, port);
+        DHTNode node = create(new BigInteger("1"),
+            addr, port, DHTNode.State.UNKNOWN);
 
         // when
         rt.addNode(node);
@@ -129,16 +130,17 @@ public final class DHTNodeBucketRoutingTableUnitTest {
     public void testAddNode04() {
         // given
         DHTNodeBucketRoutingTable rt = new DHTNodeBucketRoutingTable();
-        DHTNode node0 = new DHTNodeBasic(new BigInteger("1"), addr, port);
-        DHTNode node1 = new DHTNodeBasic(new BigInteger(
-                "217572328821850967755762913845138112465869557436"),
-                addr, port);
-        DHTNode node2 = new DHTNodeBasic(new BigInteger(
-                "253718933283387888344146948372599275024431560999"),
-                addr, port);
-        DHTNode node3 = new DHTNodeBasic(new BigInteger(
-                "909396897490697132528408310795708133687135388426"),
-                addr, port);
+        DHTNode node0 = create(new BigInteger("1"), addr, port,
+                DHTNode.State.UNKNOWN);
+        DHTNode node1 = create(new BigInteger(
+            "217572328821850967755762913845138112465869557436"),
+            addr, port, DHTNode.State.UNKNOWN);
+        DHTNode node2 = create(new BigInteger(
+            "253718933283387888344146948372599275024431560999"),
+            addr, port, DHTNode.State.UNKNOWN);
+        DHTNode node3 = create(new BigInteger(
+            "909396897490697132528408310795708133687135388426"),
+            addr, port, DHTNode.State.UNKNOWN);
 
         // when
         rt.addNode(node0);
@@ -163,7 +165,7 @@ public final class DHTNodeBucketRoutingTableUnitTest {
         // given
         Logger.getLogger(DHTNodeBucketRoutingTable.class).setLevel(Level.DEBUG);
         DHTNodeBucketRoutingTable rt = new DHTNodeBucketRoutingTable();
-        DHTNode node = new DHTNodeBasic(new BigInteger("1"), null, port);
+        DHTNode node = create(new BigInteger("1"), DHTNode.State.UNKNOWN);
 
         // when
         rt.addNode(node);
@@ -183,7 +185,8 @@ public final class DHTNodeBucketRoutingTableUnitTest {
     @Test
     public void testFindClosestNodes01() {
         // given
-        DHTNode n = new DHTNodeBasic(new BigInteger("11"), addr, port);
+        DHTNode n = create(new BigInteger("11"), addr, port,
+                DHTNode.State.UNKNOWN);
         DHTNodeBucketRoutingTable rt = new DHTNodeBucketRoutingTable();
 
         addNodes(rt);
@@ -210,7 +213,8 @@ public final class DHTNodeBucketRoutingTableUnitTest {
     @Test
     public void testFindClosestNodes02() {
         // given
-        DHTNode n = new DHTNodeBasic(new BigInteger("1"), addr, port);
+        DHTNode n = create(new BigInteger("1"), addr, port,
+                DHTNode.State.UNKNOWN);
         DHTNodeBucketRoutingTable rt = new DHTNodeBucketRoutingTable();
 
         addNodes(rt);
@@ -237,7 +241,8 @@ public final class DHTNodeBucketRoutingTableUnitTest {
     @Test
     public void testFindClosestNodes03() {
         // given
-        DHTNode n = new DHTNodeBasic(new BigInteger("41"), addr, port);
+        DHTNode n = create(new BigInteger("41"), addr, port,
+                DHTNode.State.UNKNOWN);
         DHTNodeBucketRoutingTable rt = new DHTNodeBucketRoutingTable();
 
         addNodes(rt);
@@ -263,7 +268,8 @@ public final class DHTNodeBucketRoutingTableUnitTest {
     @Test
     public void testFindClosestNodes04() {
         // given
-        DHTNode n = new DHTNodeBasic(new BigInteger("22"), addr, port);
+        DHTNode n = create(new BigInteger("22"), addr, port,
+                DHTNode.State.UNKNOWN);
         DHTNodeBucketRoutingTable rt = new DHTNodeBucketRoutingTable();
 
         addNodes(rt);
@@ -289,7 +295,8 @@ public final class DHTNodeBucketRoutingTableUnitTest {
     @Test
     public void testFindClosestNodes05() {
         // given
-        DHTNode n = new DHTNodeBasic(new BigInteger("0"), addr, port);
+        DHTNode n = create(new BigInteger("0"), addr, port,
+                DHTNode.State.UNKNOWN);
         DHTNodeBucketRoutingTable rt = new DHTNodeBucketRoutingTable();
 
         addNodes(rt);
@@ -358,8 +365,8 @@ public final class DHTNodeBucketRoutingTableUnitTest {
      */
     private void addNodes(final DHTNodeBucketRoutingTable rt) {
         for (int i = 0; i < 40; i = i + 2) {
-            DHTNode node = new DHTNodeBasic(new BigInteger("" + i),
-                    addr, port);
+            DHTNode node = create(new BigInteger("" + i),
+                addr, port, DHTNode.State.UNKNOWN);
             rt.addNode(node);
         }
     }

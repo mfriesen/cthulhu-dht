@@ -39,6 +39,9 @@ public final class DHTNodeBasic implements DHTNode {
     /** IP Port. */
     private int port;
 
+    /** State of Node. */
+    private State state;
+
     /** Date the node was last pinged. */
     private Date lastUpdated;
 
@@ -46,28 +49,6 @@ public final class DHTNodeBasic implements DHTNode {
      * constructor.
      */
     public DHTNodeBasic() {
-        this.lastUpdated = new Date();
-    }
-
-    /**
-     * constructor.
-     * @param nodeId Identifier
-     * @param addr IP address
-     * @param addrPort listening port
-     */
-    public DHTNodeBasic(final BigInteger nodeId, final byte[] addr,
-            final int addrPort) {
-        this();
-
-        this.infoHash = nodeId;
-
-        if (addr != null) {
-            this.address = DHTConversion.toLongArray(addr);
-            this.port = addrPort;
-        } else {
-            this.address = null;
-            this.port = 0;
-        }
     }
 
     @Override
@@ -76,6 +57,7 @@ public final class DHTNodeBasic implements DHTNode {
         builder.append("infohash", infoHash);
         builder.append("address", DHTConversion.toInetAddressString(address));
         builder.append("port", port);
+        builder.append("state", state);
         builder.append("lastUpdated", lastUpdated);
         return builder.toString();
     }
@@ -119,7 +101,6 @@ public final class DHTNodeBasic implements DHTNode {
      * Sets the Last Updated Date.
      * @param date sets Last Updated Date
      */
-    @Override
     public void setLastUpdated(final Date date) {
         this.lastUpdated = date;
     }
@@ -133,8 +114,8 @@ public final class DHTNodeBasic implements DHTNode {
     }
 
     /**
-     * Sets Info Hash.
-     * @param infoHashId  InfoHash
+     * Sets the Info Hash.
+     * @param infoHashId  infoHash
      */
     public void setInfoHash(final BigInteger infoHashId) {
         this.infoHash = infoHashId;
@@ -164,5 +145,18 @@ public final class DHTNodeBasic implements DHTNode {
      */
     public void setPort(final int lport) {
         this.port = lport;
+    }
+
+    @Override
+    public State getState() {
+        return state;
+    }
+
+    /**
+     * Sets the State.
+     * @param s state
+     */
+    public void setState(final State s) {
+        this.state = s;
     }
 }

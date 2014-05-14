@@ -11,7 +11,7 @@ import java.util.Collection;
 import java.util.List;
 
 import ca.gobits.cthulhu.domain.DHTNode;
-import ca.gobits.cthulhu.domain.DHTNodeBasic;
+import ca.gobits.cthulhu.domain.DHTNodeFactory;
 import ca.gobits.cthulhu.domain.DHTPeer;
 
 /**
@@ -350,9 +350,9 @@ public final class DHTConversion {
 
                 int port = decodeCompactAddressPort(addr);
 
-                DHTNode node = new DHTNodeBasic(nodeId,
+                DHTNode node = DHTNodeFactory.create(nodeId,
                         java.util.Arrays.copyOfRange(addr, 0, addr.length - 2),
-                        port);
+                        port, DHTNode.State.UNKNOWN);
                 nodes.add(node);
             }
 
