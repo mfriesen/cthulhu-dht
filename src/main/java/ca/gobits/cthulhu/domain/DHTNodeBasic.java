@@ -30,6 +30,9 @@ import ca.gobits.dht.DHTConversion;
  */
 public final class DHTNodeBasic implements DHTNode {
 
+    /** serialVersionUID. */
+    private static final long serialVersionUID = -9209374329583239161L;
+
     /** Node identifier. */
     private BigInteger infoHash;
 

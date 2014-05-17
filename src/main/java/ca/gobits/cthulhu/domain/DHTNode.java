@@ -16,13 +16,14 @@
 
 package ca.gobits.cthulhu.domain;
 
+import java.io.Serializable;
 import java.math.BigInteger;
 import java.util.Date;
 
 /**
  * DHTNode - holder for information about a DHT Node.
  */
-public interface DHTNode {
+public interface DHTNode extends Serializable {
 
     /**
      * State of DHTNode.

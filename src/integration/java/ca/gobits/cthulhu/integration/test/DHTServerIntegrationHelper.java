@@ -33,6 +33,9 @@ import ca.gobits.dht.BEncoder;
  */
 public final class DHTServerIntegrationHelper {
 
+    /** UDP timeout in milliseconds. */
+    private static final int UDP_TIMEOUT = 1000;
+
     /** DATA PACKET LENGTH. */
     public static final int DATA_PACKET_LENGTH = 1024;
 
@@ -67,11 +70,14 @@ public final class DHTServerIntegrationHelper {
         InetAddress ipAddress = InetAddress.getByName("localhost");
 
         DatagramSocket clientSocket = new DatagramSocket();
+        clientSocket.setSoTimeout(UDP_TIMEOUT);
+
         DatagramPacket sendPacket = new DatagramPacket(sendData,
                 sendData.length, ipAddress, DHTServerConfig.DEFAULT_PORT);
         clientSocket.send(sendPacket);
         DatagramPacket receivePacket = new DatagramPacket(receiveData,
                 receiveData.length);
+
         clientSocket.receive(receivePacket);
 
         clientSocket.close();

@@ -18,44 +18,39 @@ package ca.gobits.cthulhu.integration.test;
 
 import static ca.gobits.cthulhu.integration.test.DHTServerIntegrationHelper.DATA_PACKET_LENGTH;
 import static ca.gobits.cthulhu.integration.test.DHTServerIntegrationHelper.sendUDPPacket;
-import static ca.gobits.cthulhu.test.DHTTestHelper.runDHTServerInNewThread;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
-import org.junit.AfterClass;
-import org.junit.BeforeClass;
+import org.junit.Before;
 import org.junit.Test;
-import org.springframework.context.ConfigurableApplicationContext;
-import org.springframework.context.annotation.AnnotationConfigApplicationContext;
+import org.junit.runner.RunWith;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 import ca.gobits.cthulhu.DHTConfiguration;
-import ca.gobits.cthulhu.DHTServerConfig;
+import ca.gobits.cthulhu.JmsConfiguration;
 
 /**
  * DHTServer UnitTests.
  *
  */
+@RunWith(SpringJUnit4ClassRunner.class)
+@ContextConfiguration(classes = { DHTConfiguration.class,
+        JmsConfiguration.class, IntegrationTestConfiguration.class })
 public final class DHTServerIntegrationTest {
 
-    /** Aplication Context. */
-    private static ConfigurableApplicationContext ac;
+    /** Async DHT Server. */
+    @Autowired
+    private DHTServerAsync async;
 
-    /**
-     * start server.
+    /** Starts DHTServer.
      * @throws Exception  Exception
      */
-    @BeforeClass
-    public static void beforeClass() throws Exception {
-        ac = new AnnotationConfigApplicationContext(DHTConfiguration.class);
-        runDHTServerInNewThread(ac, DHTServerConfig.DEFAULT_PORT);
-    }
-
-    /**
-     * Shutdown server.
-     */
-    @AfterClass
-    public static void afterClass() {
-        ac.close();
+    @Before
+    public void before() throws Exception {
+        async.start();
+        async.waitForServerStart();
     }
 
     /**

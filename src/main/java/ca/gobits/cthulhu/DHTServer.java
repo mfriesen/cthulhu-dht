@@ -28,7 +28,6 @@ import org.apache.commons.cli.HelpFormatter;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ConfigurableApplicationContext;
-import org.springframework.context.Lifecycle;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 
 import ca.gobits.dht.DHTIdentifier;
@@ -37,7 +36,7 @@ import ca.gobits.dht.DHTIdentifier;
 /**
  * DHTServer implementation.
  */
-public class DHTServer implements Lifecycle {
+public class DHTServer /*implements Lifecycle*/ {
 
     /** DHT Server Logger. */
     private static final Logger LOGGER = Logger.getLogger(DHTServer.class);
@@ -67,9 +66,8 @@ public class DHTServer implements Lifecycle {
      * @param port port to run server on
      * @throws Exception  Exception
      */
-    // CHECKSTYLE:OFF
     public void run(final int port) throws Exception {
-    // CHECKSTYLE:ON
+
         LOGGER.info("starting cthulhu on " + port);
 
         try {
@@ -150,19 +148,19 @@ public class DHTServer implements Lifecycle {
         writer.close();
     }
 
-    @Override
-    public void start() {
-    }
-
-    @Override
-    public final void stop() {
-        shutdownGracefully();
-    }
-
-    @Override
-    public final boolean isRunning() {
-        return !group.isShutdown()
-                && !group.isShuttingDown()
-                && !group.isTerminated();
-    }
+//    @Override
+//    public void start() {
+//    }
+//
+//    @Override
+//    public final void stop() {
+//        shutdownGracefully();
+//    }
+//
+//    @Override
+//    public final boolean isRunning() {
+//        return !group.isShutdown()
+//                && !group.isShuttingDown()
+//                && !group.isTerminated();
+//    }
 }

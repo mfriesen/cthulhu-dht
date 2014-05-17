@@ -20,16 +20,11 @@ import static ca.gobits.dht.DHTConversion.COMPACT_ADDR_LENGTH;
 import static ca.gobits.dht.DHTConversion.NODE_ID_LENGTH;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 
 import java.math.BigInteger;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.apache.log4j.Logger;
-import org.springframework.context.ApplicationContext;
-
-import ca.gobits.cthulhu.DHTServer;
 import ca.gobits.dht.DHTConversion;
 
 /**
@@ -37,43 +32,10 @@ import ca.gobits.dht.DHTConversion;
  */
 public final class DHTTestHelper {
 
-    /** Logger. */
-    private static final Logger LOGGER = Logger
-            .getLogger(DHTTestHelper.class);
-
-    /** Delay to wait afte starting DHT Server. */
-    private static final int START_DELAY_MILLIS = 3000;
-
     /**
      * private constructor.
      */
     private DHTTestHelper() {
-    }
-
-    /**
-     * Runs DHT Server in new thread.
-     * @param ac ApplicationContext.
-     * @param port port
-     * @throws Exception  Exception
-     */
-    public static void runDHTServerInNewThread(final ApplicationContext ac,
-            final int port)
-            throws Exception {
-        Thread thread = new Thread(new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    ac.getBean(DHTServer.class)
-                        .run(port);
-                } catch (Exception e) {
-                    LOGGER.fatal(e, e);
-                    fail();
-                }
-            }
-        });
-
-        thread.start();
-        Thread.sleep(START_DELAY_MILLIS);
     }
 
     /**
@@ -91,7 +53,6 @@ public final class DHTTestHelper {
             assertTrue(mapB.containsValue(e.getValue()));
             assertTrue(mapB.containsKey(e.getKey()));
         }
-
     }
 
     /**

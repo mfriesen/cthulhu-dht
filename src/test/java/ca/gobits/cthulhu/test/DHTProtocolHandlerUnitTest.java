@@ -40,6 +40,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import javax.jms.Queue;
+
 import org.apache.commons.codec.binary.Base64;
 import org.easymock.Capture;
 import org.easymock.EasyMockRunner;
@@ -49,6 +51,7 @@ import org.easymock.TestSubject;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.springframework.jms.core.JmsTemplate;
 import org.springframework.test.util.ReflectionTestUtils;
 
 import ca.gobits.cthulhu.DHTInfoHashRoutingTable;
@@ -57,6 +60,7 @@ import ca.gobits.cthulhu.DHTProtocolHandler;
 import ca.gobits.cthulhu.DHTServer;
 import ca.gobits.cthulhu.DHTTokenTable;
 import ca.gobits.cthulhu.domain.DHTNode;
+import ca.gobits.cthulhu.domain.DHTNode.State;
 import ca.gobits.cthulhu.domain.DHTNodeFactory;
 import ca.gobits.cthulhu.domain.DHTPeer;
 import ca.gobits.cthulhu.domain.DHTPeerBasic;
@@ -90,9 +94,21 @@ public final class DHTProtocolHandlerUnitTest extends EasyMockSupport {
     @Mock
     private ChannelHandlerContext ctx;
 
+    /** JMSTemplate. */
+    @Mock
+    private JmsTemplate jmsTemplate;
+
+    /** Queue for determining a DHTNode's status. */
+    @Mock
+    private Queue nodeStatusQueue;
+
     /** Capture DatagramPacket. */
     private final Capture<DatagramPacket> capturedPacket =
             new Capture<DatagramPacket>();
+
+    /** Capture DatagramPacket. */
+    private final Capture<DHTNode> dhtNode =
+            new Capture<DHTNode>();
 
     /** InetSocketAddress. */
     private InetSocketAddress iaddr;
@@ -123,6 +139,7 @@ public final class DHTProtocolHandlerUnitTest extends EasyMockSupport {
                 iaddr);
 
         // when
+        jmsTemplate.convertAndSend(eq(nodeStatusQueue), capture(dhtNode));
         expect(ctx.write(capture(capturedPacket))).andReturn(null);
 
         replayAll();
@@ -144,6 +161,8 @@ public final class DHTProtocolHandlerUnitTest extends EasyMockSupport {
                 + "wuQVw4idejCIEqBeXEPQFlMTp0MjphYTE6eTE6cmU=",
                 Base64.encodeBase64String(os.toByteArray()));
 
+        DHTNode node = dhtNode.getValue();
+        assertEquals(State.UNKNOWN, node.getState());
         os.close();
     }
 

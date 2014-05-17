@@ -26,13 +26,6 @@ import org.springframework.context.annotation.Configuration;
 public class DHTConfiguration {
 
     /**
-     * default constructor.
-     */
-    public DHTConfiguration() {
-    }
-
-    //CHECKSTYLE:OFF
-    /**
      * @return DHTRoutingTable
      */
     @Bean
@@ -71,6 +64,4 @@ public class DHTConfiguration {
     public DHTProtocolHandler dhtProtocolHandler() {
         return new DHTProtocolHandler();
     }
-
-    //CHECKSTYLE:ON
 }
