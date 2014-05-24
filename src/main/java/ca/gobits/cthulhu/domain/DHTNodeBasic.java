@@ -155,10 +155,7 @@ public final class DHTNodeBasic implements DHTNode {
         return state;
     }
 
-    /**
-     * Sets the State.
-     * @param s state
-     */
+    @Override
     public void setState(final State s) {
         this.state = s;
     }

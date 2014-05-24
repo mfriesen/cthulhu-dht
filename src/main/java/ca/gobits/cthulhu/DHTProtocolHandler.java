@@ -33,15 +33,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.Random;
 
-import javax.jms.Queue;
-
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.jms.core.JmsTemplate;
 import org.springframework.util.CollectionUtils;
 
 import ca.gobits.cthulhu.domain.DHTNode;
-import ca.gobits.cthulhu.domain.DHTNodeFactory;
 import ca.gobits.cthulhu.domain.DHTPeer;
 import ca.gobits.dht.BDecoder;
 import ca.gobits.dht.BEncoder;
@@ -73,14 +69,6 @@ public final class DHTProtocolHandler extends
     @Autowired
     private DHTTokenTable tokenTable;
 
-    /** JMSTemplate. */
-    @Autowired
-    private JmsTemplate jmsTemplate;
-
-    /** Queue for determining a DHTNode's status. */
-    @Autowired
-    private Queue nodeStatusQueue;
-
     @Override
     public void channelRead0(final ChannelHandlerContext ctx,
             final DatagramPacket packet)
@@ -108,9 +96,8 @@ public final class DHTProtocolHandler extends
 
                 addPingResponse(arguments, response, packet);
 
-                DHTNode node = DHTNodeFactory.create(arguments.getId(),
-                        packet.sender(), DHTNode.State.UNKNOWN);
-                jmsTemplate.convertAndSend(nodeStatusQueue, node);
+//                routingTable.addNode(arguments.getId(), packet.sender(),
+//                        State.UNKNOWN);
 
             } else if (action.equals("find_node")) {
 

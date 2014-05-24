@@ -61,4 +61,10 @@ public interface DHTNode extends Serializable {
      * @return State
      */
     State getState();
+
+    /**
+     * Sets the State of DHTNode.
+     * @param state  state
+     */
+    void setState(State state);
 }

@@ -98,7 +98,8 @@ public class DHTServer /*implements Lifecycle*/ {
      */
     public static void main(final String[] args) {
         ConfigurableApplicationContext ac =
-                new AnnotationConfigApplicationContext(DHTConfiguration.class);
+            new AnnotationConfigApplicationContext(
+                DHTConfiguration.class);
 
         try {
             main(args, ac);
@@ -147,20 +148,4 @@ public class DHTServer /*implements Lifecycle*/ {
                 DHTServerConfig.DHTSERVER_OPTIONS, "");
         writer.close();
     }
-
-//    @Override
-//    public void start() {
-//    }
-//
-//    @Override
-//    public final void stop() {
-//        shutdownGracefully();
-//    }
-//
-//    @Override
-//    public final boolean isRunning() {
-//        return !group.isShutdown()
-//                && !group.isShuttingDown()
-//                && !group.isTerminated();
-//    }
 }

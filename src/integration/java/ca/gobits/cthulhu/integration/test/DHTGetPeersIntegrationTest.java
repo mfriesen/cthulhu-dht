@@ -23,6 +23,7 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 import java.io.IOException;
+import java.net.InetSocketAddress;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
@@ -38,8 +39,8 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 import ca.gobits.cthulhu.DHTConfiguration;
 import ca.gobits.cthulhu.DHTNodeRoutingTable;
-import ca.gobits.cthulhu.JmsConfiguration;
 import ca.gobits.cthulhu.domain.DHTNode;
+import ca.gobits.cthulhu.domain.DHTNode.State;
 import ca.gobits.dht.BDecoder;
 import ca.gobits.dht.BEncoder;
 import ca.gobits.dht.DHTConversion;
@@ -51,7 +52,7 @@ import ca.gobits.dht.DHTConversion;
  */
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(classes = { DHTConfiguration.class,
-        JmsConfiguration.class, IntegrationTestConfiguration.class })
+        IntegrationTestConfiguration.class })
 public final class DHTGetPeersIntegrationTest {
 
     /** LOGGER. */
@@ -135,7 +136,13 @@ public final class DHTGetPeersIntegrationTest {
         LOGGER.debug("add " + nodes.size() + " nodes to DHTNode Routing Table");
         assertFalse(nodes.isEmpty());
         for (DHTNode node : nodes) {
-            nodeRoutingTable.addNode(node);
+
+            InetSocketAddress addr = new InetSocketAddress(
+                    DHTConversion.toInetAddress(node.getAddress()),
+                    node.getPort());
+
+            nodeRoutingTable.addNode(node.getInfoHash().toByteArray(), addr,
+                    State.GOOD);
         }
     }
 

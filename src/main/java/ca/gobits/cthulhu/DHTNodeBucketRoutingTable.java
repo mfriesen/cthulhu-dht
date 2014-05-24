@@ -16,17 +16,29 @@
 
 package ca.gobits.cthulhu;
 
-import static ca.gobits.cthulhu.domain.DHTNodeFactory.create;
 import static ca.gobits.dht.DHTConversion.toInetAddress;
+import io.netty.bootstrap.Bootstrap;
+import io.netty.buffer.Unpooled;
+import io.netty.channel.Channel;
+import io.netty.channel.ChannelHandlerContext;
+import io.netty.channel.EventLoopGroup;
+import io.netty.channel.SimpleChannelInboundHandler;
+import io.netty.channel.nio.NioEventLoopGroup;
+import io.netty.channel.socket.DatagramPacket;
+import io.netty.channel.socket.nio.NioDatagramChannel;
+import io.netty.util.CharsetUtil;
 
 import java.math.BigInteger;
 import java.net.InetAddress;
+import java.net.InetSocketAddress;
 import java.util.List;
 
 import org.apache.log4j.Logger;
 
 import ca.gobits.cthulhu.domain.DHTNode;
+import ca.gobits.cthulhu.domain.DHTNode.State;
 import ca.gobits.cthulhu.domain.DHTNodeComparator;
+import ca.gobits.cthulhu.domain.DHTNodeFactory;
 
 /**
  * Implementation of DHT Bucket Routing Table.
@@ -34,17 +46,28 @@ import ca.gobits.cthulhu.domain.DHTNodeComparator;
  * http://www.bittorrent.org/beps/bep_0005.html
  *
  */
-public final class DHTNodeBucketRoutingTable implements DHTNodeRoutingTable {
+public final class DHTNodeBucketRoutingTable extends
+    SimpleChannelInboundHandler<DatagramPacket> implements
+    DHTNodeRoutingTable {
 
     /** LOGGER. */
     private static final Logger LOGGER = Logger
             .getLogger(DHTNodeBucketRoutingTable.class);
 
-    /** root node of the routing table. */
-    private final ConcurrentSortedList<DHTNode> nodes;
+    /** Default Time in Millis to wait for a response from a DHTNode. */
+    private static final int DEFAULT_REQUEST_TIMEOUT = 5000;
 
     /** Maximum number of nodes Routing Table holds. */
-    public static final int MAX_NUMBER_OF_NODES = 1000000;
+    private static final int MAX_NUMBER_OF_NODES = 1000000;
+
+    /** Netty EventLoopGroup used to determine which nodes are 'good'. */
+    private final EventLoopGroup group = new NioEventLoopGroup();
+
+    /** Netty Bootstrap used to determine which nodes are 'good'. */
+    private final Bootstrap bootstrap = new Bootstrap();
+
+    /** root node of the routing table. */
+    private final ConcurrentSortedList<DHTNode> nodes;
 
     /**
      * constructor.
@@ -52,20 +75,63 @@ public final class DHTNodeBucketRoutingTable implements DHTNodeRoutingTable {
     public DHTNodeBucketRoutingTable() {
         this.nodes = new ConcurrentSortedList<DHTNode>(
                 DHTNodeComparator.getInstance(), false);
+
+        this.bootstrap
+            .group(group)
+            .channel(NioDatagramChannel.class)
+            .handler(this);
     }
 
     @Override
-    public void addNode(final DHTNode node) {
+    public void addNode(final byte[] infoHash, final InetSocketAddress addr,
+            final State state) {
 
         if (nodes.size() < MAX_NUMBER_OF_NODES) {
 
-            addNodeLoggerDebug(node);
+            if (State.GOOD == state) {
 
-            nodes.add(node);
+                DHTNode node = DHTNodeFactory.create(infoHash, addr, state);
+
+                addNodeLoggerDebug(node);
+                nodes.add(node);
+
+            } else {
+
+                sendFindRequest(infoHash, addr);
+            }
 
         } else {
             LOGGER.warn("MAXIMUM number of noded reached "
                     + MAX_NUMBER_OF_NODES);
+        }
+    }
+
+    /**
+     * Sends a Find Request to a node to determine
+     * whether it is "good" or not.
+     * @param infoHash  info hash
+     * @param addr  address to send find request to
+     */
+    private void sendFindRequest(final byte[] infoHash,
+            final InetSocketAddress addr) {
+
+        String message = "d1:ad2:id20:abcdefghij01234567899:info_hash20:"
+            + "mnopqrstuvwxyz123456e1:q9:get_peers1:t2:aa1:y1:qe";
+
+        try {
+            // Start the client.
+            Channel ch = this.bootstrap.bind(0).sync().channel();
+
+            ch.writeAndFlush(
+                    new DatagramPacket(Unpooled.copiedBuffer(message,
+                            CharsetUtil.UTF_8), addr)).sync();
+
+            if (!ch.closeFuture().await(DEFAULT_REQUEST_TIMEOUT)) {
+                LOGGER.info("Find Request to " + addr.getHostString()
+                        + " timed out.");
+            }
+        } catch (Exception e) {
+            LOGGER.warn("Cannot send Find Request", e);
         }
     }
 
@@ -103,7 +169,7 @@ public final class DHTNodeBucketRoutingTable implements DHTNodeRoutingTable {
     public DHTNode findExactNode(final BigInteger nodeId) {
 
         DHTNode nodeMatch = null;
-        DHTNode node = create(nodeId, DHTNode.State.UNKNOWN);
+        DHTNode node = DHTNodeFactory.create(nodeId, DHTNode.State.UNKNOWN);
         int index = this.nodes.indexOf(node);
 
         if (index >= 0 && index < this.nodes.size()) {
@@ -120,7 +186,26 @@ public final class DHTNodeBucketRoutingTable implements DHTNodeRoutingTable {
     public List<DHTNode> findClosestNodes(final BigInteger nodeId,
             final int returnCount) {
 
-        DHTNode node = create(nodeId, DHTNode.State.UNKNOWN);
+        DHTNode node = findExactNode(nodeId);
+
+        if (node != null) {
+            node.setState(State.GOOD);
+        } else {
+            node = DHTNodeFactory.create(nodeId, State.UNKNOWN);
+        }
+
+        return findClosestNodes(node, returnCount);
+    }
+
+    /**
+     * Finds the closest nodes list.
+     * @param node  node to find
+     * @param returnCount  number of nodes to return
+     * @return List<DHTNode>
+     */
+    private List<DHTNode> findClosestNodes(final DHTNode node,
+            final int returnCount) {
+
         int index = nodes.indexOf(node);
 
         int fromIndex = index > 0 ? index - 1 : 0;
@@ -145,6 +230,22 @@ public final class DHTNodeBucketRoutingTable implements DHTNodeRoutingTable {
         return nodes.subList(fromIndex, toIndex);
     }
 
+    @Override
+    public void channelRead0(final ChannelHandlerContext ctx,
+            final DatagramPacket msg) throws Exception {
+        String response = msg.content().toString(CharsetUtil.UTF_8);
+        System.out.println("Quote of the Moment: " + response);
+        ctx.close();
+    }
+
+    @Override
+    public void exceptionCaught(final ChannelHandlerContext ctx,
+            final Throwable cause) {
+        LOGGER.info("Exception thrown while sending request to DHTNode: "
+                + cause.getMessage());
+        ctx.close();
+    }
+
     /**
      * @return DHTBucket
      */
@@ -155,5 +256,10 @@ public final class DHTNodeBucketRoutingTable implements DHTNodeRoutingTable {
     @Override
     public int getTotalNodeCount() {
         return nodes.size();
+    }
+
+    @Override
+    public int getMaxNodeCount() {
+        return MAX_NUMBER_OF_NODES;
     }
 }

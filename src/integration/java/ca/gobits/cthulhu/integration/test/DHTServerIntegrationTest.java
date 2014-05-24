@@ -29,7 +29,6 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 import ca.gobits.cthulhu.DHTConfiguration;
-import ca.gobits.cthulhu.JmsConfiguration;
 
 /**
  * DHTServer UnitTests.
@@ -37,7 +36,7 @@ import ca.gobits.cthulhu.JmsConfiguration;
  */
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(classes = { DHTConfiguration.class,
-        JmsConfiguration.class, IntegrationTestConfiguration.class })
+        IntegrationTestConfiguration.class })
 public final class DHTServerIntegrationTest {
 
     /** Async DHT Server. */

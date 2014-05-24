@@ -22,6 +22,8 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 
 import java.math.BigInteger;
+import java.net.InetAddress;
+import java.net.InetSocketAddress;
 import java.util.List;
 
 import org.apache.log4j.Level;
@@ -31,6 +33,7 @@ import org.junit.Test;
 import ca.gobits.cthulhu.DHTNodeBucketRoutingTable;
 import ca.gobits.cthulhu.SortedCollection;
 import ca.gobits.cthulhu.domain.DHTNode;
+import ca.gobits.cthulhu.domain.DHTNode.State;
 
 /**
  * DHTBucketRoutingTableTest.
@@ -42,6 +45,17 @@ public final class DHTNodeBucketRoutingTableUnitTest {
 
     /** port. */
     private static int port = 64568;
+
+    /** inet socket address. */
+    private static InetSocketAddress iaddr;
+
+    /**
+     * constuctor.
+     * @throws Exception  Exception
+     */
+    public DHTNodeBucketRoutingTableUnitTest() throws Exception {
+        iaddr = new InetSocketAddress(InetAddress.getByAddress(addr), port);
+    }
 
     /**
      * testConstructor01().
@@ -60,17 +74,18 @@ public final class DHTNodeBucketRoutingTableUnitTest {
 
     /**
      * testAddNode01() - test add nodes to bucket.
+     * @throws Exception  Exception
      */
     @Test
-    public void testAddNode01() {
+    public void testAddNode01() throws Exception {
         // given
         Logger.getLogger(DHTNodeBucketRoutingTable.class).setLevel(Level.DEBUG);
         DHTNodeBucketRoutingTable rt = new DHTNodeBucketRoutingTable();
         DHTNode node = create(new BigInteger("1"), addr, port,
-                DHTNode.State.UNKNOWN);
+                State.GOOD);
 
         // when
-        rt.addNode(node);
+        rt.addNode(new BigInteger("1").toByteArray(), iaddr, State.GOOD);
 
         // then
         assertEquals(1, rt.getTotalNodeCount());
@@ -87,19 +102,16 @@ public final class DHTNodeBucketRoutingTableUnitTest {
     @Test
     public void testAddNode02() {
         // given
-        int nodeCount = DHTNodeBucketRoutingTable.MAX_NUMBER_OF_NODES + 1;
         DHTNodeBucketRoutingTable rt = new DHTNodeBucketRoutingTable();
+        int nodeCount = rt.getMaxNodeCount() + 1;
 
         // when
         for (int i = 0; i < nodeCount; i++) {
-            DHTNode node = create(new BigInteger("" + i),
-                    addr, port, DHTNode.State.UNKNOWN);
-            rt.addNode(node);
+            rt.addNode(new BigInteger("" + i).toByteArray(), iaddr, State.GOOD);
         }
 
         // then
-        assertEquals(DHTNodeBucketRoutingTable.MAX_NUMBER_OF_NODES,
-                rt.getTotalNodeCount());
+        assertEquals(rt.getMaxNodeCount(), rt.getTotalNodeCount());
     }
 
     /**
@@ -109,12 +121,13 @@ public final class DHTNodeBucketRoutingTableUnitTest {
     public void testAddNode03() {
         // given
         DHTNodeBucketRoutingTable rt = new DHTNodeBucketRoutingTable();
+        byte[] id = new BigInteger("1").toByteArray();
         DHTNode node = create(new BigInteger("1"),
-            addr, port, DHTNode.State.UNKNOWN);
+            addr, port, State.GOOD);
 
         // when
-        rt.addNode(node);
-        rt.addNode(node);
+        rt.addNode(id, iaddr, State.GOOD);
+        rt.addNode(id, iaddr, State.GOOD);
 
         // then
         assertEquals(1, rt.getTotalNodeCount());
@@ -131,22 +144,22 @@ public final class DHTNodeBucketRoutingTableUnitTest {
         // given
         DHTNodeBucketRoutingTable rt = new DHTNodeBucketRoutingTable();
         DHTNode node0 = create(new BigInteger("1"), addr, port,
-                DHTNode.State.UNKNOWN);
+                State.GOOD);
         DHTNode node1 = create(new BigInteger(
             "217572328821850967755762913845138112465869557436"),
-            addr, port, DHTNode.State.UNKNOWN);
+            addr, port, State.GOOD);
         DHTNode node2 = create(new BigInteger(
             "253718933283387888344146948372599275024431560999"),
-            addr, port, DHTNode.State.UNKNOWN);
+            addr, port, State.GOOD);
         DHTNode node3 = create(new BigInteger(
             "909396897490697132528408310795708133687135388426"),
-            addr, port, DHTNode.State.UNKNOWN);
+            addr, port, DHTNode.State.GOOD);
 
         // when
-        rt.addNode(node0);
-        rt.addNode(node3);
-        rt.addNode(node2);
-        rt.addNode(node1);
+        rt.addNode(node0.getInfoHash().toByteArray(), iaddr, State.GOOD);
+        rt.addNode(node3.getInfoHash().toByteArray(), iaddr, State.GOOD);
+        rt.addNode(node2.getInfoHash().toByteArray(), iaddr, State.GOOD);
+        rt.addNode(node1.getInfoHash().toByteArray(), iaddr, State.GOOD);
 
         // then
         assertEquals(4, rt.getTotalNodeCount());
@@ -165,10 +178,10 @@ public final class DHTNodeBucketRoutingTableUnitTest {
         // given
         Logger.getLogger(DHTNodeBucketRoutingTable.class).setLevel(Level.DEBUG);
         DHTNodeBucketRoutingTable rt = new DHTNodeBucketRoutingTable();
-        DHTNode node = create(new BigInteger("1"), DHTNode.State.UNKNOWN);
+        DHTNode node = create(new BigInteger("1"), State.GOOD);
 
         // when
-        rt.addNode(node);
+        rt.addNode(node.getInfoHash().toByteArray(), iaddr, State.GOOD);
 
         // then
         assertEquals(1, rt.getTotalNodeCount());
@@ -186,7 +199,7 @@ public final class DHTNodeBucketRoutingTableUnitTest {
     public void testFindClosestNodes01() {
         // given
         DHTNode n = create(new BigInteger("11"), addr, port,
-                DHTNode.State.UNKNOWN);
+                State.UNKNOWN);
         DHTNodeBucketRoutingTable rt = new DHTNodeBucketRoutingTable();
 
         addNodes(rt);
@@ -365,9 +378,8 @@ public final class DHTNodeBucketRoutingTableUnitTest {
      */
     private void addNodes(final DHTNodeBucketRoutingTable rt) {
         for (int i = 0; i < 40; i = i + 2) {
-            DHTNode node = create(new BigInteger("" + i),
-                addr, port, DHTNode.State.UNKNOWN);
-            rt.addNode(node);
+            byte[] id = new BigInteger("" + i).toByteArray();
+            rt.addNode(id, iaddr, State.GOOD);
         }
     }
 }
