@@ -115,6 +115,15 @@ public final class DHTNodeBucketRoutingTable extends
     private void sendFindRequest(final byte[] infoHash,
             final InetSocketAddress addr) {
 
+        /**
+         * TODO ignore IP addresses
+         * Ignore
+         *      if ((ip & 0xff000000) == 0x0a000000 // 10.x.x.x
+|| (ip & 0xfff00000) == 0xac100000 // 172.16.x.x
+|| (ip & 0xffff0000) == 0xc0a80000 // 192.168.x.x
+|| (ip & 0xffff0000) == 0xa9fe0000 // 169.254.x.x
+|| (ip & 0xff000000) == 0x7f000000) // 127.x.x.x
+         */
         String message = "d1:ad2:id20:abcdefghij01234567899:info_hash20:"
             + "mnopqrstuvwxyz123456e1:q9:get_peers1:t2:aa1:y1:qe";
 
