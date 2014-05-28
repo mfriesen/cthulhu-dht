@@ -16,7 +16,9 @@
 
 package ca.gobits.cthulhu;
 import io.netty.bootstrap.Bootstrap;
+import io.netty.channel.Channel;
 import io.netty.channel.ChannelFuture;
+import io.netty.channel.ChannelInitializer;
 import io.netty.channel.ChannelOption;
 import io.netty.channel.EventLoopGroup;
 import io.netty.channel.nio.NioEventLoopGroup;
@@ -49,7 +51,7 @@ public class DHTServer /*implements Lifecycle*/ {
             .getName());
 
     /** Main Event Loop. */
-    private final EventLoopGroup group = new NioEventLoopGroup();
+    private final EventLoopGroup bossGroup = new NioEventLoopGroup();
 
     /** DHT Protocol Handler. */
     @Autowired
@@ -72,10 +74,15 @@ public class DHTServer /*implements Lifecycle*/ {
 
         try {
             Bootstrap b = new Bootstrap();
-            b.group(group)
+            b.group(bossGroup)
              .channel(NioDatagramChannel.class)
              .option(ChannelOption.SO_BROADCAST, SO_BROADCAST)
-             .handler(dhtHandler);
+             .handler(new ChannelInitializer<Channel>() {
+                @Override
+                protected void initChannel(final Channel ch) throws Exception {
+                    ch.pipeline().addLast(dhtHandler);
+                }
+            });
 
             ChannelFuture cf = b.bind(port).sync().channel().closeFuture();
             cf.await();
@@ -89,7 +96,7 @@ public class DHTServer /*implements Lifecycle*/ {
      * Gracefully shutdown server.
      */
     public final void shutdownGracefully() {
-        group.shutdownGracefully();
+        bossGroup.shutdownGracefully();
     }
 
     /**
