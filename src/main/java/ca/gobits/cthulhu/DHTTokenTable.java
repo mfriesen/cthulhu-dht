@@ -16,7 +16,7 @@
 
 package ca.gobits.cthulhu;
 
-import java.net.InetSocketAddress;
+import java.net.InetAddress;
 
 import ca.gobits.cthulhu.domain.DHTToken;
 
@@ -28,23 +28,26 @@ public interface DHTTokenTable {
     /**
      * Adds Address / Token to Token.
      * @param addr  address
+     * @param port  port
      * @param secret  secret
      */
-    void add(InetSocketAddress addr, byte[] secret);
+    void add(InetAddress addr, int port, byte[] secret);
 
     /**
      * Gets a token.
      * @param addr  address
+     * @param port  port
      * @param secret  secret
      * @return DHTToken
      */
-    DHTToken get(InetSocketAddress addr, byte[] secret);
+    DHTToken get(InetAddress addr, int port, byte[] secret);
 
     /**
      * Validates an addr and token combination exists.
      * @param addr  address
+     * @param port  port
      * @param secret  secret
      * @return boolean
      */
-    boolean valid(InetSocketAddress addr, byte[] secret);
+    boolean valid(InetAddress addr, int port, byte[] secret);
 }

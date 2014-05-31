@@ -17,16 +17,6 @@
 package ca.gobits.cthulhu;
 
 import static ca.gobits.dht.DHTConversion.toInetAddress;
-import io.netty.bootstrap.Bootstrap;
-import io.netty.buffer.Unpooled;
-import io.netty.channel.Channel;
-import io.netty.channel.ChannelHandlerContext;
-import io.netty.channel.EventLoopGroup;
-import io.netty.channel.SimpleChannelInboundHandler;
-import io.netty.channel.nio.NioEventLoopGroup;
-import io.netty.channel.socket.DatagramPacket;
-import io.netty.channel.socket.nio.NioDatagramChannel;
-import io.netty.util.CharsetUtil;
 
 import java.math.BigInteger;
 import java.net.InetAddress;
@@ -46,25 +36,14 @@ import ca.gobits.cthulhu.domain.DHTNodeFactory;
  * http://www.bittorrent.org/beps/bep_0005.html
  *
  */
-public final class DHTNodeBucketRoutingTable extends
-    SimpleChannelInboundHandler<DatagramPacket> implements
-    DHTNodeRoutingTable {
+public final class DHTNodeBucketRoutingTable implements DHTNodeRoutingTable {
 
     /** LOGGER. */
     private static final Logger LOGGER = Logger
             .getLogger(DHTNodeBucketRoutingTable.class);
 
-    /** Default Time in Millis to wait for a response from a DHTNode. */
-    private static final int DEFAULT_REQUEST_TIMEOUT = 5000;
-
     /** Maximum number of nodes Routing Table holds. */
     private static final int MAX_NUMBER_OF_NODES = 1000000;
-
-    /** Netty EventLoopGroup used to determine which nodes are 'good'. */
-    private final EventLoopGroup group = new NioEventLoopGroup();
-
-    /** Netty Bootstrap used to determine which nodes are 'good'. */
-    private final Bootstrap bootstrap = new Bootstrap();
 
     /** root node of the routing table. */
     private final ConcurrentSortedList<DHTNode> nodes;
@@ -75,11 +54,6 @@ public final class DHTNodeBucketRoutingTable extends
     public DHTNodeBucketRoutingTable() {
         this.nodes = new ConcurrentSortedList<DHTNode>(
                 DHTNodeComparator.getInstance(), false);
-
-        this.bootstrap
-            .group(group)
-            .channel(NioDatagramChannel.class)
-            .handler(this);
     }
 
     @Override
@@ -124,24 +98,8 @@ public final class DHTNodeBucketRoutingTable extends
 || (ip & 0xffff0000) == 0xa9fe0000 // 169.254.x.x
 || (ip & 0xff000000) == 0x7f000000) // 127.x.x.x
          */
-        String message = "d1:ad2:id20:abcdefghij01234567899:info_hash20:"
-            + "mnopqrstuvwxyz123456e1:q9:get_peers1:t2:aa1:y1:qe";
-
-        try {
-            // Start the client.
-            Channel ch = this.bootstrap.bind(0).sync().channel();
-
-            ch.writeAndFlush(
-                    new DatagramPacket(Unpooled.copiedBuffer(message,
-                            CharsetUtil.UTF_8), addr)).sync();
-
-            if (!ch.closeFuture().await(DEFAULT_REQUEST_TIMEOUT)) {
-                LOGGER.info("Find Request to " + addr.getHostString()
-                        + " timed out.");
-            }
-        } catch (Exception e) {
-            LOGGER.warn("Cannot send Find Request", e);
-        }
+//        String message = "d1:ad2:id20:abcdefghij01234567899:info_hash20:"
+//            + "mnopqrstuvwxyz123456e1:q9:get_peers1:t2:aa1:y1:qe";
     }
 
     /**
@@ -237,22 +195,6 @@ public final class DHTNodeBucketRoutingTable extends
         }
 
         return nodes.subList(fromIndex, toIndex);
-    }
-
-    @Override
-    public void channelRead0(final ChannelHandlerContext ctx,
-            final DatagramPacket msg) throws Exception {
-        String response = msg.content().toString(CharsetUtil.UTF_8);
-        System.out.println("Quote of the Moment: " + response);
-        ctx.close();
-    }
-
-    @Override
-    public void exceptionCaught(final ChannelHandlerContext ctx,
-            final Throwable cause) {
-        LOGGER.info("Exception thrown while sending request to DHTNode: "
-                + cause.getMessage());
-        ctx.close();
     }
 
     /**

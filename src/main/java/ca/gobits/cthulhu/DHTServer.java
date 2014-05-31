@@ -15,22 +15,16 @@
 //
 
 package ca.gobits.cthulhu;
-import io.netty.bootstrap.Bootstrap;
-import io.netty.channel.Channel;
-import io.netty.channel.ChannelFuture;
-import io.netty.channel.ChannelInitializer;
-import io.netty.channel.ChannelOption;
-import io.netty.channel.EventLoopGroup;
-import io.netty.channel.nio.NioEventLoopGroup;
-import io.netty.channel.socket.nio.NioDatagramChannel;
-
 import java.io.PrintWriter;
+import java.net.DatagramPacket;
+import java.net.DatagramSocket;
 
 import org.apache.commons.cli.HelpFormatter;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
+import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 
 import ca.gobits.dht.DHTIdentifier;
 
@@ -43,19 +37,20 @@ public class DHTServer /*implements Lifecycle*/ {
     /** DHT Server Logger. */
     private static final Logger LOGGER = Logger.getLogger(DHTServer.class);
 
-    /** SO_BROADCAST. */
-    private static final Boolean SO_BROADCAST = Boolean.valueOf(true);
+    /** Receive Data UDP Length. */
+    private static final int RECEIVE_DATA_LENGTH = 1024;
 
     /** DHT Node Id. */
     public static final byte[] NODE_ID = DHTIdentifier.sha1(DHTServer.class
             .getName());
 
-    /** Main Event Loop. */
-    private final EventLoopGroup bossGroup = new NioEventLoopGroup();
-
     /** DHT Protocol Handler. */
     @Autowired
     private DHTProtocolHandler dhtHandler;
+
+    /** Thread Pool Executor. */
+    @Autowired
+    private ThreadPoolTaskExecutor threadPool;
 
     /**
      * Constructor.
@@ -73,19 +68,21 @@ public class DHTServer /*implements Lifecycle*/ {
         LOGGER.info("starting cthulhu on " + port);
 
         try {
-            Bootstrap b = new Bootstrap();
-            b.group(bossGroup)
-             .channel(NioDatagramChannel.class)
-             .option(ChannelOption.SO_BROADCAST, SO_BROADCAST)
-             .handler(new ChannelInitializer<Channel>() {
-                @Override
-                protected void initChannel(final Channel ch) throws Exception {
-                    ch.pipeline().addLast(dhtHandler);
-                }
-            });
+            DatagramSocket serverSocket = new DatagramSocket(port);
+            byte[] receiveData = new byte[RECEIVE_DATA_LENGTH];
 
-            ChannelFuture cf = b.bind(port).sync().channel().closeFuture();
-            cf.await();
+            try {
+                while (true) {
+                    DatagramPacket receivePacket = new DatagramPacket(
+                            receiveData, receiveData.length);
+                    serverSocket.receive(receivePacket);
+
+                    threadPool.execute(new DHTProtocolRunnable(serverSocket,
+                            dhtHandler, receivePacket));
+                }
+            } finally {
+                serverSocket.close();
+            }
 
         } finally {
             shutdownGracefully();
@@ -96,7 +93,7 @@ public class DHTServer /*implements Lifecycle*/ {
      * Gracefully shutdown server.
      */
     public final void shutdownGracefully() {
-        bossGroup.shutdownGracefully();
+        threadPool.shutdown();
     }
 
     /**

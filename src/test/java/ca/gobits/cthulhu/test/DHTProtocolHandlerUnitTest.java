@@ -18,21 +18,17 @@ package ca.gobits.cthulhu.test;
 
 import static ca.gobits.cthulhu.test.DHTTestHelper.assertNodesEquals;
 import static org.easymock.EasyMock.aryEq;
-import static org.easymock.EasyMock.capture;
 import static org.easymock.EasyMock.eq;
 import static org.easymock.EasyMock.expect;
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
-import io.netty.buffer.Unpooled;
-import io.netty.channel.ChannelHandlerContext;
-import io.netty.channel.socket.DatagramPacket;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.math.BigInteger;
+import java.net.DatagramPacket;
 import java.net.InetAddress;
-import java.net.InetSocketAddress;
 import java.net.UnknownHostException;
 import java.util.Arrays;
 import java.util.Collection;
@@ -41,7 +37,6 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.codec.binary.Base64;
-import org.easymock.Capture;
 import org.easymock.EasyMockRunner;
 import org.easymock.EasyMockSupport;
 import org.easymock.Mock;
@@ -86,16 +81,11 @@ public final class DHTProtocolHandlerUnitTest extends EasyMockSupport {
     @Mock
     private DHTTokenTable tokenTable;
 
-    /** Mock ChannelHandlerContext. */
-    @Mock
-    private ChannelHandlerContext ctx;
-
-    /** Capture DatagramPacket. */
-    private final Capture<DatagramPacket> capturedPacket =
-            new Capture<DatagramPacket>();
-
     /** InetSocketAddress. */
-    private InetSocketAddress iaddr;
+    private InetAddress iaddr;
+
+    /** Port. */
+    private final int port = 64568;
 
     /**
      * before().
@@ -105,8 +95,7 @@ public final class DHTProtocolHandlerUnitTest extends EasyMockSupport {
     public void before() throws Exception {
         ReflectionTestUtils.setField(handler, "routingTable", routingTable);
 
-        iaddr = new InetSocketAddress(
-                InetAddress.getByName("50.71.214.139"), 64568);
+        iaddr = InetAddress.getByName("50.71.214.139");
     }
 
     /**
@@ -117,24 +106,18 @@ public final class DHTProtocolHandlerUnitTest extends EasyMockSupport {
     public void testChannelRead001() throws Exception {
         // given
         String dat = "d1:ad2:id20:abcdefghij0123456789e1:q4:ping1:t2:aa1:y1:qe";
+        byte[] bb = dat.getBytes();
 
-        DatagramPacket packet = new DatagramPacket(
-                Unpooled.copiedBuffer(dat.getBytes()), iaddr,
-                iaddr);
+        DatagramPacket packet = new DatagramPacket(bb, bb.length, iaddr, port);
 
         // when
-        expect(ctx.write(capture(capturedPacket))).andReturn(null);
-
         replayAll();
-        handler.channelRead0(ctx , packet);
+        byte[] resultBytes = handler.handle(packet);
 
         // then
         verifyAll();
 
-        ByteArrayOutputStream os = handler.extractBytes(capturedPacket
-                .getValue().content());
-
-        String result = new String(os.toByteArray());
+        String result = new String(resultBytes);
 
         assertTrue(result.contains("d2:ip6:2G"));
         assertTrue(result.contains(":rd2:id20:6h"));
@@ -142,9 +125,8 @@ public final class DHTProtocolHandlerUnitTest extends EasyMockSupport {
 
         assertEquals("ZDI6aXA2OjJH1ov8ODE6cmQyOmlkMjA6NmjAFP"
                 + "wuQVw4idejCIEqBeXEPQFlMTp0MjphYTE6eTE6cmU=",
-                Base64.encodeBase64String(os.toByteArray()));
 
-        os.close();
+                Base64.encodeBase64String(resultBytes));
     }
 
     /**
@@ -161,25 +143,21 @@ public final class DHTProtocolHandlerUnitTest extends EasyMockSupport {
 
         // when
         expect(routingTable.findClosestNodes(nodeId)).andReturn(getFindNodes());
-        expect(ctx.write(capture(capturedPacket))).andReturn(null);
 
         replayAll();
-        handler.channelRead0(ctx , packet);
+        byte[] bytes = handler.handle(packet);
 
         // then
         verifyAll();
-
-        ByteArrayOutputStream os = handler.extractBytes(capturedPacket
-                .getValue().content());
 
         byte[] bytesA = Base64.decodeBase64(getBase64FindNodeResponse());
 
         Map<String, Object> mapA = (Map<String, Object>)
                 new BDecoder().decode(bytesA);
-        assertEquals(bytesA.length, os.toByteArray().length);
+        assertEquals(bytesA.length, bytes.length);
 
         Map<String, Object> mapB = (Map<String, Object>)
-                new BDecoder().decode(os.toByteArray());
+                new BDecoder().decode(bytes);
 
         assertArrayEquals(mapA.keySet().toArray(new String[0]),
                 mapB.keySet().toArray(new String[0]));
@@ -205,8 +183,6 @@ public final class DHTProtocolHandlerUnitTest extends EasyMockSupport {
 
         assertNodesEquals((byte[]) mapA1.get("nodes"),
                 (byte[]) mapB1.get("nodes"));
-
-        os.close();
     }
 
     /**
@@ -217,31 +193,23 @@ public final class DHTProtocolHandlerUnitTest extends EasyMockSupport {
     public void testChannelRead004() throws Exception {
         // given
         String dat = "d1:ad2:id20:abcdefghij0123456789e1:q4:pinA1:t2:aa1:y1:qe";
+        byte[] bb = dat.getBytes();
 
-        DatagramPacket packet = new DatagramPacket(
-                Unpooled.copiedBuffer(dat.getBytes()), iaddr,
-                iaddr);
+        DatagramPacket packet = new DatagramPacket(bb, bb.length, iaddr, port);
 
         // when
-        expect(ctx.write(capture(capturedPacket))).andReturn(null);
-
         replayAll();
-        handler.channelRead0(ctx , packet);
+        byte[] bytes = handler.handle(packet);
 
         // then
         verifyAll();
 
-        ByteArrayOutputStream os = handler.extractBytes(capturedPacket
-                .getValue().content());
-
-        String result = new String(os.toByteArray());
+        String result = new String(bytes);
         assertTrue(result.endsWith(":rd3:20414:Method Unknowne1:t2:aa1:y1:ee"));
 
         assertEquals("ZDI6aXA2OjJH1ov8ODE6cmQzOjIwNDE0Ok1ldGh"
                 + "vZCBVbmtub3duZTE6dDI6YWExOnkxOmVl",
-                Base64.encodeBase64String(os.toByteArray()));
-
-        os.close();
+                Base64.encodeBase64String(bytes));
     }
 
     /**
@@ -252,27 +220,19 @@ public final class DHTProtocolHandlerUnitTest extends EasyMockSupport {
     public void testChannelRead005() throws Exception {
         // given
         String dat = "adsadadsa";
+        byte[] bb = dat.getBytes();
 
-        DatagramPacket packet = new DatagramPacket(
-                Unpooled.copiedBuffer(dat.getBytes()), iaddr,
-                iaddr);
+        DatagramPacket packet = new DatagramPacket(bb, bb.length, iaddr, port);
 
         // when
-        expect(ctx.write(capture(capturedPacket))).andReturn(null);
-
         replayAll();
-        handler.channelRead0(ctx , packet);
+        byte[] bytes = handler.handle(packet);
 
         // then
         verifyAll();
 
-        ByteArrayOutputStream os = handler.extractBytes(capturedPacket
-                .getValue().content());
-
-        String result = new String(os.toByteArray());
+        String result = new String(bytes);
         assertTrue(result.startsWith("d1:rd3:20212:Server Errore1:y1:ee"));
-
-        os.close();
     }
 
     /**
@@ -285,10 +245,9 @@ public final class DHTProtocolHandlerUnitTest extends EasyMockSupport {
         BigInteger nodeId = new BigInteger("mnopqrstuvwxyz123456".getBytes());
         String dat = "d1:ad2:id20:abcdefghij01234567899:info_hash20:"
                 + "mnopqrstuvwxyz123456e1:q9:get_peers1:t2:aa1:y1:qe";
+        byte[] bb = dat.getBytes();
 
-        DatagramPacket packet = new DatagramPacket(
-                Unpooled.copiedBuffer(dat.getBytes()), iaddr,
-                iaddr);
+        DatagramPacket packet = new DatagramPacket(bb, bb.length, iaddr, port);
 
         DHTPeer peer = new DHTPeerBasic(InetAddress.getByName("240.120.222.12")
                 .getAddress(), 23);
@@ -296,19 +255,15 @@ public final class DHTProtocolHandlerUnitTest extends EasyMockSupport {
 
         // when
         expect(peerRoutingTable.findPeers(nodeId)).andReturn(peers);
-        expect(ctx.write(capture(capturedPacket))).andReturn(null);
 
         replayAll();
-        handler.channelRead0(ctx , packet);
+        byte[] bytes = handler.handle(packet);
 
         // then
         verifyAll();
 
-        ByteArrayOutputStream os = handler.extractBytes(capturedPacket
-                .getValue().content());
-
         Map<String, Object> map = (Map<String, Object>) new BDecoder()
-            .decode(os.toByteArray());
+            .decode(bytes);
 
         assertEquals("aa", new String((byte[]) map.get("t")));
         assertEquals("r", new String((byte[]) map.get("y")));
@@ -328,8 +283,6 @@ public final class DHTProtocolHandlerUnitTest extends EasyMockSupport {
         assertEquals(12, addr[3]);
         assertEquals(0, addr[4]);
         assertEquals(23, addr[5]);
-
-        os.close();
     }
 
     /**
@@ -344,27 +297,22 @@ public final class DHTProtocolHandlerUnitTest extends EasyMockSupport {
         BigInteger nodeId = new BigInteger("mnopqrstuvwxyz123456".getBytes());
         String dat = "d1:ad2:id20:abcdefghij01234567899:info_hash20:"
                 + "mnopqrstuvwxyz123456e1:q9:get_peers1:t2:aa1:y1:qe";
+        byte[] bb = dat.getBytes();
 
-        DatagramPacket packet = new DatagramPacket(
-                Unpooled.copiedBuffer(dat.getBytes()), iaddr,
-                iaddr);
+        DatagramPacket packet = new DatagramPacket(bb, bb.length, iaddr, port);
 
         // when
         expect(peerRoutingTable.findPeers(nodeId)).andReturn(null);
         expect(routingTable.findClosestNodes(nodeId)).andReturn(getFindNodes());
-        expect(ctx.write(capture(capturedPacket))).andReturn(null);
 
         replayAll();
-        handler.channelRead0(ctx , packet);
+        byte[] bytes = handler.handle(packet);
 
         // then
         verifyAll();
 
-        ByteArrayOutputStream os = handler.extractBytes(capturedPacket
-                .getValue().content());
-
         Map<String, Object> map = (Map<String, Object>) new BDecoder()
-            .decode(os.toByteArray());
+            .decode(bytes);
 
         assertEquals("aa", new String((byte[]) map.get("t")));
         assertEquals("r", new String((byte[]) map.get("y")));
@@ -388,8 +336,6 @@ public final class DHTProtocolHandlerUnitTest extends EasyMockSupport {
                 + "pwHVCMYWbhgQ2OE3X4RTyLF7WXyXGNXe2YIxN47mXqYnZtH9vXi/dzC"
                 + "giaNTUqwDDsy8HE=",
                 Base64.encodeBase64String((byte[]) rmap.get("nodes")));
-
-        os.close();
     }
 
     /**
@@ -400,29 +346,28 @@ public final class DHTProtocolHandlerUnitTest extends EasyMockSupport {
     @Test
     public void testChannelRead008() throws Exception {
         // given
+        int p = 6881;
         byte[] secret = "aoeusnth".getBytes();
         BigInteger nodeId = new BigInteger("mnopqrstuvwxyz123456".getBytes());
         String dat = "d1:ad2:id20:abcdefghij01234567899:info_hash20:"
                 + "mnopqrstuvwxyz1234564:porti6881e5:token8:aoeusnthe1:q13:"
                 + "announce_peer1:t2:aa1:y1:qe";
+        byte[] bb = dat.getBytes();
 
-        DatagramPacket packet = new DatagramPacket(
-                Unpooled.copiedBuffer(dat.getBytes()), iaddr,
-                iaddr);
+        DatagramPacket packet = new DatagramPacket(bb, bb.length, iaddr, port);
 
         // when
-        expect(tokenTable.valid(eq(iaddr), aryEq(secret))).andReturn(true);
-        peerRoutingTable.addPeer(eq(nodeId), aryEq(iaddr.getAddress()
-                .getAddress()), eq(6881));
-        expect(ctx.write(capture(capturedPacket))).andReturn(null);
+        expect(tokenTable.valid(eq(iaddr), eq(p), aryEq(secret))).andReturn(
+                true);
+        peerRoutingTable.addPeer(eq(nodeId), aryEq(iaddr.getAddress()), eq(p));
 
         replayAll();
-        handler.channelRead0(ctx , packet);
+        byte[] bytes = handler.handle(packet);
 
         // then
         verifyAll();
 
-        verifyAnnouncePeer();
+        verifyAnnouncePeer(bytes);
     }
 
     /**
@@ -433,29 +378,28 @@ public final class DHTProtocolHandlerUnitTest extends EasyMockSupport {
     @Test
     public void testChannelRead009() throws Exception {
         // given
+        int p = 6881;
         byte[] secret = "aoeusnth".getBytes();
         BigInteger nodeId = new BigInteger("mnopqrstuvwxyz123456".getBytes());
         String dat = "d1:ad2:id20:abcdefghij01234567899:info_hash20:"
                 + "mnopqrstuvwxyz12345612:implied_porti0e4:porti6881e5:"
                 + "token8:aoeusnthe1:q13:announce_peer1:t2:aa1:y1:qe";
+        byte[] bb = dat.getBytes();
 
-        DatagramPacket packet = new DatagramPacket(
-                Unpooled.copiedBuffer(dat.getBytes()), iaddr,
-                iaddr);
+        DatagramPacket packet = new DatagramPacket(bb, bb.length, iaddr, port);
 
         // when
-        expect(tokenTable.valid(eq(iaddr), aryEq(secret))).andReturn(true);
-        peerRoutingTable.addPeer(eq(nodeId), aryEq(iaddr.getAddress()
-                .getAddress()), eq(6881));
-        expect(ctx.write(capture(capturedPacket))).andReturn(null);
+        expect(tokenTable.valid(eq(iaddr), eq(6881), aryEq(secret))).andReturn(
+                true);
+        peerRoutingTable.addPeer(eq(nodeId), aryEq(iaddr.getAddress()), eq(p));
 
         replayAll();
-        handler.channelRead0(ctx , packet);
+        byte[] bytes = handler.handle(packet);
 
         // then
         verifyAll();
 
-        verifyAnnouncePeer();
+        verifyAnnouncePeer(bytes);
     }
 
     /**
@@ -471,24 +415,24 @@ public final class DHTProtocolHandlerUnitTest extends EasyMockSupport {
         String dat = "d1:ad2:id20:abcdefghij01234567899:info_hash20:"
                 + "mnopqrstuvwxyz12345612:implied_porti1e4:porti6881e5:"
                 + "token8:aoeusnthe1:q13:announce_peer1:t2:aa1:y1:qe";
+        byte[] bb = dat.getBytes();
 
-        DatagramPacket packet = new DatagramPacket(
-                Unpooled.copiedBuffer(dat.getBytes()), iaddr,
-                iaddr);
+        DatagramPacket packet = new DatagramPacket(bb, bb.length, iaddr, port);
 
         // when
-        expect(tokenTable.valid(eq(iaddr), aryEq(secret))).andReturn(true);
-        peerRoutingTable.addPeer(eq(nodeId), aryEq(iaddr.getAddress()
-                .getAddress()), eq(iaddr.getPort()));
-        expect(ctx.write(capture(capturedPacket))).andReturn(null);
+        expect(tokenTable.valid(eq(iaddr), eq(port), aryEq(secret))).andReturn(
+                true);
+
+        peerRoutingTable.addPeer(eq(nodeId), aryEq(iaddr.getAddress()),
+                eq(port));
 
         replayAll();
-        handler.channelRead0(ctx , packet);
+        byte[] bytes = handler.handle(packet);
 
         // then
         verifyAll();
 
-        verifyAnnouncePeer();
+        verifyAnnouncePeer(bytes);
     }
 
     /**
@@ -504,40 +448,33 @@ public final class DHTProtocolHandlerUnitTest extends EasyMockSupport {
         String dat = "d1:ad2:id20:abcdefghij01234567899:info_hash20:"
                 + "mnopqrstuvwxyz12345612:implied_porti1e4:porti6881e5:"
                 + "token8:aoeusnthe1:q13:announce_peer1:t2:aa1:y1:qe";
+        byte[] bb = dat.getBytes();
 
-        DatagramPacket packet = new DatagramPacket(
-                Unpooled.copiedBuffer(dat.getBytes()), iaddr,
-                iaddr);
+        DatagramPacket packet = new DatagramPacket(bb, bb.length, iaddr, port);
 
         // when
-        expect(tokenTable.valid(eq(iaddr), aryEq(secret))).andReturn(false);
-        expect(ctx.write(capture(capturedPacket))).andReturn(null);
+        expect(tokenTable.valid(eq(iaddr), eq(port), aryEq(secret)))
+            .andReturn(false);
 
         replayAll();
-        handler.channelRead0(ctx , packet);
+        byte[] bytes = handler.handle(packet);
 
         // then
         verifyAll();
 
-        ByteArrayOutputStream os = handler.extractBytes(capturedPacket
-                .getValue().content());
-
-        String result = new String(os.toByteArray());
+        String result = new String(bytes);
         assertTrue(result.endsWith(":rd3:2039:Bad Tokene1:t2:aa1:y1:ee"));
-
-        os.close();
     }
 
     /**
      * Verify AnnouncePeer response.
+     * @param bytes  bytes
      * @throws IOException  IOException
      */
-    private void verifyAnnouncePeer() throws IOException {
-        ByteArrayOutputStream os = handler.extractBytes(capturedPacket
-                .getValue().content());
+    private void verifyAnnouncePeer(final byte[] bytes) throws IOException {
 
         Map<String, Object> map = (Map<String, Object>) new BDecoder()
-            .decode(os.toByteArray());
+            .decode(bytes);
 
         assertEquals("aa", new String((byte[]) map.get("t")));
         assertEquals("r", new String((byte[]) map.get("y")));
@@ -547,26 +484,6 @@ public final class DHTProtocolHandlerUnitTest extends EasyMockSupport {
         byte[] id = (byte[]) rmap.get("id");
         assertEquals(20, id.length);
         assertEquals("mnopqrstuvwxyz123456", new String(id));
-
-        os.close();
-    }
-
-    /**
-     * testChannelReadComplete01().
-     * @throws Exception Exception
-     */
-    @Test
-    public void testChannelReadComplete01() throws Exception {
-        // given
-
-        // when
-        expect(ctx.flush()).andReturn(null);
-        replayAll();
-
-        handler.channelReadComplete(ctx);
-
-        // then
-        verifyAll();
     }
 
     /**
@@ -631,14 +548,14 @@ public final class DHTProtocolHandlerUnitTest extends EasyMockSupport {
      * Create DHTNode.
      * @param id  identifier
      * @param address  hostname
-     * @param port  port
+     * @param portNo  port
      * @return DHTNode
      * @throws UnknownHostException  UnknownHostException
      */
     private DHTNode createDHTNode(final String id, final String address,
-            final int port) throws UnknownHostException {
+            final int portNo) throws UnknownHostException {
         byte[] addr = InetAddress.getByName(address).getAddress();
-        return DHTNodeFactory.create(new BigInteger(id), addr, port,
+        return DHTNodeFactory.create(new BigInteger(id), addr, portNo,
                 DHTNode.State.UNKNOWN);
     }
 
@@ -669,10 +586,9 @@ public final class DHTProtocolHandlerUnitTest extends EasyMockSupport {
     private DatagramPacket createFindNodeRequest() throws IOException {
         Map<String, Object> map = createFindNodeRequestMap();
         ByteArrayOutputStream bytes = BEncoder.bencoding(map);
+        byte[] bb = bytes.toByteArray();
 
-        DatagramPacket packet = new DatagramPacket(
-                Unpooled.copiedBuffer(bytes.toByteArray()), iaddr,
-                iaddr);
+        DatagramPacket packet = new DatagramPacket(bb, bb.length, iaddr, port);
 
         bytes.close();
 

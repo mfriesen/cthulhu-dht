@@ -17,7 +17,7 @@
 package ca.gobits.cthulhu;
 
 import java.math.BigInteger;
-import java.net.InetSocketAddress;
+import java.net.InetAddress;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
@@ -56,35 +56,39 @@ public final class DHTTokenTableBasic implements DHTTokenTable {
                     DHTTokenComparator.getInstance(), false);
 
     @Override
-    public void add(final InetSocketAddress addr, final byte[] secret) {
+    public void add(final InetAddress addr, final int port,
+            final byte[] secret) {
+
         LOGGER.debug("add token: " + java.util.Arrays.toString(secret)
                 + " from "
-                + java.util.Arrays.toString(addr.getAddress().getAddress())
-                + " port " + addr.getPort());
+                + java.util.Arrays.toString(addr.getAddress())
+                + " port " + port);
 
-        DHTToken dhtToken = createToken(addr, secret);
+        DHTToken dhtToken = createToken(addr, port, secret);
 
         this.tokens.add(dhtToken);
     }
 
     @Override
-    public DHTToken get(final InetSocketAddress addr, final byte[] secret) {
-        return this.tokens.get(createToken(addr, secret));
+    public DHTToken get(final InetAddress addr, final int port,
+            final byte[] secret) {
+        return this.tokens.get(createToken(addr, port, secret));
     }
 
     @Override
-    public boolean valid(final InetSocketAddress addr, final byte[] secret) {
+    public boolean valid(final InetAddress addr, final int port,
+            final byte[] secret) {
 
         boolean valid = false;
-        DHTToken token = this.tokens.get(createToken(addr, secret));
+        DHTToken token = this.tokens.get(createToken(addr, port, secret));
 
         if (token != null) {
 
             byte[] addr0 = DHTConversion.toByteArray(token.getAddress());
 
             valid = isValid(token, new Date())
-                    && Arrays.equals(addr0, addr.getAddress().getAddress())
-                    && token.getPort() == addr.getPort();
+                    && Arrays.equals(addr0, addr.getAddress())
+                    && token.getPort() == port;
         }
 
         return valid;
@@ -137,14 +141,14 @@ public final class DHTTokenTableBasic implements DHTTokenTable {
     /**
      * Creates a token.
      * @param addr  address
+     * @param port  port
      * @param secret  secret
      * @return DHTToken
      */
-    private DHTToken createToken(final InetSocketAddress addr,
+    private DHTToken createToken(final InetAddress addr, final int port,
             final byte[] secret) {
         BigInteger id = DHTConversion.toBigInteger(secret);
-        DHTToken dhtToken = new DHTTokenBasic(id, addr.getAddress()
-                .getAddress(), addr.getPort());
+        DHTToken dhtToken = new DHTTokenBasic(id, addr.getAddress(), port);
         return dhtToken;
     }
 

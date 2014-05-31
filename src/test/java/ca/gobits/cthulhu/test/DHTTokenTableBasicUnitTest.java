@@ -24,7 +24,6 @@ import static org.junit.Assert.assertTrue;
 
 import java.math.BigInteger;
 import java.net.InetAddress;
-import java.net.InetSocketAddress;
 import java.util.Arrays;
 import java.util.Calendar;
 
@@ -52,12 +51,12 @@ public final class DHTTokenTableBasicUnitTest {
         // given
         DHTTokenTable tt = new DHTTokenTableBasic();
         String secret = "secret";
-        InetSocketAddress addr = new InetSocketAddress(
-                InetAddress.getByName("50.71.214.139"), 64568);
+        int port = 64568;
+        InetAddress addr = InetAddress.getByName("50.71.214.139");
 
         // when
-        tt.add(addr, secret.getBytes());
-        DHTToken result = tt.get(addr, secret.getBytes());
+        tt.add(addr, port, secret.getBytes());
+        DHTToken result = tt.get(addr, port, secret.getBytes());
 
         // then
         assertNotNull(result);
@@ -72,11 +71,11 @@ public final class DHTTokenTableBasicUnitTest {
         // given
         DHTTokenTable tt = new DHTTokenTableBasic();
         String secret = "secret";
-        InetSocketAddress addr = new InetSocketAddress(
-                InetAddress.getByName("50.71.214.139"), 64568);
+        int port = 64568;
+        InetAddress addr = InetAddress.getByName("50.71.214.139");
 
         // when
-        boolean result = tt.valid(addr, secret.getBytes());
+        boolean result = tt.valid(addr, port, secret.getBytes());
 
         // then
         assertFalse(result);
@@ -91,13 +90,13 @@ public final class DHTTokenTableBasicUnitTest {
         // given
         DHTTokenTable tt = new DHTTokenTableBasic();
         String secret = "secret";
-        InetSocketAddress addr = new InetSocketAddress(
-                InetAddress.getByName("50.71.214.139"), 64568);
+        int port = 64568;
+        InetAddress addr = InetAddress.getByName("50.71.214.139");
 
-        tt.add(addr, secret.getBytes());
+        tt.add(addr, port, secret.getBytes());
 
         // when
-        boolean result = tt.valid(addr, secret.getBytes());
+        boolean result = tt.valid(addr, port, secret.getBytes());
 
         // then
         assertTrue(result);
@@ -112,11 +111,11 @@ public final class DHTTokenTableBasicUnitTest {
         // given
         DHTTokenTableBasic tt = new DHTTokenTableBasic();
         String secret = "secret";
-        InetSocketAddress addr = new InetSocketAddress(
-                InetAddress.getByName("50.71.214.139"), 64568);
+        int port = 64568;
+        InetAddress addr = InetAddress.getByName("50.71.214.139");
 
-        tt.add(addr, secret.getBytes());
-        DHTToken token = tt.get(addr, secret.getBytes());
+        tt.add(addr, port, secret.getBytes());
+        DHTToken token = tt.get(addr, port, secret.getBytes());
 
         Calendar c = Calendar.getInstance();
         c.setTime(token.getAddedDate());
@@ -125,7 +124,7 @@ public final class DHTTokenTableBasicUnitTest {
         ReflectionTestUtils.setField(token, "addedDate", c.getTime());
 
         // when
-        boolean result = tt.valid(addr, secret.getBytes());
+        boolean result = tt.valid(addr, port, secret.getBytes());
 
         // then
         assertFalse(result);
@@ -140,15 +139,15 @@ public final class DHTTokenTableBasicUnitTest {
         // given
         DHTTokenTable tt = new DHTTokenTableBasic();
         String secret = "secret";
-        InetSocketAddress addr0 = new InetSocketAddress(
-                InetAddress.getByName("50.71.214.139"), 64568);
-        InetSocketAddress addr1 = new InetSocketAddress(
-                InetAddress.getByName("50.71.214.139"), 64569);
+        int port0 = 64568;
+        InetAddress addr0 = InetAddress.getByName("50.71.214.139");
+        int port1 = 64569;
+        InetAddress addr1 = InetAddress.getByName("50.71.214.139");
 
-        tt.add(addr0, secret.getBytes());
+        tt.add(addr0, port0, secret.getBytes());
 
         // when
-        boolean result = tt.valid(addr1, secret.getBytes());
+        boolean result = tt.valid(addr1, port1, secret.getBytes());
 
         // then
         assertFalse(result);
@@ -164,15 +163,14 @@ public final class DHTTokenTableBasicUnitTest {
         // given
         DHTTokenTable tt = new DHTTokenTableBasic();
         String secret = "secret";
-        InetSocketAddress addr0 = new InetSocketAddress(
-                InetAddress.getByName("50.71.214.139"), 64568);
-        InetSocketAddress addr1 = new InetSocketAddress(
-                InetAddress.getByName("50.71.214.140"), 64568);
+        int port = 64568;
+        InetAddress addr0 = InetAddress.getByName("50.71.214.139");
+        InetAddress addr1 = InetAddress.getByName("50.71.214.140");
 
-        tt.add(addr0, secret.getBytes());
+        tt.add(addr0, port, secret.getBytes());
 
         // when
-        boolean result = tt.valid(addr1, secret.getBytes());
+        boolean result = tt.valid(addr1, port, secret.getBytes());
 
         // then
         assertFalse(result);
@@ -190,13 +188,13 @@ public final class DHTTokenTableBasicUnitTest {
         tt.setTokenExpiryInMinutes(-20);
 
         String secret = "secret";
-        InetSocketAddress addr0 = new InetSocketAddress(
-                InetAddress.getByName("50.71.214.139"), 64568);
+        int port = 64568;
+        InetAddress addr0 = InetAddress.getByName("50.71.214.139");
 
-        tt.add(addr0, secret.getBytes());
+        tt.add(addr0, port, secret.getBytes());
 
         // when
-        boolean result = tt.valid(addr0, secret.getBytes());
+        boolean result = tt.valid(addr0, port, secret.getBytes());
 
         // then
         assertFalse(result);
@@ -307,17 +305,17 @@ public final class DHTTokenTableBasicUnitTest {
         final Calendar expired = Calendar.getInstance();
         expired.add(Calendar.MINUTE, -1 * tt.getTokenExpiryInMinutes() - 1);
 
-        final InetSocketAddress addr = new InetSocketAddress(
-                InetAddress.getByName("50.71.214.139"), 64568);
+        final int port = 64568;
+        final InetAddress addr = InetAddress.getByName("50.71.214.139");
 
         // when
         Thread add = new Thread(new Runnable() {
             @Override
             public void run() {
                 for (int i = 0; i < 100; i++) {
-                    tt.add(addr, "secret".getBytes());
-                    DHTToken t0 = new DHTTokenBasic(new BigInteger("" + i), addr
-                            .getAddress().getAddress(), 10);
+                    tt.add(addr, port, "secret".getBytes());
+                    DHTToken t0 = new DHTTokenBasic(new BigInteger("" + i),
+                            addr.getAddress(), 10);
                     t0.setAddedDate(expired.getTime());
                     list.add(t0);
                 }

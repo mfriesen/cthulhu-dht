@@ -18,12 +18,22 @@ package ca.gobits.cthulhu;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 
 /**
  * DHT Configuration class.
  */
 @Configuration
 public class DHTConfiguration {
+
+    /** Thread Queue Capacity. */
+    private static final int THREAD_QUEUE_CAPACITY = 25;
+
+    /** Thread Max Pool Size. */
+    private static final int THREAD_MAX_POOL_SIZE = 10;
+
+    /** Thread Core Pool Size. */
+    private static final int THREAD_CORE_POOL_SIZE = 5;
 
     /**
      * @return DHTRoutingTable
@@ -55,6 +65,18 @@ public class DHTConfiguration {
     @Bean
     public DHTServer dhtServer() {
         return new DHTServer();
+    }
+
+    /**
+     * @return ThreadPoolTaskExecutor
+     */
+    @Bean
+    public ThreadPoolTaskExecutor threadExecutor() {
+        ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
+        executor.setCorePoolSize(THREAD_CORE_POOL_SIZE);
+        executor.setMaxPoolSize(THREAD_MAX_POOL_SIZE);
+        executor.setQueueCapacity(THREAD_QUEUE_CAPACITY);
+        return executor;
     }
 
     /**

@@ -17,16 +17,12 @@
 package ca.gobits.cthulhu;
 
 import static ca.gobits.dht.DHTConversion.toByteArrayFromDHTPeer;
-import io.netty.buffer.ByteBuf;
-import io.netty.buffer.Unpooled;
-import io.netty.channel.ChannelHandlerContext;
-import io.netty.channel.SimpleChannelInboundHandler;
-import io.netty.channel.socket.DatagramPacket;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.math.BigInteger;
-import java.net.InetSocketAddress;
+import java.net.DatagramPacket;
+import java.net.InetAddress;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
@@ -47,8 +43,7 @@ import ca.gobits.dht.DHTConversion;
  * DHTProtocolHandler  implementation of the BitTorrent protocol.
  * http://www.bittorrent.org/beps/bep_0005.html
  */
-public final class DHTProtocolHandler extends
-        SimpleChannelInboundHandler<DatagramPacket> {
+public final class DHTProtocolHandler {
 
     /** Length of Get_Peers token. */
     private static final int GET_PEERS_TOKEN_LENGTH = 10;
@@ -69,22 +64,26 @@ public final class DHTProtocolHandler extends
     @Autowired
     private DHTTokenTable tokenTable;
 
-    @Override
-    public void channelRead0(final ChannelHandlerContext ctx,
-            final DatagramPacket packet)
-            throws Exception {
+    /**
+     * Read DatagramPacket.
+     * @param packet  packet
+     * @return byte[]
+     * @throws IOException  IOException
+     */
+    public byte[] handle(final DatagramPacket packet) throws IOException {
+
+        InetAddress addr = packet.getAddress();
+        int port = packet.getPort();
 
         Map<String, Object> response = new HashMap<String, Object>();
 
         try {
-            InetSocketAddress addr = packet.sender();
-            Map<String, Object> request = bdecode(packet.content());
+            Map<String, Object> request = bdecode(packet.getData());
 
             response.put("y", "r");
             response.put("t", request.get("t"));
             response.put("ip",
-                    DHTConversion.compactAddress(addr.getAddress().getAddress(),
-                            addr.getPort()));
+                    DHTConversion.compactAddress(addr.getAddress(), port));
 
             String action = new String((byte[]) request.get("q"));
 
@@ -126,8 +125,7 @@ public final class DHTProtocolHandler extends
         byte[] bytes = os.toByteArray();
         os.close();
 
-        ctx.write(new DatagramPacket(
-                Unpooled.copiedBuffer(bytes), packet.sender()));
+        return bytes;
     }
 
     /**
@@ -139,15 +137,16 @@ public final class DHTProtocolHandler extends
     private void addAnnouncePeerResponse(final DHTArgumentRequest arguments,
             final Map<String, Object> response, final DatagramPacket packet) {
 
-        if (tokenTable.valid(packet.sender(), arguments.getToken())) {
+        int port = isImpliedPort(arguments) ? packet.getPort()
+                : arguments.getPort().intValue();
+
+        if (tokenTable.valid(packet.getAddress(), port, arguments.getToken())) {
 
             BigInteger infoHash = DHTConversion.toBigInteger(arguments
                     .getInfoHash());
 
-            InetSocketAddress addr = packet.sender();
-            byte[] address = addr.getAddress().getAddress();
-            int port = isImpliedPort(arguments) ? addr.getPort()
-                    : arguments.getPort().intValue();
+            InetAddress addr = packet.getAddress();
+            byte[] address = addr.getAddress();
 
             peerRoutingTable.addPeer(infoHash, address, port);
 
@@ -209,7 +208,7 @@ public final class DHTProtocolHandler extends
             responseParameter.put("nodes", transformNodes);
         }
 
-        responseParameter.put("token", generateToken(packet.sender()));
+        responseParameter.put("token", generateToken());
         responseParameter.put("id", arguments.getId());
 
         response.put("r", responseParameter);
@@ -269,27 +268,6 @@ public final class DHTProtocolHandler extends
         return routingTable.findClosestNodes(target);
     }
 
-    @Override
-    public void channelReadComplete(final ChannelHandlerContext ctx)
-            throws Exception {
-        ctx.flush();
-    }
-
-    /**
-     * Extract bytes from ByteBuf.
-     * @param msg  ByteBuf
-     * @return ByteArrayOutputStream
-     */
-    public ByteArrayOutputStream extractBytes(final ByteBuf msg) {
-        ByteArrayOutputStream os = new ByteArrayOutputStream();
-        ByteBuf in = msg;
-        while (in.isReadable()) {
-            byte b = in.readByte();
-            os.write(b);
-        }
-        return os;
-    }
-
     /**
      * Create Map.
      * @param key  map key
@@ -314,28 +292,23 @@ public final class DHTProtocolHandler extends
     /**
      * Extract Byte Array using BDecoder.
      *
-     * @param byteBuf  ByteBuf
+     * @param bytes  bytes
      * @return Map<String, Object>
-     * @throws IOException  IOException
      */
     @SuppressWarnings("unchecked")
-    private Map<String, Object> bdecode(final ByteBuf byteBuf)
-            throws IOException {
+    private Map<String, Object> bdecode(final byte[] bytes) {
 
-        ByteArrayOutputStream os = extractBytes(byteBuf);
         Map<String, Object> map = (Map<String, Object>) new BDecoder()
-                .decode(os.toByteArray());
-        os.close();
+                .decode(bytes);
         return map;
     }
 
     /**
      * Token returned to a get_peers request.
      * This is to prevent malicious hosts from signing up other hosts
-     * @param inetSocketAddress address of sender
      * @return byte[]
      */
-    private byte[] generateToken(final InetSocketAddress inetSocketAddress) {
+    private byte[] generateToken() {
         byte[] bytes = new byte[GET_PEERS_TOKEN_LENGTH];
         Random random = new Random();
         random.nextBytes(bytes);
