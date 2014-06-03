@@ -88,22 +88,4 @@ public final class DHTServerIntegrationTest {
         assertTrue(result.startsWith("d1:rd3:20212:Server Errore1:y1:ee"));
         assertEquals(DATA_PACKET_LENGTH, result.length());
     }
-
-    /**
-     * testMissingQParameter01().
-     * @throws Exception  Exception
-     */
-    @Test(timeout = 10000)
-    public void testMissingQParameter01() throws Exception {
-
-        // given
-        String dat = "d1:ad2:id20:abcdefghij0123456789e1:t2:aa1:y1:qe";
-
-        // when
-        String result = sendUDPPacket(dat);
-
-        // then
-        assertTrue(result.contains(":rd3:20212:Server Errore1:t2:aa1:y1:ee"));
-        assertEquals(DATA_PACKET_LENGTH, result.length());
-    }
 }

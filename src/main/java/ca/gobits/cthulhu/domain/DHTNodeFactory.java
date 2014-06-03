@@ -17,7 +17,7 @@
 package ca.gobits.cthulhu.domain;
 
 import java.math.BigInteger;
-import java.net.InetSocketAddress;
+import java.net.InetAddress;
 import java.util.Date;
 
 import ca.gobits.cthulhu.domain.DHTNode.State;
@@ -52,28 +52,30 @@ public final class DHTNodeFactory {
     /**
      * Creates DHTNode.
      * @param infoHash  InfoHash
-     * @param source of node
+     * @param addr InetAddress
+     * @param port  port
      * @param state  State
      * @return DHTNode
      */
     public static DHTNode create(final byte[] infoHash,
-            final InetSocketAddress source, final State state) {
+            final InetAddress addr, final int port, final State state) {
 
-        return create(new BigInteger(infoHash), source, state);
+        return create(new BigInteger(infoHash), addr, port, state);
     }
 
     /**
      * Creates DHTNode.
      * @param infoHash  InfoHash
-     * @param source of node
+     * @param addr  InetAddress
+     * @param port  port
      * @param state  State
      * @return DHTNode
      */
     public static DHTNode create(final BigInteger infoHash,
-            final InetSocketAddress source, final State state) {
+            final InetAddress addr, final int port, final State state) {
 
-        return create(infoHash, source.getAddress().getAddress(),
-                source.getPort(), state);
+        return create(infoHash, addr.getAddress(),
+                port, state);
     }
 
     /**

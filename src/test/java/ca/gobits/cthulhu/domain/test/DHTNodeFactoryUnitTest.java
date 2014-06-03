@@ -8,7 +8,6 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.Modifier;
 import java.math.BigInteger;
 import java.net.InetAddress;
-import java.net.InetSocketAddress;
 
 import org.junit.Test;
 
@@ -68,11 +67,11 @@ public final class DHTNodeFactoryUnitTest {
         // given
         byte[] infoHash = new BigInteger("1").toByteArray();
         State state = State.GOOD;
-        InetSocketAddress addr = new InetSocketAddress(
-                InetAddress.getByName("50.71.214.139"), 64568);
+        InetAddress addr = InetAddress.getByName("50.71.214.139");
+        int port = 64568;
 
         // when
-        DHTNode result = DHTNodeFactory.create(infoHash, addr, state);
+        DHTNode result = DHTNodeFactory.create(infoHash, addr, port, state);
 
         // then
         assertEquals(new BigInteger(infoHash), result.getInfoHash());

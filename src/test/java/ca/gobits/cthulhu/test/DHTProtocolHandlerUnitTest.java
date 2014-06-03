@@ -22,6 +22,7 @@ import static org.easymock.EasyMock.eq;
 import static org.easymock.EasyMock.expect;
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
 import java.io.ByteArrayOutputStream;
@@ -52,6 +53,8 @@ import ca.gobits.cthulhu.DHTProtocolHandler;
 import ca.gobits.cthulhu.DHTServer;
 import ca.gobits.cthulhu.DHTTokenTable;
 import ca.gobits.cthulhu.domain.DHTNode;
+import ca.gobits.cthulhu.domain.DHTNode.State;
+import ca.gobits.cthulhu.domain.DHTNodeBasic;
 import ca.gobits.cthulhu.domain.DHTNodeFactory;
 import ca.gobits.cthulhu.domain.DHTPeer;
 import ca.gobits.cthulhu.domain.DHTPeerBasic;
@@ -99,11 +102,11 @@ public final class DHTProtocolHandlerUnitTest extends EasyMockSupport {
     }
 
     /**
-     * testChannelRead001() - "ping" request.
+     * testHandle01() - "ping" request.
      * @throws Exception  Exception
      */
     @Test
-    public void testChannelRead001() throws Exception {
+    public void testHandle01() throws Exception {
         // given
         String dat = "d1:ad2:id20:abcdefghij0123456789e1:q4:ping1:t2:aa1:y1:qe";
         byte[] bb = dat.getBytes();
@@ -130,12 +133,12 @@ public final class DHTProtocolHandlerUnitTest extends EasyMockSupport {
     }
 
     /**
-     * testChannelRead003() - "find_node" compare our result from
+     * testHandle02() - "find_node" compare our result from
      * router.bittorrent.com response.
      * @throws Exception  Exception
      */
     @Test
-    public void testChannelRead003() throws Exception {
+    public void testHandle02() throws Exception {
         // given
         BigInteger nodeId = new BigInteger(
                 "1461501637330902918203684832716283019655932542975");
@@ -186,11 +189,11 @@ public final class DHTProtocolHandlerUnitTest extends EasyMockSupport {
     }
 
     /**
-     * testChannelRead004() - test "unknown method" request.
+     * testHandle03() - test "unknown method" request.
      * @throws Exception  Exception
      */
     @Test
-    public void testChannelRead004() throws Exception {
+    public void testHandle03() throws Exception {
         // given
         String dat = "d1:ad2:id20:abcdefghij0123456789e1:q4:pinA1:t2:aa1:y1:qe";
         byte[] bb = dat.getBytes();
@@ -213,11 +216,35 @@ public final class DHTProtocolHandlerUnitTest extends EasyMockSupport {
     }
 
     /**
-     * testChannelRead005() - test "garbage" request.
+     * testHandle04() - test exception thrown in queryRequestHandler.
      * @throws Exception  Exception
      */
     @Test
-    public void testChannelRead005() throws Exception {
+    public void testHandle04() throws Exception {
+        // given
+        String dat = "d1:ad2:id20:abcdefghij0123456789e1:q4:ping1:t2:aa1:y1:qe";
+        byte[] bb = dat.getBytes();
+
+        DatagramPacket packet = new DatagramPacket(bb, bb.length, null, port);
+
+
+        // when
+        replayAll();
+        byte[] bytes = handler.handle(packet);
+
+        // then
+        verifyAll();
+
+        String result = new String(bytes);
+        assertEquals("d1:rd3:20212:Server Errore1:t2:aa1:y1:ee", result);
+    }
+
+    /**
+     * testHandle05() - test "garbage" request.
+     * @throws Exception  Exception
+     */
+    @Test
+    public void testHandle05() throws Exception {
         // given
         String dat = "adsadadsa";
         byte[] bb = dat.getBytes();
@@ -236,11 +263,11 @@ public final class DHTProtocolHandlerUnitTest extends EasyMockSupport {
     }
 
     /**
-     * testChannelRead006() - test "get_peers" request and peers exists.
+     * testHandle06() - test "get_peers" request and peers exists.
      * @throws Exception  Exception
      */
     @Test
-    public void testChannelRead006() throws Exception {
+    public void testHandle06() throws Exception {
         // given
         BigInteger nodeId = new BigInteger("mnopqrstuvwxyz123456".getBytes());
         String dat = "d1:ad2:id20:abcdefghij01234567899:info_hash20:"
@@ -286,13 +313,13 @@ public final class DHTProtocolHandlerUnitTest extends EasyMockSupport {
     }
 
     /**
-     * testChannelRead007() - test "get_peers" request and InfoHash node is
+     * testHandle07() - test "get_peers" request and InfoHash node is
      * null.
      *
      * @throws Exception Exception
      */
     @Test
-    public void testChannelRead007() throws Exception {
+    public void testHandle07() throws Exception {
         // given
         BigInteger nodeId = new BigInteger("mnopqrstuvwxyz123456".getBytes());
         String dat = "d1:ad2:id20:abcdefghij01234567899:info_hash20:"
@@ -339,12 +366,12 @@ public final class DHTProtocolHandlerUnitTest extends EasyMockSupport {
     }
 
     /**
-     * testChannelRead008() - "announce_peer" request and InfoHash is found.
+     * testHandle08() - "announce_peer" request and InfoHash is found.
      *
      * @throws Exception Exception
      */
     @Test
-    public void testChannelRead008() throws Exception {
+    public void testHandle08() throws Exception {
         // given
         int p = 6881;
         byte[] secret = "aoeusnth".getBytes();
@@ -371,12 +398,12 @@ public final class DHTProtocolHandlerUnitTest extends EasyMockSupport {
     }
 
     /**
-     * testChannelRead009() - "announce_peer" request, with implied_port of 0.
+     * testHandle09() - "announce_peer" request, with implied_port of 0.
      *
      * @throws Exception Exception
      */
     @Test
-    public void testChannelRead009() throws Exception {
+    public void testHandle09() throws Exception {
         // given
         int p = 6881;
         byte[] secret = "aoeusnth".getBytes();
@@ -403,12 +430,12 @@ public final class DHTProtocolHandlerUnitTest extends EasyMockSupport {
     }
 
     /**
-     * testChannelRead010() - "announce_peer" request, with implied_port of 1.
+     * testHandle10() - "announce_peer" request, with implied_port of 1.
      *
      * @throws Exception Exception
      */
     @Test
-    public void testChannelRead010() throws Exception {
+    public void testHandle10() throws Exception {
         // given
         byte[] secret = "aoeusnth".getBytes();
         BigInteger nodeId = new BigInteger("mnopqrstuvwxyz123456".getBytes());
@@ -436,12 +463,12 @@ public final class DHTProtocolHandlerUnitTest extends EasyMockSupport {
     }
 
     /**
-     * testChannelRead011() - "announce_peer" request, with invalid token.
+     * testHandle11() - "announce_peer" request, with invalid token.
      *
      * @throws Exception Exception
      */
     @Test
-    public void testChannelRead011() throws Exception {
+    public void testHandle11() throws Exception {
         // given
         byte[] secret = "aoeusnth".getBytes();
 
@@ -464,6 +491,108 @@ public final class DHTProtocolHandlerUnitTest extends EasyMockSupport {
 
         String result = new String(bytes);
         assertTrue(result.endsWith(":rd3:2039:Bad Tokene1:t2:aa1:y1:ee"));
+    }
+
+    /**
+     * testHandle12() - test request is NOT "r".
+     * @throws Exception  Exception
+     */
+    @Test
+    public void testHandle12() throws Exception {
+        // given
+        String s = "d1:t2:aa1:y1:re";
+        byte[] bb = s.getBytes();
+        DatagramPacket packet = new DatagramPacket(bb, bb.length, iaddr, port);
+
+        // when
+        replayAll();
+
+        byte[] bytes = handler.handle(packet);
+
+        // then
+        verifyAll();
+
+        assertNull(bytes);
+    }
+
+    /**
+     * testHandle13() - test request is HAS "r", not does not have "id".
+     * @throws Exception  Exception
+     */
+    @Test
+    public void testHandle13() throws Exception {
+        // given
+        String s = "d1:rd2:ia20:mnopqrstuvwxyz123456e1:t2:aa1:y1:re";
+        byte[] bb = s.getBytes();
+        DatagramPacket packet = new DatagramPacket(bb, bb.length, iaddr, port);
+
+        // when
+        replayAll();
+
+        byte[] bytes = handler.handle(packet);
+
+        // then
+        verifyAll();
+
+        assertNull(bytes);
+    }
+
+    /**
+     * testHandle14() - test request HAS "id" and NODE IS found.
+     * @throws Exception  Exception
+     */
+    @Test
+    public void testHandle14() throws Exception {
+        // given
+        BigInteger id = new BigInteger(
+                "624742783717797424288959994005102614424044451126");
+        String s = "d1:rd2:id20:mnopqrstuvwxyz123456e1:t2:aa1:y1:re";
+        byte[] bb = s.getBytes();
+        DatagramPacket packet = new DatagramPacket(bb, bb.length, iaddr, port);
+
+        DHTNode node = new DHTNodeBasic();
+        assertNull(node.getState());
+
+        // when
+        expect(routingTable.findExactNode(id)).andReturn(node);
+        replayAll();
+
+        byte[] bytes = handler.handle(packet);
+
+        // then
+        verifyAll();
+
+        assertNull(bytes);
+        assertEquals(State.GOOD, node.getState());
+    }
+
+    /**
+     * testHandle15() - test request HAS "id" and NODE IS NOT found.
+     * @throws Exception  Exception
+     */
+    @Test
+    public void testHandle15() throws Exception {
+
+        // given
+        DHTNode node = null;
+        BigInteger id = new BigInteger(
+                "624742783717797424288959994005102614424044451126");
+        String s = "d1:rd2:id20:mnopqrstuvwxyz123456e1:t2:aa1:y1:re";
+        byte[] bb = s.getBytes();
+        DatagramPacket packet = new DatagramPacket(bb, bb.length, iaddr, port);
+
+        // when
+        expect(routingTable.findExactNode(id)).andReturn(node);
+        routingTable.addNode(id, iaddr, port, State.GOOD);
+
+        replayAll();
+
+        byte[] bytes = handler.handle(packet);
+
+        // then
+        verifyAll();
+
+        assertNull(bytes);
     }
 
     /**

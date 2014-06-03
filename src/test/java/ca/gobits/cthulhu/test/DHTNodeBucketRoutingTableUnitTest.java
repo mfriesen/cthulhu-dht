@@ -23,7 +23,6 @@ import static org.junit.Assert.assertNull;
 
 import java.math.BigInteger;
 import java.net.InetAddress;
-import java.net.InetSocketAddress;
 import java.util.List;
 
 import org.apache.log4j.Level;
@@ -47,14 +46,14 @@ public final class DHTNodeBucketRoutingTableUnitTest {
     private static int port = 64568;
 
     /** inet socket address. */
-    private static InetSocketAddress iaddr;
+    private static InetAddress iaddr;
 
     /**
      * constuctor.
      * @throws Exception  Exception
      */
     public DHTNodeBucketRoutingTableUnitTest() throws Exception {
-        iaddr = new InetSocketAddress(InetAddress.getByAddress(addr), port);
+        iaddr = InetAddress.getByAddress(addr);
     }
 
     /**
@@ -85,7 +84,7 @@ public final class DHTNodeBucketRoutingTableUnitTest {
                 State.GOOD);
 
         // when
-        rt.addNode(new BigInteger("1").toByteArray(), iaddr, State.GOOD);
+        rt.addNode(new BigInteger("1").toByteArray(), iaddr, port, State.GOOD);
 
         // then
         assertEquals(1, rt.getTotalNodeCount());
@@ -107,7 +106,8 @@ public final class DHTNodeBucketRoutingTableUnitTest {
 
         // when
         for (int i = 0; i < nodeCount; i++) {
-            rt.addNode(new BigInteger("" + i).toByteArray(), iaddr, State.GOOD);
+            rt.addNode(new BigInteger("" + i).toByteArray(), iaddr, port,
+                    State.GOOD);
         }
 
         // then
@@ -126,8 +126,8 @@ public final class DHTNodeBucketRoutingTableUnitTest {
             addr, port, State.GOOD);
 
         // when
-        rt.addNode(id, iaddr, State.GOOD);
-        rt.addNode(id, iaddr, State.GOOD);
+        rt.addNode(id, iaddr, port, State.GOOD);
+        rt.addNode(id, iaddr, port, State.GOOD);
 
         // then
         assertEquals(1, rt.getTotalNodeCount());
@@ -156,10 +156,10 @@ public final class DHTNodeBucketRoutingTableUnitTest {
             addr, port, DHTNode.State.GOOD);
 
         // when
-        rt.addNode(node0.getInfoHash().toByteArray(), iaddr, State.GOOD);
-        rt.addNode(node3.getInfoHash().toByteArray(), iaddr, State.GOOD);
-        rt.addNode(node2.getInfoHash().toByteArray(), iaddr, State.GOOD);
-        rt.addNode(node1.getInfoHash().toByteArray(), iaddr, State.GOOD);
+        rt.addNode(node0.getInfoHash().toByteArray(), iaddr, port, State.GOOD);
+        rt.addNode(node3.getInfoHash().toByteArray(), iaddr, port, State.GOOD);
+        rt.addNode(node2.getInfoHash().toByteArray(), iaddr, port, State.GOOD);
+        rt.addNode(node1.getInfoHash().toByteArray(), iaddr, port, State.GOOD);
 
         // then
         assertEquals(4, rt.getTotalNodeCount());
@@ -181,7 +181,7 @@ public final class DHTNodeBucketRoutingTableUnitTest {
         DHTNode node = create(new BigInteger("1"), State.GOOD);
 
         // when
-        rt.addNode(node.getInfoHash().toByteArray(), iaddr, State.GOOD);
+        rt.addNode(node.getInfoHash().toByteArray(), iaddr, port, State.GOOD);
 
         // then
         assertEquals(1, rt.getTotalNodeCount());
@@ -379,7 +379,7 @@ public final class DHTNodeBucketRoutingTableUnitTest {
     private void addNodes(final DHTNodeBucketRoutingTable rt) {
         for (int i = 0; i < 40; i = i + 2) {
             byte[] id = new BigInteger("" + i).toByteArray();
-            rt.addNode(id, iaddr, State.GOOD);
+            rt.addNode(id, iaddr, port, State.GOOD);
         }
     }
 }

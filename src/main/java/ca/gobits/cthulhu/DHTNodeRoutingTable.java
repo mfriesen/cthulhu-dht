@@ -17,7 +17,7 @@
 package ca.gobits.cthulhu;
 
 import java.math.BigInteger;
-import java.net.InetSocketAddress;
+import java.net.InetAddress;
 import java.util.List;
 
 import ca.gobits.cthulhu.domain.DHTNode;
@@ -36,9 +36,19 @@ public interface DHTNodeRoutingTable {
      * Adds node to RoutingTable.
      * @param infoHash  node identifier
      * @param addr   address of node
+     * @param port  port
      * @param state  State of Node
      */
-    void addNode(byte[] infoHash, InetSocketAddress addr, State state);
+    void addNode(byte[] infoHash, InetAddress addr, int port, State state);
+
+    /**
+     * Adds node to RoutingTable.
+     * @param infoHash  node identifier
+     * @param addr   address of node
+     * @param port  port
+     * @param state  State of Node
+     */
+    void addNode(BigInteger infoHash, InetAddress addr, int port, State state);
 
     /**
      * Find the node with matching ID or NULL.
@@ -71,4 +81,9 @@ public interface DHTNodeRoutingTable {
      * @return int
      */
     int getMaxNodeCount();
+
+    /**
+     * Clears Routing Table.
+     */
+    void clear();
 }

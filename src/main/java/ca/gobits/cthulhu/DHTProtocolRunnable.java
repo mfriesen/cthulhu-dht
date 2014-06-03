@@ -60,9 +60,12 @@ public class DHTProtocolRunnable implements Runnable {
 
             byte[] bytes = this.handler.handle(packet);
 
-            DatagramPacket sendPacket = new DatagramPacket(bytes,
-                    bytes.length, addr, port);
-            serverSocket.send(sendPacket);
+            if (bytes != null) {
+
+                DatagramPacket sendPacket = new DatagramPacket(bytes,
+                        bytes.length, addr, port);
+                serverSocket.send(sendPacket);
+            }
 
         } catch (IOException e) {
             throw new RuntimeException(e);

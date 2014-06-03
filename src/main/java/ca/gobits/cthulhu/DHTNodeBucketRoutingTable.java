@@ -20,7 +20,6 @@ import static ca.gobits.dht.DHTConversion.toInetAddress;
 
 import java.math.BigInteger;
 import java.net.InetAddress;
-import java.net.InetSocketAddress;
 import java.util.List;
 
 import org.apache.log4j.Logger;
@@ -29,6 +28,7 @@ import ca.gobits.cthulhu.domain.DHTNode;
 import ca.gobits.cthulhu.domain.DHTNode.State;
 import ca.gobits.cthulhu.domain.DHTNodeComparator;
 import ca.gobits.cthulhu.domain.DHTNodeFactory;
+import ca.gobits.dht.DHTConversion;
 
 /**
  * Implementation of DHT Bucket Routing Table.
@@ -57,22 +57,22 @@ public final class DHTNodeBucketRoutingTable implements DHTNodeRoutingTable {
     }
 
     @Override
-    public void addNode(final byte[] infoHash, final InetSocketAddress addr,
-            final State state) {
+    public void addNode(final byte[] infoHash, final InetAddress addr,
+            final int port, final State state) {
+        addNode(DHTConversion.toBigInteger(infoHash), addr, port, state);
+    }
+
+    @Override
+    public void addNode(final BigInteger infoHash, final InetAddress addr,
+            final int port, final State state) {
 
         if (nodes.size() < MAX_NUMBER_OF_NODES) {
 
-            if (State.GOOD == state) {
+            DHTNode node = DHTNodeFactory.create(infoHash, addr, port,
+                    state);
 
-                DHTNode node = DHTNodeFactory.create(infoHash, addr, state);
-
-                addNodeLoggerDebug(node);
-                nodes.add(node);
-
-            } else {
-
-                sendFindRequest(infoHash, addr);
-            }
+            addNodeLoggerDebug(node);
+            nodes.add(node);
 
         } else {
             LOGGER.warn("MAXIMUM number of noded reached "
@@ -80,27 +80,27 @@ public final class DHTNodeBucketRoutingTable implements DHTNodeRoutingTable {
         }
     }
 
-    /**
-     * Sends a Find Request to a node to determine
-     * whether it is "good" or not.
-     * @param infoHash  info hash
-     * @param addr  address to send find request to
-     */
-    private void sendFindRequest(final byte[] infoHash,
-            final InetSocketAddress addr) {
-
-        /**
-         * TODO ignore IP addresses
-         * Ignore
-         *      if ((ip & 0xff000000) == 0x0a000000 // 10.x.x.x
-|| (ip & 0xfff00000) == 0xac100000 // 172.16.x.x
-|| (ip & 0xffff0000) == 0xc0a80000 // 192.168.x.x
-|| (ip & 0xffff0000) == 0xa9fe0000 // 169.254.x.x
-|| (ip & 0xff000000) == 0x7f000000) // 127.x.x.x
-         */
-//        String message = "d1:ad2:id20:abcdefghij01234567899:info_hash20:"
-//            + "mnopqrstuvwxyz123456e1:q9:get_peers1:t2:aa1:y1:qe";
-    }
+//    /**
+//     * Sends a Find Request to a node to determine
+//     * whether it is "good" or not.
+//     * @param infoHash  info hash
+//     * @param addr  address to send find request to
+//     */
+//    private void sendFindRequest(final byte[] infoHash,
+//            final InetSocketAddress addr) {
+//
+//        /**
+//         * TODO ignore IP addresses
+//         * Ignore
+//         *      if ((ip & 0xff000000) == 0x0a000000 // 10.x.x.x
+//|| (ip & 0xfff00000) == 0xac100000 // 172.16.x.x
+//|| (ip & 0xffff0000) == 0xc0a80000 // 192.168.x.x
+//|| (ip & 0xffff0000) == 0xa9fe0000 // 169.254.x.x
+//|| (ip & 0xff000000) == 0x7f000000) // 127.x.x.x
+//         */
+////        String message = "d1:ad2:id20:abcdefghij01234567899:info_hash20:"
+////            + "mnopqrstuvwxyz123456e1:q9:get_peers1:t2:aa1:y1:qe";
+//    }
 
     /**
      * Print debug information on adding a node. (LOGGER.isDebugEnabled())
@@ -212,5 +212,10 @@ public final class DHTNodeBucketRoutingTable implements DHTNodeRoutingTable {
     @Override
     public int getMaxNodeCount() {
         return MAX_NUMBER_OF_NODES;
+    }
+
+    @Override
+    public void clear() {
+        this.nodes.clear();
     }
 }

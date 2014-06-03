@@ -23,7 +23,7 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 import java.io.IOException;
-import java.net.InetSocketAddress;
+import java.net.InetAddress;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
@@ -72,6 +72,7 @@ public final class DHTGetPeersIntegrationTest {
      */
     @Before
     public void before() throws Exception {
+        nodeRoutingTable.clear();
         async.start();
         async.waitForServerStart();
     }
@@ -137,12 +138,10 @@ public final class DHTGetPeersIntegrationTest {
         assertFalse(nodes.isEmpty());
         for (DHTNode node : nodes) {
 
-            InetSocketAddress addr = new InetSocketAddress(
-                    DHTConversion.toInetAddress(node.getAddress()),
-                    node.getPort());
+            InetAddress addr = DHTConversion.toInetAddress(node.getAddress());
 
             nodeRoutingTable.addNode(node.getInfoHash().toByteArray(), addr,
-                    State.GOOD);
+                node.getPort(), State.GOOD);
         }
     }
 

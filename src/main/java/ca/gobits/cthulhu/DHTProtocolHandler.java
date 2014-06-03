@@ -34,6 +34,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.util.CollectionUtils;
 
 import ca.gobits.cthulhu.domain.DHTNode;
+import ca.gobits.cthulhu.domain.DHTNode.State;
 import ca.gobits.cthulhu.domain.DHTPeer;
 import ca.gobits.dht.BDecoder;
 import ca.gobits.dht.BEncoder;
@@ -72,20 +73,90 @@ public final class DHTProtocolHandler {
      */
     public byte[] handle(final DatagramPacket packet) throws IOException {
 
-        InetAddress addr = packet.getAddress();
-        int port = packet.getPort();
+        byte[] bytes = null;
 
         Map<String, Object> response = new HashMap<String, Object>();
 
         try {
+
             Map<String, Object> request = bdecode(packet.getData());
+
+            // TODO valid request ("T") parameter
+
+             if (request.containsKey("q")) {
+                bytes = queryRequestHandler(packet, request);
+            } else {
+                queryResponseHandler(packet, request);
+            }
+
+        } catch (Exception e) {
+
+            LOGGER.fatal(e, e);
+            addServerError(response);
+            bytes = bencode(response);
+        }
+
+        return bytes;
+    }
+
+    /**
+     * Handles DHT Query Response.
+     * @param packet  DatagramPacket
+     * @param request Map<String, Object>
+     */
+    private void queryResponseHandler(final DatagramPacket packet,
+        final Map<String, Object> request) {
+
+        if (request.containsKey("r")) {
+
+            @SuppressWarnings("unchecked")
+            Map<String, Object> request1 =
+                (Map<String, Object>) request.get("r");
+
+            if (request1.containsKey("id")) {
+
+                BigInteger id = DHTConversion.toBigInteger(
+                        (byte[]) request1.get("id"));
+
+                DHTNode node = routingTable.findExactNode(id);
+
+                if (node != null) {
+
+                    node.setState(State.GOOD);
+                } else {
+
+                    // TODO verify transaction being sent back is valid
+//                    String t = (String) request.get("t");
+
+                    routingTable.addNode(id, packet.getAddress(),
+                            packet.getPort(), State.GOOD);
+                }
+            }
+        }
+    }
+
+    /**
+     * Creates response from DHT Query request.
+     * @param packet  DatagramPacket
+     * @param request Map<String, Object>
+     * @return byte[]
+     */
+    private byte[] queryRequestHandler(final DatagramPacket packet,
+            final Map<String, Object> request) {
+
+        Map<String, Object> response = new HashMap<String, Object>();
+
+        try {
+
+            String action = new String((byte[]) request.get("q"));
+
+            InetAddress addr = packet.getAddress();
+            int port = packet.getPort();
 
             response.put("y", "r");
             response.put("t", request.get("t"));
             response.put("ip",
                     DHTConversion.compactAddress(addr.getAddress(), port));
-
-            String action = new String((byte[]) request.get("q"));
 
             @SuppressWarnings("unchecked")
             DHTArgumentRequest arguments = new DHTArgumentRequest(
@@ -94,9 +165,6 @@ public final class DHTProtocolHandler {
             if (action.equals("ping")) {
 
                 addPingResponse(arguments, response, packet);
-
-//                routingTable.addNode(arguments.getId(), packet.sender(),
-//                        State.UNKNOWN);
 
             } else if (action.equals("find_node")) {
 
@@ -115,15 +183,27 @@ public final class DHTProtocolHandler {
             }
 
         } catch (Exception e) {
-
-            LOGGER.fatal(e, e);
+            LOGGER.trace(e, e);
             addServerError(response);
-
         }
 
+        return bencode(response);
+    }
+
+    /**
+     * BEncodes response.
+     * @param response  Map<String, Object>
+     * @return byte[]
+     */
+    private byte[] bencode(final Map<String, Object> response) {
         ByteArrayOutputStream os = BEncoder.bencoding(response);
         byte[] bytes = os.toByteArray();
-        os.close();
+
+        try {
+            os.close();
+        } catch (IOException e) {
+            LOGGER.trace(e, e);
+        }
 
         return bytes;
     }

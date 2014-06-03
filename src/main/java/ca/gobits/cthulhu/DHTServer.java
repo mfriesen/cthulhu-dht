@@ -52,6 +52,12 @@ public class DHTServer /*implements Lifecycle*/ {
     @Autowired
     private ThreadPoolTaskExecutor threadPool;
 
+    /** Indicator whether to stop the server. */
+    private boolean stop;
+
+    /** Datagram Socket. */
+    private DatagramSocket serverSocket;
+
     /**
      * Constructor.
      */
@@ -68,20 +74,21 @@ public class DHTServer /*implements Lifecycle*/ {
         LOGGER.info("starting cthulhu on " + port);
 
         try {
-            DatagramSocket serverSocket = new DatagramSocket(port);
+            serverSocket = new DatagramSocket(port);
             byte[] receiveData = new byte[RECEIVE_DATA_LENGTH];
 
-            try {
-                while (true) {
-                    DatagramPacket receivePacket = new DatagramPacket(
-                            receiveData, receiveData.length);
-                    serverSocket.receive(receivePacket);
+            while (true) {
 
-                    threadPool.execute(new DHTProtocolRunnable(serverSocket,
-                            dhtHandler, receivePacket));
+                if (stop) {
+                    break;
                 }
-            } finally {
-                serverSocket.close();
+
+                DatagramPacket receivePacket = new DatagramPacket(
+                        receiveData, receiveData.length);
+                serverSocket.receive(receivePacket);
+
+                threadPool.execute(new DHTProtocolRunnable(serverSocket,
+                        dhtHandler, receivePacket));
             }
 
         } finally {
@@ -89,11 +96,31 @@ public class DHTServer /*implements Lifecycle*/ {
         }
     }
 
+//    @Scheduled(initialDelay=1000, fixedRate=50000000)
+//    public void doSomething() {
+//        System.out.println ("RUNNING>..");
+//
+//        try {
+    // String dat = "d1:ad2:id20:abcdefghij0123456789e1:q4:ping1:t2:aa1:y1:qe";
+//            byte[] bytes = dat.getBytes();
+//            DatagramPacket sendPacket = new DatagramPacket(bytes,
+//                    bytes.length, InetAddress.getByName("localhost"), 8080);
+//            serverSocket.send(sendPacket);
+//        } catch (IOException e) {
+//            LOGGER.warn(e, e);
+//        }
+//    }
+
     /**
      * Gracefully shutdown server.
      */
     public final void shutdownGracefully() {
+        stop = true;
         threadPool.shutdown();
+
+        if (serverSocket != null) {
+            serverSocket.close();
+        }
     }
 
     /**
