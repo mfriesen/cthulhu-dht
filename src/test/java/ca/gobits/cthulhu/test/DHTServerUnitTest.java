@@ -17,97 +17,68 @@
 package ca.gobits.cthulhu.test;
 
 import static org.easymock.EasyMock.expect;
-import static org.junit.Assert.assertTrue;
+import static org.easymock.EasyMock.isA;
 
-import java.io.ByteArrayOutputStream;
+import java.net.DatagramPacket;
+import java.net.DatagramSocket;
 
 import org.easymock.EasyMockRunner;
 import org.easymock.EasyMockSupport;
 import org.easymock.Mock;
+import org.easymock.TestSubject;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.springframework.context.annotation.AnnotationConfigApplicationContext;
+import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.test.util.ReflectionTestUtils;
 
+import ca.gobits.cthulhu.DHTProtocolHandler;
 import ca.gobits.cthulhu.DHTServer;
-import ca.gobits.cthulhu.DHTServerConfig;
 
 /**
  * DHTServer UnitTests.
  *
  */
+@SuppressWarnings("boxing")
 @RunWith(EasyMockRunner.class)
 public final class DHTServerUnitTest extends EasyMockSupport {
 
-    /** Mock ApplicationContext. */
+    /** DHTServer instance. */
+    @TestSubject
+    private final DHTServer server = new DHTServer();
+
+    /** Mock DHT Protocol Handler. */
     @Mock
-    private AnnotationConfigApplicationContext mockAc;
+    private DHTProtocolHandler dhtHandler;
+
+    /** Mock Thread Pool Executor. */
+    @Mock
+    private ThreadPoolTaskExecutor socketThreadPool;
+
+    /** Mock Datagram Socket. */
+    @Mock
+    private DatagramSocket serverSocket;
 
     /**
-     * testMain01() -?.
+     * testRun01().
+     * @throws Exception  Exception
      */
     @Test
-    public void testMain01() {
+    public void testRun01() throws Exception {
         // given
-        String[] args = new String[] {"-?"};
-        ByteArrayOutputStream bo = new ByteArrayOutputStream();
-        ReflectionTestUtils.setField(System.out, "out", bo);
+        int port = 6881;
+        ReflectionTestUtils.setField(server, "stop", Boolean.TRUE);
 
         // when
-        DHTServer.main(args, mockAc);
+        expect(serverSocket.getLocalPort()).andReturn(port);
+        serverSocket.receive(isA(DatagramPacket.class));
+        socketThreadPool.execute(isA(Runnable.class));
+        socketThreadPool.shutdown();
+        serverSocket.close();
 
-        assertUsage(bo);
-    }
-
-    /**
-     * testMain02().
-     * @throws Exception Exception
-     */
-    @Test
-    public void testMain02() throws Exception {
-        // given
-        final String[] args = new String[]{};
-
-        DHTServer mockServer = createMock(DHTServer.class);
-
-        // when
-        expect(mockAc.getBean(DHTServer.class)).andReturn(mockServer);
-        mockServer.run(DHTServerConfig.DEFAULT_PORT);
         replayAll();
-        DHTServer.main(args, mockAc);
+        server.run();
 
-        // verify
+        // then
         verifyAll();
-    }
-
-    /**
-     * testMain03() - server throws exception.
-     * @throws Exception Exception
-     */
-    @Test
-    public void testMain03() throws Exception {
-        // given
-        final String[] args = new String[]{};
-
-        // when
-        expect(mockAc.getBean(DHTServer.class))
-                .andThrow(new RuntimeException());
-        replayAll();
-        DHTServer.main(args, mockAc);
-
-        // verify
-        verifyAll();
-    }
-
-    /**
-     * Assert Usage Message is shown.
-     * @param bo ByteArrayOutputStream
-     */
-    private void assertUsage(final ByteArrayOutputStream bo) {
-        String expected = "usage: java -jar dht.jar\nParameters\n"
-            + " -?         help\n"
-            + " -p <arg>   bind to port\n";
-
-        assertTrue(bo.toString().contains(expected));
     }
 }

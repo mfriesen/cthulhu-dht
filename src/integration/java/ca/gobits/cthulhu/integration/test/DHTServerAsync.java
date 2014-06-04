@@ -45,8 +45,9 @@ public class DHTServerAsync {
     @Async
     public void start() throws Exception {
         if (!isStarted) {
+            System.setProperty("port", "" + DHTServerConfig.DEFAULT_PORT);
             isStarted = true;
-            server.run(DHTServerConfig.DEFAULT_PORT);
+            server.run();
         }
     }
 

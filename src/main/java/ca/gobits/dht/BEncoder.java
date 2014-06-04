@@ -19,6 +19,7 @@ package ca.gobits.dht;
 import static ca.gobits.dht.DHTConversion.BYTE_TO_INT;
 
 import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.util.Collection;
 import java.util.Map;
 import java.util.SortedMap;
@@ -42,11 +43,20 @@ public final class BEncoder {
      * @param ob  object to encode
      * @return String
      */
-    public static ByteArrayOutputStream bencoding(final Object ob) {
+    public static byte[] bencoding(final Object ob) {
 
         ByteArrayOutputStream os = new ByteArrayOutputStream();
         bencoding(ob, os);
-        return os;
+
+        byte[] bytes = os.toByteArray();
+
+        try {
+            os.close();
+        } catch (IOException e) {
+            return bytes;
+        }
+
+        return bytes;
     }
 
     /**

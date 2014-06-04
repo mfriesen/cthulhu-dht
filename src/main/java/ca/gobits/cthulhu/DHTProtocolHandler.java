@@ -18,7 +18,6 @@ package ca.gobits.cthulhu;
 
 import static ca.gobits.dht.DHTConversion.toByteArrayFromDHTPeer;
 
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.math.BigInteger;
 import java.net.DatagramPacket;
@@ -44,7 +43,7 @@ import ca.gobits.dht.DHTConversion;
  * DHTProtocolHandler  implementation of the BitTorrent protocol.
  * http://www.bittorrent.org/beps/bep_0005.html
  */
-public final class DHTProtocolHandler {
+public class DHTProtocolHandler {
 
     /** Length of Get_Peers token. */
     private static final int GET_PEERS_TOKEN_LENGTH = 10;
@@ -64,6 +63,10 @@ public final class DHTProtocolHandler {
     /** DHT Token Table. */
     @Autowired
     private DHTTokenTable tokenTable;
+
+    /** DHTQuery Protocol instance. */
+    @Autowired
+    private DHTQueryProtocol queryProtocol;
 
     /**
      * Read DatagramPacket.
@@ -148,6 +151,8 @@ public final class DHTProtocolHandler {
 
         try {
 
+            // TODO update Node status
+
             String action = new String((byte[]) request.get("q"));
 
             InetAddress addr = packet.getAddress();
@@ -183,7 +188,7 @@ public final class DHTProtocolHandler {
             }
 
         } catch (Exception e) {
-            LOGGER.trace(e, e);
+            LOGGER.debug(e, e);
             addServerError(response);
         }
 
@@ -196,15 +201,7 @@ public final class DHTProtocolHandler {
      * @return byte[]
      */
     private byte[] bencode(final Map<String, Object> response) {
-        ByteArrayOutputStream os = BEncoder.bencoding(response);
-        byte[] bytes = os.toByteArray();
-
-        try {
-            os.close();
-        } catch (IOException e) {
-            LOGGER.trace(e, e);
-        }
-
+        byte[] bytes = BEncoder.bencoding(response);
         return bytes;
     }
 
@@ -334,7 +331,7 @@ public final class DHTProtocolHandler {
             final Map<String, Object> response,
             final DatagramPacket packet) {
 
-        response.put("r", map("id", DHTServer.NODE_ID));
+        response.put("r", map("id", queryProtocol.getNodeId()));
     }
 
     /**

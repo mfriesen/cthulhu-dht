@@ -24,7 +24,7 @@ public final class DHTServerConfig {
         .addOption("?", false, "help");
 
     /** Default Port. */
-    public static final int DEFAULT_PORT = 8080;
+    public static final int DEFAULT_PORT = 6881;
 
     /** DHT Server Port. */
     private int port = DEFAULT_PORT;

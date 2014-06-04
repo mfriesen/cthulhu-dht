@@ -25,7 +25,6 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.math.BigInteger;
 import java.net.DatagramPacket;
@@ -50,7 +49,7 @@ import org.springframework.test.util.ReflectionTestUtils;
 import ca.gobits.cthulhu.DHTInfoHashRoutingTable;
 import ca.gobits.cthulhu.DHTNodeRoutingTable;
 import ca.gobits.cthulhu.DHTProtocolHandler;
-import ca.gobits.cthulhu.DHTServer;
+import ca.gobits.cthulhu.DHTQueryProtocol;
 import ca.gobits.cthulhu.DHTTokenTable;
 import ca.gobits.cthulhu.domain.DHTNode;
 import ca.gobits.cthulhu.domain.DHTNode.State;
@@ -84,6 +83,10 @@ public final class DHTProtocolHandlerUnitTest extends EasyMockSupport {
     @Mock
     private DHTTokenTable tokenTable;
 
+    /** Mock DHTQueryProtocol. */
+    @Mock
+    private DHTQueryProtocol queryProtocol;
+
     /** InetSocketAddress. */
     private InetAddress iaddr;
 
@@ -114,6 +117,8 @@ public final class DHTProtocolHandlerUnitTest extends EasyMockSupport {
         DatagramPacket packet = new DatagramPacket(bb, bb.length, iaddr, port);
 
         // when
+        expect(queryProtocol.getNodeId()).andReturn(
+                "ABCDEFGHIJKLMNOPQRST".getBytes());
         replayAll();
         byte[] resultBytes = handler.handle(packet);
 
@@ -123,13 +128,8 @@ public final class DHTProtocolHandlerUnitTest extends EasyMockSupport {
         String result = new String(resultBytes);
 
         assertTrue(result.contains("d2:ip6:2G"));
-        assertTrue(result.contains(":rd2:id20:6h"));
-        assertTrue(result.contains("e1:t2:aa1:y1:re"));
-
-        assertEquals("ZDI6aXA2OjJH1ov8ODE6cmQyOmlkMjA6NmjAFP"
-                + "wuQVw4idejCIEqBeXEPQFlMTp0MjphYTE6eTE6cmU=",
-
-                Base64.encodeBase64String(resultBytes));
+        assertTrue(result
+                .endsWith("81:rd2:id20:ABCDEFGHIJKLMNOPQRSTe1:t2:aa1:y1:re"));
     }
 
     /**
@@ -699,7 +699,7 @@ public final class DHTProtocolHandlerUnitTest extends EasyMockSupport {
         map.put("q", "find_node");
 
         Map<String, Object> map2 = new HashMap<String, Object>();
-        map2.put("id", DHTServer.NODE_ID);
+        map2.put("id", new DHTQueryProtocol().getNodeId());
         map2.put("target", new int[] {255, 255, 255, 255, 255, 255, 255, 255,
                 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255 });
         map.put("a", map2);
@@ -714,13 +714,9 @@ public final class DHTProtocolHandlerUnitTest extends EasyMockSupport {
      */
     private DatagramPacket createFindNodeRequest() throws IOException {
         Map<String, Object> map = createFindNodeRequestMap();
-        ByteArrayOutputStream bytes = BEncoder.bencoding(map);
-        byte[] bb = bytes.toByteArray();
+        byte[] bb = BEncoder.bencoding(map);
 
         DatagramPacket packet = new DatagramPacket(bb, bb.length, iaddr, port);
-
-        bytes.close();
-
         return packet;
     }
 

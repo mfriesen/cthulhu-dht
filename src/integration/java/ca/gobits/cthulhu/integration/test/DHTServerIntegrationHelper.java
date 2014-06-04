@@ -100,7 +100,7 @@ public final class DHTServerIntegrationHelper {
         a.put("id", node.getInfoHash().toByteArray());
         request.put("a", a);
 
-        return BEncoder.bencoding(request).toByteArray();
+        return BEncoder.bencoding(request);
 
     }
 }

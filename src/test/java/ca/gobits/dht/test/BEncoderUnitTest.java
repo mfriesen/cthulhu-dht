@@ -19,7 +19,6 @@ package ca.gobits.dht.test;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
-import java.io.ByteArrayOutputStream;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Modifier;
 import java.net.Inet6Address;
@@ -56,13 +55,12 @@ public final class BEncoderUnitTest {
         map.put("a", map2);
 
         // when
-        ByteArrayOutputStream result = BEncoder.bencoding(map);
+        byte[] result = BEncoder.bencoding(map);
 
         // then
         assertEquals(
                 "d1:ad2:id20:abcdefghij0123456789e1:q4:ping1:t2:aa1:y1:qe",
-                result.toString());
-        result.close();
+                new String(result));
     }
 
     /**
@@ -84,15 +82,13 @@ public final class BEncoderUnitTest {
         map2.put("token", "aoeusnth");
 
         // when
-        ByteArrayOutputStream result = BEncoder.bencoding(map);
+        byte[] result = BEncoder.bencoding(map);
 
         // then
         assertEquals(
           "d1:ad2:id20:abcdefghij01234567899:info_hash20:mnopqrstuvwxyz1234564:"
           + "porti6881e5:token8:aoeusnthe1:q13:announce_peer1:t2:aa1:y1:qe",
-          result.toString());
-
-        result.close();
+          new String(result));
     }
 
     /**
@@ -107,12 +103,10 @@ public final class BEncoderUnitTest {
         list.add(Long.valueOf(12));
 
         // when
-        ByteArrayOutputStream result = BEncoder.bencoding(list);
+        byte[] result = BEncoder.bencoding(list);
 
         // then
-        assertEquals("l1:si12ee", result.toString());
-
-        result.close();
+        assertEquals("l1:si12ee", new String(result));
     }
 
     /**
@@ -129,11 +123,10 @@ public final class BEncoderUnitTest {
         map.put("t", list);
 
         // when
-        ByteArrayOutputStream result = BEncoder.bencoding(map);
+        byte[] result = BEncoder.bencoding(map);
 
         // then
-        assertEquals("d1:tl1:si12eee", new String(result.toByteArray()));
-        result.close();
+        assertEquals("d1:tl1:si12eee", new String(result));
     }
 
     /**
@@ -161,19 +154,17 @@ public final class BEncoderUnitTest {
               -66, -91, 39, -22, 2, 32, 3, 82, 49, 59, -64, 89, 68, 81, -112 };
 
         // when
-        ByteArrayOutputStream result = BEncoder.bencoding(bytes);
-        byte[] resultBytes = result.toByteArray();
+        byte[] result = BEncoder.bencoding(bytes);
+//        byte[] resultBytes = result.toByteArray();
 
         // then
-        assertEquals(3 + bytes.length, resultBytes.length);
-        assertEquals('2', resultBytes[0]);
-        assertEquals('0', resultBytes[1]);
-        assertEquals(':', resultBytes[2]);
-        assertEquals(bytes[0], resultBytes[3]);
-        assertEquals(bytes[1], resultBytes[4]);
-        assertEquals(bytes[2], resultBytes[5]);
-
-        result.close();
+        assertEquals(3 + bytes.length, result.length);
+        assertEquals('2', result[0]);
+        assertEquals('0', result[1]);
+        assertEquals(':', result[2]);
+        assertEquals(bytes[0], result[3]);
+        assertEquals(bytes[1], result[4]);
+        assertEquals(bytes[2], result[5]);
     }
 
     /**

@@ -16,6 +16,9 @@
 
 package ca.gobits.cthulhu;
 
+import java.net.DatagramSocket;
+import java.net.SocketException;
+
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.scheduling.annotation.EnableAsync;
@@ -74,8 +77,20 @@ public class DHTConfiguration {
     /**
      * @return ThreadPoolTaskExecutor
      */
-    @Bean
-    public ThreadPoolTaskExecutor threadExecutor() {
+    @Bean(name = "socketThreadPool")
+    public ThreadPoolTaskExecutor socketThreadPool() {
+        ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
+        executor.setCorePoolSize(THREAD_CORE_POOL_SIZE);
+        executor.setMaxPoolSize(THREAD_MAX_POOL_SIZE);
+        executor.setQueueCapacity(THREAD_QUEUE_CAPACITY);
+        return executor;
+    }
+
+    /**
+     * @return ThreadPoolTaskExecutor
+     */
+    @Bean(name = "nodeStatusThreadPool")
+    public ThreadPoolTaskExecutor nodeStatusThreadPool() {
         ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
         executor.setCorePoolSize(THREAD_CORE_POOL_SIZE);
         executor.setMaxPoolSize(THREAD_MAX_POOL_SIZE);
@@ -89,5 +104,33 @@ public class DHTConfiguration {
     @Bean
     public DHTProtocolHandler dhtProtocolHandler() {
         return new DHTProtocolHandler();
+    }
+
+    /**
+     * @return DHTQueryProtocol
+     */
+    @Bean
+    public DHTQueryProtocol dhtQueryProtocol() {
+        return new DHTQueryProtocol();
+    }
+
+    /**
+     * @return DHTNodeStatusQueue
+     */
+    @Bean
+    public DHTNodeStatusQueue dhtNodeStatusQueue() {
+        return new DHTNodeStatusQueue();
+    }
+
+    /**
+     * @return DatagramSocket
+     * @throws SocketException  SocketException
+     */
+    @Bean
+    public DatagramSocket datagramSocket() throws SocketException {
+        String p = System.getProperty("port");
+        int port = p != null ? Integer.valueOf(p).intValue()
+                : DHTServerConfig.DEFAULT_PORT;
+        return  new DatagramSocket(port);
     }
 }

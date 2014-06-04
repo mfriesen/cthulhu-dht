@@ -101,8 +101,7 @@ public final class DHTGetPeersIntegrationTest {
                 infohash.getBytes());
 
         // when
-        byte[] results = sendUDPPacket(BEncoder.bencoding(request)
-                .toByteArray());
+        byte[] results = sendUDPPacket(BEncoder.bencoding(request));
 
         // then
         Map<String, Object> response = (Map<String, Object>) new BDecoder()

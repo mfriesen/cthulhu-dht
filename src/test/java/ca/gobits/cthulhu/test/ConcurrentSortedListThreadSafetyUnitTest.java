@@ -157,7 +157,7 @@ public final class ConcurrentSortedListThreadSafetyUnitTest {
             @Override
             public void run() {
                 for (int i = 0; i < ITERATION_COUNT; i++) {
-                    LOGGER.debug("CLEAR");
+                    LOGGER.trace("CLEAR");
                     list.clear();
 
                     sleep();
@@ -177,7 +177,7 @@ public final class ConcurrentSortedListThreadSafetyUnitTest {
             public void run() {
                 for (int i = 0; i < ITERATION_COUNT; i++) {
 
-                    LOGGER.debug("REMOVE");
+                    LOGGER.trace("REMOVE");
                     if (!list.isEmpty()) {
                         String s = list.get(0);
                         list.remove(s);
@@ -201,7 +201,7 @@ public final class ConcurrentSortedListThreadSafetyUnitTest {
                 for (int i = 0; i < ITERATION_COUNT; i++) {
 
                     if (!list.isEmpty()) {
-                        LOGGER.debug("REMOVEALL");
+                        LOGGER.trace("REMOVEALL");
 
                         String s = list.get(0);
                         list.removeAll(Arrays.asList(s));
@@ -224,7 +224,7 @@ public final class ConcurrentSortedListThreadSafetyUnitTest {
             @Override
             public void run() {
                 for (int i = 0; i < ITERATION_COUNT; i++) {
-                    LOGGER.debug("ADD");
+                    LOGGER.trace("ADD");
                     list.add(UUID.randomUUID().toString());
                     list.add(UUID.randomUUID().toString());
                     list.add(UUID.randomUUID().toString());
@@ -259,7 +259,7 @@ public final class ConcurrentSortedListThreadSafetyUnitTest {
             @Override
             public void run() {
                 for (int i = 0; i < ITERATION_COUNT; i++) {
-                    LOGGER.debug("ADDALL");
+                    LOGGER.trace("ADDALL");
                     String uuid0 = UUID.randomUUID().toString();
                     String uuid1 = UUID.randomUUID().toString();
                     String uuid2 = UUID.randomUUID().toString();
@@ -287,12 +287,12 @@ public final class ConcurrentSortedListThreadSafetyUnitTest {
             @Override
             public void run() {
                 for (int i = 0; i < ITERATION_COUNT; i++) {
-                    LOGGER.debug("GET");
+                    LOGGER.trace("GET");
                     String s = list.get(list.size() - 1);
                     assertNotNull(list.get(s));
 
                     int index = list.indexOf(s);
-                    LOGGER.debug("INDEXOF");
+                    LOGGER.trace("INDEXOF");
                     assertTrue(index > -1);
                     assertNotNull(list.get(s));
 
@@ -314,7 +314,7 @@ public final class ConcurrentSortedListThreadSafetyUnitTest {
             @Override
             public void run() {
                 for (int i = 0; i < ITERATION_COUNT; i++) {
-                    LOGGER.debug("TOARRAY");
+                    LOGGER.trace("TOARRAY");
                     assertNotNull(list.toArray());
 
                     sleep();
@@ -337,7 +337,7 @@ public final class ConcurrentSortedListThreadSafetyUnitTest {
                 for (int i = 0; i < ITERATION_COUNT; i++) {
 
                     assertNotNull(list.subList(0, list.size() - 1));
-                    LOGGER.debug("SUBLIST");
+                    LOGGER.trace("SUBLIST");
                     sleep();
                 }
             }
@@ -357,7 +357,7 @@ public final class ConcurrentSortedListThreadSafetyUnitTest {
                 for (int i = 0; i < ITERATION_COUNT; i++) {
 
                     assertNotNull(list.iterator());
-                    LOGGER.debug("ITERATOR");
+                    LOGGER.trace("ITERATOR");
                     sleep();
                 }
             }
@@ -377,7 +377,7 @@ public final class ConcurrentSortedListThreadSafetyUnitTest {
                 for (int i = 0; i < ITERATION_COUNT; i++) {
 
                     assertFalse(list.isEmpty());
-                    LOGGER.debug("ISEMPTY");
+                    LOGGER.trace("ISEMPTY");
                     sleep();
                 }
             }
