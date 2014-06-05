@@ -343,4 +343,83 @@ public final class DHTTokenTableBasicUnitTest {
 
         assertEquals(1, list.size());
     }
+
+    /**
+     * testGetTransactionId01() - first time Null LastUpdated Date.
+     */
+    @Test
+    public void testGetTransactionId01() {
+        // given
+        DHTTokenTable t = new DHTTokenTableBasic();
+        assertNull(ReflectionTestUtils.getField(t, "transactionId1"));
+        assertNull(ReflectionTestUtils.getField(t, "transactionId2"));
+
+        // when
+        String result = t.getTransactionId();
+
+        // verify
+        assertEquals(2, result.length());
+        assertEquals(result, ReflectionTestUtils.getField(t, "transactionId1"));
+        assertEquals(result, ReflectionTestUtils.getField(t, "transactionId2"));
+    }
+
+    /**
+     * testGetTransactionId02() - Expired Transaction Last Updated.
+     */
+    @Test
+    public void testGetTransactionId02() {
+        // given
+        DHTTokenTable tt = new DHTTokenTableBasic();
+        Calendar c = Calendar.getInstance();
+        c.add(Calendar.MINUTE, -16);
+        ReflectionTestUtils.setField(tt, "transactionLastUpdated", c.getTime());
+        String transactionId = tt.getTransactionId();
+
+        // when
+        String result = tt.getTransactionId();
+
+        // verify
+        assertEquals(2, result.length());
+        assertFalse(result.equals(transactionId));
+    }
+
+    /**
+     * testGetTransactionId03() - NOT Expired Transaction Last Updated.
+     */
+    @Test
+    public void testGetTransactionId03() {
+        // given
+        DHTTokenTable tt = new DHTTokenTableBasic();
+        Calendar c = Calendar.getInstance();
+        c.add(Calendar.MINUTE, -14);
+        ReflectionTestUtils.setField(tt, "transactionLastUpdated", c.getTime());
+        String transactionId = tt.getTransactionId();
+
+        // when
+        String result = tt.getTransactionId();
+
+        // verify
+        assertEquals(2, result.length());
+        assertEquals(result, transactionId);
+    }
+
+    /**
+     * testGetTransactionId04() - different transaction Id tokens both
+     * transaction ids are valid.
+     */
+    @Test
+    public void testGetTransactionId04() {
+        // given
+        DHTTokenTable tt = new DHTTokenTableBasic();
+
+        // when
+        ReflectionTestUtils.setField(tt, "transactionId1", "aa");
+        ReflectionTestUtils.setField(tt, "transactionId2", "bb");
+
+        // verify
+        assertTrue(tt.isValidTransactionId("aa"));
+        assertTrue(tt.isValidTransactionId("bb"));
+        assertFalse(tt.isValidTransactionId(null));
+        assertFalse(tt.isValidTransactionId("ab"));
+    }
 }

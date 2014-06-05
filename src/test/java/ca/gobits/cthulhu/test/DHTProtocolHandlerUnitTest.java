@@ -568,6 +568,7 @@ public final class DHTProtocolHandlerUnitTest extends EasyMockSupport {
 
     /**
      * testHandle15() - test request HAS "id" and NODE IS NOT found.
+     * Transaction ID is valid.
      * @throws Exception  Exception
      */
     @Test
@@ -583,7 +584,38 @@ public final class DHTProtocolHandlerUnitTest extends EasyMockSupport {
 
         // when
         expect(routingTable.findExactNode(id)).andReturn(node);
+        expect(tokenTable.isValidTransactionId("aa")).andReturn(true);
         routingTable.addNode(id, iaddr, port, State.GOOD);
+
+        replayAll();
+
+        byte[] bytes = handler.handle(packet);
+
+        // then
+        verifyAll();
+
+        assertNull(bytes);
+    }
+
+    /**
+     * testHandle16() - test request HAS "id" and NODE IS NOT found.
+     * Transaction ID is NOT valid.
+     * @throws Exception  Exception
+     */
+    @Test
+    public void testHandle16() throws Exception {
+
+        // given
+        DHTNode node = null;
+        BigInteger id = new BigInteger(
+                "624742783717797424288959994005102614424044451126");
+        String s = "d1:rd2:id20:mnopqrstuvwxyz123456e1:t2:aa1:y1:re";
+        byte[] bb = s.getBytes();
+        DatagramPacket packet = new DatagramPacket(bb, bb.length, iaddr, port);
+
+        // when
+        expect(routingTable.findExactNode(id)).andReturn(node);
+        expect(tokenTable.isValidTransactionId("aa")).andReturn(false);
 
         replayAll();
 

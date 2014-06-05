@@ -126,13 +126,15 @@ public class DHTProtocolHandler {
                 if (node != null) {
 
                     node.setState(State.GOOD);
+
                 } else {
 
-                    // TODO verify transaction being sent back is valid
-//                    String t = (String) request.get("t");
+                    String transId = new String((byte[]) request.get("t"));
+                    if (tokenTable.isValidTransactionId(transId)) {
 
-                    routingTable.addNode(id, packet.getAddress(),
-                            packet.getPort(), State.GOOD);
+                        routingTable.addNode(id, packet.getAddress(),
+                                packet.getPort(), State.GOOD);
+                    }
                 }
             }
         }

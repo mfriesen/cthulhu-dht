@@ -19,6 +19,8 @@ package ca.gobits.cthulhu;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.springframework.beans.factory.annotation.Autowired;
+
 import ca.gobits.dht.BEncoder;
 import ca.gobits.dht.DHTIdentifier;
 
@@ -27,9 +29,14 @@ import ca.gobits.dht.DHTIdentifier;
  */
 public class DHTQueryProtocol {
 
+    // TODO generate random protocol or command line param.
     /** DHT Node Id. */
     private static final byte[] NODE_ID = DHTIdentifier
             .sha1(DHTQueryProtocol.class.getName());
+
+    /** DHT Tokens handler. */
+    @Autowired
+    private DHTTokenTable tokens;
 
     /**
      * Generates a Ping Request.
@@ -37,7 +44,7 @@ public class DHTQueryProtocol {
      */
     public byte[] pingQuery() {
         Map<Object, Object> map = new HashMap<Object, Object>();
-        map.put("t", "aa");
+        map.put("t", tokens.getTransactionId());
         map.put("y", "q");
         map.put("q", "ping");
 
