@@ -628,6 +628,28 @@ public final class DHTProtocolHandlerUnitTest extends EasyMockSupport {
     }
 
     /**
+     * testHandle17() - test invalid packet missing "T" param.
+     * @throws Exception  Exception
+     */
+    @Test
+    public void testHandle17() throws Exception {
+        // given
+        String dat = "d1:ad2:id20:abcdefghij0123456789e1:q4:ping1:z2:aa1:y1:qe";
+        byte[] bb = dat.getBytes();
+
+        DatagramPacket packet = new DatagramPacket(bb, bb.length, iaddr, port);
+
+        // when
+        replayAll();
+        byte[] result = handler.handle(packet);
+
+        // then
+        verifyAll();
+
+        assertNull(result);
+    }
+
+    /**
      * Verify AnnouncePeer response.
      * @param bytes  bytes
      * @throws IOException  IOException

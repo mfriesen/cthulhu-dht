@@ -84,12 +84,13 @@ public class DHTProtocolHandler {
 
             Map<String, Object> request = bdecode(packet.getData());
 
-            // TODO valid request ("T") parameter
+            if (isValid(request)) {
 
-             if (request.containsKey("q")) {
-                bytes = queryRequestHandler(packet, request);
-            } else {
-                queryResponseHandler(packet, request);
+                 if (request.containsKey("q")) {
+                    bytes = queryRequestHandler(packet, request);
+                } else {
+                    queryResponseHandler(packet, request);
+                }
             }
 
         } catch (Exception e) {
@@ -100,6 +101,17 @@ public class DHTProtocolHandler {
         }
 
         return bytes;
+    }
+
+    /**
+     * Whether Request is valid.
+     * @param request  Map<String, Object>
+     * @return boolean
+     */
+    private boolean isValid(final Map<String, Object> request) {
+
+        boolean valid = request.containsKey("t");
+        return valid;
     }
 
     /**
