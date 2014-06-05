@@ -119,6 +119,8 @@ public final class DHTProtocolHandlerUnitTest extends EasyMockSupport {
         // when
         expect(queryProtocol.getNodeId()).andReturn(
                 "ABCDEFGHIJKLMNOPQRST".getBytes());
+        expectUpdateNodeStatusToGood();
+
         replayAll();
         byte[] resultBytes = handler.handle(packet);
 
@@ -145,6 +147,11 @@ public final class DHTProtocolHandlerUnitTest extends EasyMockSupport {
         DatagramPacket packet = createFindNodeRequest();
 
         // when
+        expect(
+                routingTable.findExactNode(new BigInteger(
+                        "497515722629738093096511851053646804670707962022")))
+                .andReturn(null);
+
         expect(routingTable.findClosestNodes(nodeId)).andReturn(getFindNodes());
 
         replayAll();
@@ -199,6 +206,7 @@ public final class DHTProtocolHandlerUnitTest extends EasyMockSupport {
         byte[] bb = dat.getBytes();
 
         DatagramPacket packet = new DatagramPacket(bb, bb.length, iaddr, port);
+        expectUpdateNodeStatusToGood();
 
         // when
         replayAll();
@@ -282,6 +290,7 @@ public final class DHTProtocolHandlerUnitTest extends EasyMockSupport {
 
         // when
         expect(peerRoutingTable.findPeers(nodeId)).andReturn(peers);
+        expectUpdateNodeStatusToGood();
 
         replayAll();
         byte[] bytes = handler.handle(packet);
@@ -329,6 +338,7 @@ public final class DHTProtocolHandlerUnitTest extends EasyMockSupport {
         DatagramPacket packet = new DatagramPacket(bb, bb.length, iaddr, port);
 
         // when
+        expectUpdateNodeStatusToGood();
         expect(peerRoutingTable.findPeers(nodeId)).andReturn(null);
         expect(routingTable.findClosestNodes(nodeId)).andReturn(getFindNodes());
 
@@ -384,6 +394,7 @@ public final class DHTProtocolHandlerUnitTest extends EasyMockSupport {
         DatagramPacket packet = new DatagramPacket(bb, bb.length, iaddr, port);
 
         // when
+        expectUpdateNodeStatusToGood();
         expect(tokenTable.valid(eq(iaddr), eq(p), aryEq(secret))).andReturn(
                 true);
         peerRoutingTable.addPeer(eq(nodeId), aryEq(iaddr.getAddress()), eq(p));
@@ -416,6 +427,7 @@ public final class DHTProtocolHandlerUnitTest extends EasyMockSupport {
         DatagramPacket packet = new DatagramPacket(bb, bb.length, iaddr, port);
 
         // when
+        expectUpdateNodeStatusToGood();
         expect(tokenTable.valid(eq(iaddr), eq(6881), aryEq(secret))).andReturn(
                 true);
         peerRoutingTable.addPeer(eq(nodeId), aryEq(iaddr.getAddress()), eq(p));
@@ -447,6 +459,7 @@ public final class DHTProtocolHandlerUnitTest extends EasyMockSupport {
         DatagramPacket packet = new DatagramPacket(bb, bb.length, iaddr, port);
 
         // when
+        expectUpdateNodeStatusToGood();
         expect(tokenTable.valid(eq(iaddr), eq(port), aryEq(secret))).andReturn(
                 true);
 
@@ -480,6 +493,7 @@ public final class DHTProtocolHandlerUnitTest extends EasyMockSupport {
         DatagramPacket packet = new DatagramPacket(bb, bb.length, iaddr, port);
 
         // when
+        expectUpdateNodeStatusToGood();
         expect(tokenTable.valid(eq(iaddr), eq(port), aryEq(secret)))
             .andReturn(false);
 
@@ -792,5 +806,15 @@ public final class DHTProtocolHandlerUnitTest extends EasyMockSupport {
                 + "1OMLqH4S1c80wM7Im3z+h2eT67Bk+mLkMUOm11i/GLHEmg+2eZ2k8oTW8"
                 + "nvfQeuHRuSdPFkNMlnacB1QjGFm4YENjhN1+EU8ixe1l8lxjV3tmCMTeO5"
                 + "l6mJ2bR/b14v3cwoImjU1KsAw7MvBxZTE6dDI6YWExOnkxOnJl";
+    }
+
+    /**
+     * expect Update Node Status to Good.
+     */
+    private void expectUpdateNodeStatusToGood() {
+        expect(
+                routingTable.findExactNode(new BigInteger(
+                        "555966236078696110491139251576793858856027895865")))
+                .andReturn(null);
     }
 }

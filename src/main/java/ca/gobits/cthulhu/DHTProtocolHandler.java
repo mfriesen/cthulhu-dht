@@ -133,13 +133,7 @@ public class DHTProtocolHandler {
                 BigInteger id = DHTConversion.toBigInteger(
                         (byte[]) request1.get("id"));
 
-                DHTNode node = routingTable.findExactNode(id);
-
-                if (node != null) {
-
-                    node.setState(State.GOOD);
-
-                } else {
+                if (!updateNodeStatusToGood(id, State.GOOD)) {
 
                     String transId = new String((byte[]) request.get("t"));
                     if (tokenTable.isValidTransactionId(transId)) {
@@ -150,6 +144,26 @@ public class DHTProtocolHandler {
                 }
             }
         }
+    }
+
+    /**
+     * Updates DHTNode's state.
+     * @param id  infohash
+     * @param state  state to update to
+     * @return boolean
+     */
+    private boolean updateNodeStatusToGood(final BigInteger id,
+            final State state) {
+
+        boolean updated = false;
+        DHTNode node = routingTable.findExactNode(id);
+
+        if (node != null) {
+            node.setState(state);
+            updated = true;
+        }
+
+        return updated;
     }
 
     /**
@@ -165,8 +179,6 @@ public class DHTProtocolHandler {
 
         try {
 
-            // TODO update Node status
-
             String action = new String((byte[]) request.get("q"));
 
             InetAddress addr = packet.getAddress();
@@ -180,6 +192,9 @@ public class DHTProtocolHandler {
             @SuppressWarnings("unchecked")
             DHTArgumentRequest arguments = new DHTArgumentRequest(
                     (Map<String, Object>) request.get("a"));
+
+            updateNodeStatusToGood(
+                    DHTConversion.toBigInteger(arguments.getId()), State.GOOD);
 
             if (action.equals("ping")) {
 
