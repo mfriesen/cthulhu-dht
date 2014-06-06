@@ -18,50 +18,51 @@ package ca.gobits.cthulhu.test;
 
 import static org.easymock.EasyMock.expect;
 import static org.junit.Assert.assertTrue;
+import static org.powermock.api.easymock.PowerMock.createMock;
+import static org.powermock.api.easymock.PowerMock.replay;
+import static org.powermock.api.easymock.PowerMock.verify;
+import static org.powermock.api.mockito.PowerMockito.whenNew;
 
 import java.io.ByteArrayOutputStream;
+import java.io.PrintWriter;
 
-import org.apache.log4j.Logger;
-import org.easymock.EasyMockRunner;
-import org.easymock.EasyMockSupport;
-import org.easymock.Mock;
+import org.apache.commons.cli.HelpFormatter;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.powermock.core.classloader.annotations.PrepareForTest;
+import org.powermock.modules.junit4.PowerMockRunner;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
-import org.springframework.test.util.ReflectionTestUtils;
 
 import ca.gobits.cthulhu.DHTServer;
 import ca.gobits.cthulhu.Main;
-
 /**
  * DHTServer UnitTests.
  *
  */
-@RunWith(EasyMockRunner.class)
-public final class MainUnitTest extends EasyMockSupport {
-
-    /** Logger. */
-    private static final Logger LOGGER = Logger
-            .getLogger(MainUnitTest.class);
+@RunWith(PowerMockRunner.class)
+@PrepareForTest({ HelpFormatter.class })
+public final class MainUnitTest {
 
     /** Mock ApplicationContext. */
-    @Mock
-    private AnnotationConfigApplicationContext ac;
+    private final AnnotationConfigApplicationContext ac =
+            createMock(AnnotationConfigApplicationContext.class);
 
     /**
      * testMain01() -?.
+     * @throws Exception  Exception
      */
     @Test
-    public void testMain01() {
+    public void testMain01() throws Exception {
         // given
         String[] args = new String[] {"-?"};
         ByteArrayOutputStream bo = new ByteArrayOutputStream();
-        ReflectionTestUtils.setField(System.out, "out", bo);
+        PrintWriter pw = new PrintWriter(bo);
+        whenNew(PrintWriter.class).withAnyArguments().thenReturn(pw);
 
         // when
         Main.main(args);
 
-        assertUsage(bo);
+        assertUsage(bo.toString());
     }
 
     /**
@@ -79,11 +80,11 @@ public final class MainUnitTest extends EasyMockSupport {
         ac.refresh();
         expect(ac.getBean(DHTServer.class)).andReturn(mockServer);
         mockServer.run();
-        replayAll();
+        replay(ac);
         Main.main(args, ac);
 
         // verify
-        verifyAll();
+        verify(ac);
     }
 
     /**
@@ -99,28 +100,27 @@ public final class MainUnitTest extends EasyMockSupport {
         ac.refresh();
         expect(ac.getBean(DHTServer.class))
                 .andThrow(new RuntimeException());
-        replayAll();
+        replay(ac);
         Main.main(args, ac);
 
         // verify
-        verifyAll();
+        verify(ac);
     }
 
     /**
      * Assert Usage Message is shown.
-     * @param bo ByteArrayOutputStream
+     * @param s  String
      */
-    private void assertUsage(final ByteArrayOutputStream bo) {
-        String expected0 = "usage";
+    private void assertUsage(final String s) {
+
         String expected1 = "usage: java -jar dht.jar";
         String expected2 = "Parameters";
         String expected3 = " -?         help";
         String expected4 = " -p <arg>   bind to port";
 
-        assertTrue(bo.toString().contains(expected0));
-        assertTrue(bo.toString().contains(expected1));
-        assertTrue(bo.toString().contains(expected2));
-        assertTrue(bo.toString().contains(expected3));
-        assertTrue(bo.toString().contains(expected4));
+        assertTrue(s.contains(expected1));
+        assertTrue(s.contains(expected2));
+        assertTrue(s.contains(expected3));
+        assertTrue(s.contains(expected4));
     }
 }

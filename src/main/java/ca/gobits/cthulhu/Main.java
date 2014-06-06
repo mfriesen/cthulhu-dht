@@ -16,8 +16,6 @@
 
 package ca.gobits.cthulhu;
 
-import java.io.PrintWriter;
-
 import org.apache.commons.cli.HelpFormatter;
 import org.apache.log4j.Logger;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
@@ -31,6 +29,8 @@ public final class Main {
     /** DHT Server Logger. */
     private static final Logger LOGGER = Logger.getLogger(Main.class);
 
+//    private static PrintStream ps = System.out;
+//    private ByteArrayOutputStream
     /**
      * private constructor.
      */
@@ -94,11 +94,11 @@ public final class Main {
      * Shows Usage Message.
      */
     private static void showUsage() {
-
-        PrintWriter writer = new PrintWriter(System.out);
+//System.out.println ("PS: " + ps.getClass().getName());
+//        PrintWriter writer = new PrintWriter(ps);
         HelpFormatter usageFormatter = new HelpFormatter();
         usageFormatter.printHelp("java -jar dht.jar", "Parameters",
                 DHTServerConfig.DHTSERVER_OPTIONS, "");
-        writer.close();
+//        writer.close();
     }
 }
