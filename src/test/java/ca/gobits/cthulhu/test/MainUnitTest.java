@@ -106,10 +106,14 @@ public final class MainUnitTest extends EasyMockSupport {
      * @param bo ByteArrayOutputStream
      */
     private void assertUsage(final ByteArrayOutputStream bo) {
-        String expected = "usage: java -jar dht.jar\nParameters\n"
-            + " -?         help\n"
-            + " -p <arg>   bind to port\n";
+        String expected1 = "usage: java -jar dht.jar";
+        String expected2 = "Parameters";
+        String expected3 = " -?         help";
+        String expected4 = " -p <arg>   bind to port";
 
-        assertTrue(bo.toString().contains(expected));
+        assertTrue(bo.toString().contains(expected1));
+        assertTrue(bo.toString().contains(expected2));
+        assertTrue(bo.toString().contains(expected3));
+        assertTrue(bo.toString().contains(expected4));
     }
 }
