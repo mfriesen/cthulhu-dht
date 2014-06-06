@@ -21,6 +21,7 @@ import static org.junit.Assert.assertTrue;
 
 import java.io.ByteArrayOutputStream;
 
+import org.apache.log4j.Logger;
 import org.easymock.EasyMockRunner;
 import org.easymock.EasyMockSupport;
 import org.easymock.Mock;
@@ -38,6 +39,10 @@ import ca.gobits.cthulhu.Main;
  */
 @RunWith(EasyMockRunner.class)
 public final class MainUnitTest extends EasyMockSupport {
+
+    /** Logger. */
+    private static final Logger LOGGER = Logger
+            .getLogger(MainUnitTest.class);
 
     /** Mock ApplicationContext. */
     @Mock
@@ -106,11 +111,13 @@ public final class MainUnitTest extends EasyMockSupport {
      * @param bo ByteArrayOutputStream
      */
     private void assertUsage(final ByteArrayOutputStream bo) {
+        String expected0 = "usage";
         String expected1 = "usage: java -jar dht.jar";
         String expected2 = "Parameters";
         String expected3 = " -?         help";
         String expected4 = " -p <arg>   bind to port";
 
+        assertTrue(bo.toString().contains(expected0));
         assertTrue(bo.toString().contains(expected1));
         assertTrue(bo.toString().contains(expected2));
         assertTrue(bo.toString().contains(expected3));
