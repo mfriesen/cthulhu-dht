@@ -20,7 +20,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Async;
 
 import ca.gobits.cthulhu.DHTServer;
-import ca.gobits.cthulhu.DHTServerConfig;
 
 /**
  * Runs DHTServer Async.
@@ -45,7 +44,6 @@ public class DHTServerAsync {
     @Async
     public void start() throws Exception {
         if (!isStarted) {
-            System.setProperty("port", "" + DHTServerConfig.DEFAULT_PORT);
             isStarted = true;
             server.run();
         }

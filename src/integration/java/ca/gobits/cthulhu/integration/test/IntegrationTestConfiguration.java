@@ -20,6 +20,8 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.scheduling.annotation.EnableAsync;
 
+import ca.gobits.cthulhu.DHTServerConfig;
+
 /**
  * Integration Test Configuration.
  *
@@ -34,5 +36,13 @@ public class IntegrationTestConfiguration {
     @Bean
     public DHTServerAsync asyncServer() {
         return new DHTServerAsync();
+    }
+
+    /**
+     * @return DHTServerConfig
+     */
+    @Bean
+    public DHTServerConfig serverConfig() {
+        return new DHTServerConfig(new String[]{});
     }
 }

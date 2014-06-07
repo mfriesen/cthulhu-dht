@@ -33,6 +33,13 @@ public final class DHTServerConfig {
     private boolean showHelp;
 
     /**
+     * default constructor needed for registering with Spring Application
+     * Context.
+     */
+    public DHTServerConfig() {
+    }
+
+    /**
      * Creates DHT Server Config from Command Line arguments.
      * @param args  args
      */

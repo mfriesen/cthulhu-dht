@@ -29,8 +29,6 @@ public final class Main {
     /** DHT Server Logger. */
     private static final Logger LOGGER = Logger.getLogger(Main.class);
 
-//    private static PrintStream ps = System.out;
-//    private ByteArrayOutputStream
     /**
      * private constructor.
      */
@@ -67,6 +65,7 @@ public final class Main {
             final AnnotationConfigApplicationContext ac) {
 
         DHTServerConfig config = new DHTServerConfig(args);
+        ac.register(DHTServerConfig.class);
 
         if (config.isShowHelp()) {
 
@@ -75,8 +74,6 @@ public final class Main {
         } else {
 
             try {
-
-                System.setProperty("port", "" + config.getPort());
                 ac.refresh();
 
                 DHTServer server = ac.getBean(DHTServer.class);
@@ -94,11 +91,8 @@ public final class Main {
      * Shows Usage Message.
      */
     private static void showUsage() {
-//System.out.println ("PS: " + ps.getClass().getName());
-//        PrintWriter writer = new PrintWriter(ps);
         HelpFormatter usageFormatter = new HelpFormatter();
         usageFormatter.printHelp("java -jar dht.jar", "Parameters",
                 DHTServerConfig.DHTSERVER_OPTIONS, "");
-//        writer.close();
     }
 }

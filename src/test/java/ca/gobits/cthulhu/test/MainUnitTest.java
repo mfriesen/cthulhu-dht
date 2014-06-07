@@ -34,6 +34,7 @@ import org.powermock.modules.junit4.PowerMockRunner;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 
 import ca.gobits.cthulhu.DHTServer;
+import ca.gobits.cthulhu.DHTServerConfig;
 import ca.gobits.cthulhu.Main;
 /**
  * DHTServer UnitTests.
@@ -77,6 +78,7 @@ public final class MainUnitTest {
         DHTServer mockServer = createMock(DHTServer.class);
 
         // when
+        ac.register(DHTServerConfig.class);
         ac.refresh();
         expect(ac.getBean(DHTServer.class)).andReturn(mockServer);
         mockServer.run();
@@ -97,6 +99,7 @@ public final class MainUnitTest {
         final String[] args = new String[]{};
 
         // when
+        ac.register(DHTServerConfig.class);
         ac.refresh();
         expect(ac.getBean(DHTServer.class))
                 .andThrow(new RuntimeException());

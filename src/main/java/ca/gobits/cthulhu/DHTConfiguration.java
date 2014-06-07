@@ -19,6 +19,7 @@ package ca.gobits.cthulhu;
 import java.net.DatagramSocket;
 import java.net.SocketException;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.scheduling.annotation.EnableAsync;
@@ -41,6 +42,9 @@ public class DHTConfiguration {
 
     /** Thread Core Pool Size. */
     private static final int THREAD_CORE_POOL_SIZE = 5;
+
+    @Autowired
+    private DHTServerConfig config;
 
     /**
      * @return DHTRoutingTable
@@ -128,9 +132,6 @@ public class DHTConfiguration {
      */
     @Bean
     public DatagramSocket datagramSocket() throws SocketException {
-        String p = System.getProperty("port");
-        int port = p != null ? Integer.valueOf(p).intValue()
-                : DHTServerConfig.DEFAULT_PORT;
-        return  new DatagramSocket(port);
+        return  new DatagramSocket(config.getPort());
     }
 }
