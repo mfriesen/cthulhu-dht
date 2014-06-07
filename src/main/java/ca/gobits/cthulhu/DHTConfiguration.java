@@ -43,6 +43,7 @@ public class DHTConfiguration {
     /** Thread Core Pool Size. */
     private static final int THREAD_CORE_POOL_SIZE = 5;
 
+    /** DHTServerConfig reference. */
     @Autowired
     private DHTServerConfig config;
 
