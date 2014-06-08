@@ -2,6 +2,7 @@ package ca.gobits.dht.test;
 
 import static ca.gobits.dht.DHTConversion.COMPACT_ADDR_LENGTH;
 import static ca.gobits.dht.DHTConversion.NODE_ID_LENGTH;
+import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
@@ -446,4 +447,71 @@ public final class DHTConversionUnitTest {
         // then
     }
 
+    /**
+     * testTransformToUnsignedBytes01() - test 2^160.
+     */
+    @Test
+    public void testTransformToUnsignedBytes01() {
+        // given
+        byte[] bytes = new BigInteger(
+            "1461501637330902918203684832716283019655932542975")
+            .toByteArray();
+
+        // when
+        int[] results = DHTConversion.transformToUnsignedBytes(bytes);
+
+        // then
+        assertEquals(20, results.length);
+        assertArrayEquals(new int[] {255, 255, 255, 255, 255, 255, 255, 255,
+                255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255 },
+                results);
+
+        byte[] resultBytes = DHTConversion.transformFromUnsignedBytes(results);
+        assertArrayEquals(resultBytes, bytes);
+    }
+
+    /**
+     * testTransformToUnsignedBytes02() - test 2^160 / 2.
+     */
+    @Test
+    public void testTransformToUnsignedBytes02() {
+        // given
+        byte[] bytes = new BigInteger(
+            "730750818665451459101842416358141509827966271487")
+            .toByteArray();
+
+        // when
+        int[] results = DHTConversion.transformToUnsignedBytes(bytes);
+
+        // then
+        assertEquals(20, results.length);
+        assertArrayEquals(new int[] {127, 255, 255, 255, 255, 255, 255, 255,
+                255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255 },
+                results);
+
+        byte[] resultBytes = DHTConversion.transformFromUnsignedBytes(results);
+        assertArrayEquals(resultBytes, bytes);
+    }
+
+    /**
+     * testTransformToUnsignedBytes02() - test 2^160 / 2 - 1.
+     */
+    @Test
+    public void testTransformToUnsignedBytes03() {
+        // given
+        byte[] bytes = new BigInteger(
+            "730750818665451459101842416358141509827966271488")
+            .toByteArray();
+
+        // when
+        int[] results = DHTConversion.transformToUnsignedBytes(bytes);
+
+        // then
+        assertEquals(20, results.length);
+        assertArrayEquals(new int[] {128, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+                0, 0, 0, 0, 0, 0, 0 }, results);
+
+        byte[] resultBytes = DHTConversion.transformFromUnsignedBytes(results);
+        assertArrayEquals(resultBytes, bytes);
+    }
 }

@@ -363,4 +363,51 @@ public final class DHTConversion {
         throw new IllegalArgumentException("invalid byte length");
     }
 
+    /**
+     * Transforms byte[] to an unsigned byte (int[]).
+     * @param bytes  bytes
+     * @return int[]
+     */
+    public static int[] transformToUnsignedBytes(final byte[] bytes) {
+
+        int i = 0;
+        int start = 0;
+        int[] ints = null;
+
+        if (bytes[0] == 0) {
+            ints = new int[bytes.length - 1];
+            start = 1;
+        } else {
+            ints = new int[bytes.length];
+        }
+
+        for (int ii = start; ii < bytes.length; ii++) {
+            ints[i] = bytes[ii] & BYTE_TO_INT;
+            i++;
+        }
+
+        return ints;
+    }
+
+    /**
+     * Transforms int[] to unsigned bytes.
+     * @param ints  ints
+     * @return bytes[]
+     */
+    public static byte[] transformFromUnsignedBytes(final int[] ints) {
+
+        byte[] bytes = new byte[ints.length];
+
+        for (int i = 0; i < ints.length; i++) {
+            bytes[i] = (byte) ints[i];
+        }
+
+        if (bytes[0] < 0) {
+            byte[] bb = new byte[bytes.length + 1];
+            System.arraycopy(bytes, 0, bb, 1, bytes.length);
+            return bb;
+        }
+
+        return bytes;
+    }
 }
