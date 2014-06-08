@@ -14,8 +14,10 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 
 import ca.gobits.cthulhu.DHTQueryProtocol;
+import ca.gobits.cthulhu.DHTServerConfig;
 import ca.gobits.cthulhu.DHTTokenTable;
 import ca.gobits.dht.BDecoder;
+import ca.gobits.dht.DHTIdentifier;
 
 /**
  * DHTQueryProtocol Unit Tests.
@@ -32,6 +34,13 @@ public final class DHTQueryProtocolUnitTest extends EasyMockSupport {
     @Mock
     private DHTTokenTable tokens;
 
+    /** DHTServerConfig. */
+    @Mock
+    private DHTServerConfig config;
+
+    /** Dummy NodeId. */
+    private final byte[] nodeId = DHTIdentifier.sha1("test".getBytes());
+
     /**
      * testPingQuery01() - generate ping request.
      */
@@ -40,9 +49,12 @@ public final class DHTQueryProtocolUnitTest extends EasyMockSupport {
     public void testPingQuery01() {
 
         // given
+        String transactionId = "aa";
 
         // when
-        expect(tokens.getTransactionId()).andReturn("aa");
+        expect(config.getNodeId()).andReturn(nodeId);
+        expect(tokens.getTransactionId()).andReturn(transactionId);
+
         replayAll();
         byte[] result = dht.pingQuery();
 
@@ -57,7 +69,44 @@ public final class DHTQueryProtocolUnitTest extends EasyMockSupport {
         assertEquals("ping", new String((byte[]) map.get("q")));
 
         Map<Object, Object> a = (Map<Object, Object>) map.get("a");
-        assertEquals(Base64.encodeBase64String(dht.getNodeId()),
+        assertEquals(20, ((byte[]) a.get("id")).length);
+        assertEquals(Base64.encodeBase64String(nodeId),
+                Base64.encodeBase64String((byte[]) a.get("id")));
+    }
+
+    /**
+     * testFindNodeQuery01() - generate find_node request.
+     */
+    @SuppressWarnings("unchecked")
+    @Test
+    public void testFindNodeQuery01() {
+
+        // given
+        String transactionId = "aa";
+        int[] target = new int[] {-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+                -1, -1, -1, -1, -1, -1, -1, -1, -1 };
+
+        // when
+        expect(config.getNodeId()).andReturn(nodeId);
+        expect(tokens.getTransactionId()).andReturn(transactionId);
+
+        replayAll();
+        byte[] result = dht.findNodeQuery(target);
+
+        // then
+        verifyAll();
+        assertEquals(92, result.length);
+
+        Map<Object, Object> map = (Map<Object, Object>) new BDecoder()
+                .decode(result);
+        assertEquals(transactionId, new String((byte[]) map.get("t")));
+        assertEquals("q", new String((byte[]) map.get("y")));
+        assertEquals("find_node", new String((byte[]) map.get("q")));
+
+        Map<Object, Object> a = (Map<Object, Object>) map.get("a");
+        assertEquals(20, ((byte[]) a.get("id")).length);
+        assertEquals(20, ((byte[]) a.get("target")).length);
+        assertEquals(Base64.encodeBase64String(nodeId),
                 Base64.encodeBase64String((byte[]) a.get("id")));
     }
 }

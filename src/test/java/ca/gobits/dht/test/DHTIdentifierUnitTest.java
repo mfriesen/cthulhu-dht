@@ -43,7 +43,7 @@ public final class DHTIdentifierUnitTest {
         String s = "sample string";
 
         // when
-        byte[] result = DHTIdentifier.sha1(s);
+        byte[] result = DHTIdentifier.sha1(s.getBytes());
 
         // then
         assertEquals("243182b9d0b085c06005bf773212854bf7cd4694",
@@ -61,7 +61,7 @@ public final class DHTIdentifierUnitTest {
         String s = "10";
 
         // when
-        byte[] result = DHTIdentifier.sha1(s);
+        byte[] result = DHTIdentifier.sha1(s.getBytes());
 
         // then
         assertEquals("b1d5781111d84f7b3fe45a0852e59758cd7a87e5",
@@ -79,7 +79,7 @@ public final class DHTIdentifierUnitTest {
         String s = "10";
 
         // when
-        byte[] result = DHTIdentifier.algorithm("SHA-1", s);
+        byte[] result = DHTIdentifier.algorithm("SHA-1", s.getBytes());
 
         // then
         assertEquals("b1d5781111d84f7b3fe45a0852e59758cd7a87e5",
@@ -97,7 +97,7 @@ public final class DHTIdentifierUnitTest {
         String s = "10";
 
         // when
-        DHTIdentifier.algorithm("SHA-112", s);
+        DHTIdentifier.algorithm("SHA-112", s.getBytes());
 
         // then
     }

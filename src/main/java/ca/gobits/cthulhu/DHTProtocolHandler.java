@@ -68,6 +68,10 @@ public class DHTProtocolHandler {
     @Autowired
     private DHTQueryProtocol queryProtocol;
 
+    /** DHTServerConfig. */
+    @Autowired
+    private DHTServerConfig config;
+
     /**
      * Read DatagramPacket.
      * @param packet  packet
@@ -360,7 +364,7 @@ public class DHTProtocolHandler {
             final Map<String, Object> response,
             final DatagramPacket packet) {
 
-        response.put("r", map("id", queryProtocol.getNodeId()));
+        response.put("r", map("id", config.getNodeId()));
     }
 
     /**

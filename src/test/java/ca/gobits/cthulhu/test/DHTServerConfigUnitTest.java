@@ -4,6 +4,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
+import org.apache.commons.codec.binary.Base64;
 import org.junit.Test;
 
 import ca.gobits.cthulhu.DHTServerConfig;
@@ -88,5 +89,52 @@ public final class DHTServerConfigUnitTest {
 
         // then
         assertTrue(result.isShowHelp());
+    }
+
+    /**
+     * testContructor06() - salt used.
+     */
+    @Test
+    public void testContructor06() {
+        // given
+        String[] args = new String[] {"-salt", "AAAA"};
+
+        // when
+        DHTServerConfig result = new DHTServerConfig(args);
+
+        // then
+        assertEquals("4lEhcqv4zJ9n/dSetsrPLfcbutM=",
+                Base64.encodeBase64String(result.getNodeId()));
+    }
+
+    /**
+     * testContructor07() - no params.
+     */
+    @Test
+    public void testContructor07() {
+        // given
+        String[] args = new String[] {};
+
+        // when
+        DHTServerConfig result = new DHTServerConfig(args);
+
+        // then
+        assertEquals(6881, result.getPort());
+        assertEquals(20, result.getNodeId().length);
+    }
+
+    /**
+     * testContructor08() - no params.
+     */
+    @Test
+    public void testContructor08() {
+        // given
+
+        // when
+        DHTServerConfig result = new DHTServerConfig();
+
+        // then
+        assertEquals(6881, result.getPort());
+        assertEquals(20, result.getNodeId().length);
     }
 }

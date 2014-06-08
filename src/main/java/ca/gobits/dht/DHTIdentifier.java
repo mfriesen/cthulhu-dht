@@ -19,6 +19,9 @@ package ca.gobits.dht;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 
+import org.springframework.security.crypto.keygen.BytesKeyGenerator;
+import org.springframework.security.crypto.keygen.KeyGenerators;
+
 /**
  * Calculates DHT Node Identifier.
  */
@@ -31,12 +34,22 @@ public final class DHTIdentifier {
     }
 
     /**
+     * Generates default NodeId.
+     * @return byte[]
+     */
+    public static byte[] getDefaultNodeId() {
+        BytesKeyGenerator generator = KeyGenerators.secureRandom();
+        byte[] key = generator.generateKey();
+        return sha1(key);
+    }
+
+    /**
      * Calculates the node_id.
      *
      * @param salt  SHA1 salt string
      * @return int[]
      */
-    public static byte[] sha1(final String salt) {
+    public static byte[] sha1(final byte[] salt) {
         return algorithm("SHA-1", salt);
     }
 
@@ -47,12 +60,11 @@ public final class DHTIdentifier {
      * @param salt  SHA1 salt string
      * @return int[]
      */
-    public static byte[] algorithm(final String algorithm, final String salt) {
+    public static byte[] algorithm(final String algorithm, final byte[] salt) {
 
         try {
             MessageDigest md = MessageDigest.getInstance(algorithm);
-            byte[] bytes = md.digest(salt.getBytes());
-            return bytes;
+            return md.digest(salt);
         } catch (NoSuchAlgorithmException e) {
             throw new RuntimeException(e);
         }

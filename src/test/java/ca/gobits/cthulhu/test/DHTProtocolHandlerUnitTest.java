@@ -50,6 +50,7 @@ import ca.gobits.cthulhu.DHTInfoHashRoutingTable;
 import ca.gobits.cthulhu.DHTNodeRoutingTable;
 import ca.gobits.cthulhu.DHTProtocolHandler;
 import ca.gobits.cthulhu.DHTQueryProtocol;
+import ca.gobits.cthulhu.DHTServerConfig;
 import ca.gobits.cthulhu.DHTTokenTable;
 import ca.gobits.cthulhu.domain.DHTNode;
 import ca.gobits.cthulhu.domain.DHTNode.State;
@@ -59,6 +60,7 @@ import ca.gobits.cthulhu.domain.DHTPeer;
 import ca.gobits.cthulhu.domain.DHTPeerBasic;
 import ca.gobits.dht.BDecoder;
 import ca.gobits.dht.BEncoder;
+import ca.gobits.dht.DHTIdentifier;
 
 /**
  * DHTProtocolHandler Unit Tests.
@@ -86,6 +88,10 @@ public final class DHTProtocolHandlerUnitTest extends EasyMockSupport {
     /** Mock DHTQueryProtocol. */
     @Mock
     private DHTQueryProtocol queryProtocol;
+
+    /** Mock DHTServerConfig. */
+    @Mock
+    private DHTServerConfig config;
 
     /** InetSocketAddress. */
     private InetAddress iaddr;
@@ -117,7 +123,7 @@ public final class DHTProtocolHandlerUnitTest extends EasyMockSupport {
         DatagramPacket packet = new DatagramPacket(bb, bb.length, iaddr, port);
 
         // when
-        expect(queryProtocol.getNodeId()).andReturn(
+        expect(config.getNodeId()).andReturn(
                 "ABCDEFGHIJKLMNOPQRST".getBytes());
         expectUpdateNodeStatusToGood();
 
@@ -143,16 +149,15 @@ public final class DHTProtocolHandlerUnitTest extends EasyMockSupport {
     public void testHandle02() throws Exception {
         // given
         BigInteger nodeId = new BigInteger(
+                "1019541382561204384426858321430530264477101611793");
+        BigInteger target = new BigInteger(
                 "1461501637330902918203684832716283019655932542975");
         DatagramPacket packet = createFindNodeRequest();
 
         // when
-        expect(
-                routingTable.findExactNode(new BigInteger(
-                        "497515722629738093096511851053646804670707962022")))
-                .andReturn(null);
+        expect(routingTable.findExactNode(nodeId)).andReturn(null);
 
-        expect(routingTable.findClosestNodes(nodeId)).andReturn(getFindNodes());
+        expect(routingTable.findClosestNodes(target)).andReturn(getFindNodes());
 
         replayAll();
         byte[] bytes = handler.handle(packet);
@@ -767,7 +772,7 @@ public final class DHTProtocolHandlerUnitTest extends EasyMockSupport {
         map.put("q", "find_node");
 
         Map<String, Object> map2 = new HashMap<String, Object>();
-        map2.put("id", new DHTQueryProtocol().getNodeId());
+        map2.put("id", DHTIdentifier.sha1("salt".getBytes()));
         map2.put("target", new int[] {255, 255, 255, 255, 255, 255, 255, 255,
                 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255 });
         map.put("a", map2);

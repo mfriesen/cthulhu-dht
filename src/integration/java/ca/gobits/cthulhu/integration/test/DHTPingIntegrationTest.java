@@ -18,6 +18,7 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 import ca.gobits.cthulhu.DHTConfiguration;
 import ca.gobits.cthulhu.DHTQueryProtocol;
+import ca.gobits.cthulhu.DHTServerConfig;
 import ca.gobits.dht.BDecoder;
 import ca.gobits.dht.BEncoder;
 import ca.gobits.dht.DHTConversion;
@@ -38,6 +39,10 @@ public final class DHTPingIntegrationTest {
     /** DHTQueryProtocol instance. */
     @Autowired
     private DHTQueryProtocol queryProtocol;
+
+    /** DHTServerConfig. */
+    @Autowired
+    private DHTServerConfig config;
 
     /** Starts DHTServer.
      * @throws Exception  Exception
@@ -80,7 +85,7 @@ public final class DHTPingIntegrationTest {
 
         Map<String, Object> r = (Map<String, Object>) response.get("r");
         assertEquals(1, r.size());
-        assertArrayEquals(queryProtocol.getNodeId(), (byte[]) r.get("id"));
+        assertArrayEquals(config.getNodeId(), (byte[]) r.get("id"));
     }
 
     /**

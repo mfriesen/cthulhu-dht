@@ -22,17 +22,15 @@ import java.util.Map;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import ca.gobits.dht.BEncoder;
-import ca.gobits.dht.DHTIdentifier;
 
 /**
  * Class to generate DHTQuery Requests.
  */
 public class DHTQueryProtocol {
 
-    // TODO generate random protocol or command line param.
-    /** DHT Node Id. */
-    private static final byte[] NODE_ID = DHTIdentifier
-            .sha1(DHTQueryProtocol.class.getName());
+    /** DHTServerConfig. */
+    @Autowired
+    private DHTServerConfig config;
 
     /** DHT Tokens handler. */
     @Autowired
@@ -49,7 +47,7 @@ public class DHTQueryProtocol {
         map.put("q", "ping");
 
         Map<Object, Object> a = new HashMap<Object, Object>();
-        a.put("id", getNodeId());
+        a.put("id", config.getNodeId());
         map.put("a", a);
 
         byte[] bytes = BEncoder.bencoding(map);
@@ -57,9 +55,22 @@ public class DHTQueryProtocol {
     }
 
     /**
-     * @return byte[]
+     * Creates a find request.
+     * @param target  target identifier
+     * @return Map<String, Object>
      */
-    public byte[] getNodeId() {
-        return NODE_ID;
+    public byte[] findNodeQuery(final int[] target) {
+        Map<String, Object> map = new HashMap<String, Object>();
+        map.put("t", tokens.getTransactionId());
+        map.put("y", "q");
+        map.put("q", "find_node");
+
+        Map<String, Object> map2 = new HashMap<String, Object>();
+        map2.put("id", config.getNodeId());
+        map2.put("target", target);
+        map.put("a", map2);
+
+        byte[] bytes = BEncoder.bencoding(map);
+        return bytes;
     }
 }
