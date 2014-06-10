@@ -209,7 +209,7 @@ public final class DHTConversion {
 
         byte[] dest = new byte[COMPACT_NODE_LENGTH];
 
-        byte[] ids = node.getInfoHash().toByteArray();
+        byte[] ids = node.getInfoHash();
         int len = ids.length;
         int length = Math.min(len, NODE_ID_LENGTH);
         int srcpos = len > NODE_ID_LENGTH ? len - NODE_ID_LENGTH : 0;
@@ -308,7 +308,6 @@ public final class DHTConversion {
         return port;
     }
 
-
     /**
      * Transform byte[] unsigned byte then to a BigInteger.
      *
@@ -339,14 +338,12 @@ public final class DHTConversion {
 
             while (pos < bytes.length) {
 
-                byte[] id = new byte[NODE_ID_LENGTH];
+                byte[] nodeId = new byte[NODE_ID_LENGTH];
                 byte[] addr = new byte[COMPACT_ADDR_LENGTH];
-                System.arraycopy(bytes, pos, id, 0, NODE_ID_LENGTH);
+                System.arraycopy(bytes, pos, nodeId, 0, NODE_ID_LENGTH);
                 System.arraycopy(bytes, pos + NODE_ID_LENGTH, addr, 0,
                         COMPACT_ADDR_LENGTH);
                 pos += COMPACT_NODE_LENGTH;
-
-                BigInteger nodeId = DHTConversion.toBigInteger(id);
 
                 int port = decodeCompactAddressPort(addr);
 

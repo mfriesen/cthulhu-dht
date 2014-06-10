@@ -18,8 +18,6 @@ package ca.gobits.cthulhu.domain.test;
 
 import static org.junit.Assert.assertEquals;
 
-import java.math.BigInteger;
-
 import org.junit.Test;
 
 import ca.gobits.cthulhu.domain.DHTInfoHash;
@@ -37,8 +35,8 @@ public final class DHTInfoHashComparatorUnitTest {
     @Test
     public void testCompare01() {
         // given
-        DHTInfoHash node0 = new DHTInfoHashBasic(new BigInteger("2"));
-        DHTInfoHash node1 = new DHTInfoHashBasic(new BigInteger("2"));
+        DHTInfoHash node0 = new DHTInfoHashBasic(new byte[]{2});
+        DHTInfoHash node1 = new DHTInfoHashBasic(new byte[]{2});
 
         // when
         int result = DHTInfoHashComparator.getInstance().compare(node0, node1);
@@ -53,14 +51,14 @@ public final class DHTInfoHashComparatorUnitTest {
     @Test
     public void testCompare02() {
         // given
-        DHTInfoHash node0 = new DHTInfoHashBasic(new BigInteger("2"));
-        DHTInfoHash node1 = new DHTInfoHashBasic(new BigInteger("5"));
+        DHTInfoHash node0 = new DHTInfoHashBasic(new byte[]{2});
+        DHTInfoHash node1 = new DHTInfoHashBasic(new byte[]{5});
 
         // when
         int result = DHTInfoHashComparator.getInstance().compare(node0, node1);
 
         // then
-        assertEquals(-1, result);
+        assertEquals(-3, result);
     }
 
     /**
@@ -69,13 +67,13 @@ public final class DHTInfoHashComparatorUnitTest {
     @Test
     public void testCompare03() {
         // given
-        DHTInfoHash node0 = new DHTInfoHashBasic(new BigInteger("5"));
-        DHTInfoHash node1 = new DHTInfoHashBasic(new BigInteger("2"));
+        DHTInfoHash node0 = new DHTInfoHashBasic(new byte[]{5});
+        DHTInfoHash node1 = new DHTInfoHashBasic(new byte[]{2});
 
         // when
         int result = DHTInfoHashComparator.getInstance().compare(node0, node1);
 
         // then
-        assertEquals(1, result);
+        assertEquals(3, result);
     }
 }

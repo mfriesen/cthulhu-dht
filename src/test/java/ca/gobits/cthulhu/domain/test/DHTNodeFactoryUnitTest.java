@@ -6,8 +6,8 @@ import static org.junit.Assert.assertTrue;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Modifier;
-import java.math.BigInteger;
 import java.net.InetAddress;
+import java.util.Arrays;
 
 import org.junit.Test;
 
@@ -46,14 +46,14 @@ public final class DHTNodeFactoryUnitTest {
     @Test
     public void testCreate01() {
         // given
-        BigInteger infoHash = new BigInteger("1");
+        byte[] infoHash = new byte[]{1};
         State state = State.GOOD;
 
         // when
         DHTNode result = DHTNodeFactory.create(infoHash, state);
 
         // then
-        assertEquals(infoHash, result.getInfoHash());
+        assertTrue(Arrays.equals(infoHash, result.getInfoHash()));
         assertEquals(state, result.getState());
         assertNotNull(result.getLastUpdated());
     }
@@ -65,7 +65,7 @@ public final class DHTNodeFactoryUnitTest {
     @Test
     public void testCreate02() throws Exception {
         // given
-        byte[] infoHash = new BigInteger("1").toByteArray();
+        byte[] infoHash = new byte[]{1};
         State state = State.GOOD;
         InetAddress addr = InetAddress.getByName("50.71.214.139");
         int port = 64568;
@@ -74,7 +74,7 @@ public final class DHTNodeFactoryUnitTest {
         DHTNode result = DHTNodeFactory.create(infoHash, addr, port, state);
 
         // then
-        assertEquals(new BigInteger(infoHash), result.getInfoHash());
+        assertTrue(Arrays.equals(infoHash, result.getInfoHash()));
         assertEquals(state, result.getState());
         assertEquals(64568, result.getPort());
         assertEquals(843568779, result.getAddress()[0]);

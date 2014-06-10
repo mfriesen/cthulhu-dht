@@ -16,7 +16,6 @@
 
 package ca.gobits.cthulhu.domain;
 
-import java.math.BigInteger;
 import java.util.Date;
 
 /**
@@ -26,15 +25,15 @@ import java.util.Date;
 public interface DHTToken {
 
     /**
-     * @return BigInteger
+     * @return byte[]
      */
-    BigInteger getInfoHash();
+    byte[] getInfoHash();
 
     /**
      * Sets InfoHash.
      * @param infoHashId  infoHash
      */
-    void setInfoHash(final BigInteger infoHashId);
+    void setInfoHash(final byte[] infoHashId);
 
     /**
      * @return long[]

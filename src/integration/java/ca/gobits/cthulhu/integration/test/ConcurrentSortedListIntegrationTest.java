@@ -14,7 +14,7 @@
 // limitations under the License.
 //
 
-package ca.gobits.cthulhu.test;
+package ca.gobits.cthulhu.integration.test;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -33,14 +33,14 @@ import ca.gobits.cthulhu.ConcurrentSortedList;
  * ConcurrentSortedList Unit Tests.
  *
  */
-public final class ConcurrentSortedListThreadSafetyUnitTest {
+public final class ConcurrentSortedListIntegrationTest {
 
     /** Number of Iterators per thread. */
     private static final int ITERATION_COUNT = 100;
 
     /** Logger. */
     private static final Logger LOGGER = Logger
-            .getLogger(ConcurrentSortedListThreadSafetyUnitTest.class);
+            .getLogger(ConcurrentSortedListIntegrationTest.class);
 
     /**
      * testRunningMultipleThreads().

@@ -16,7 +16,6 @@
 
 package ca.gobits.cthulhu.domain;
 
-import java.math.BigInteger;
 import java.util.Set;
 
 /**
@@ -45,13 +44,13 @@ public interface DHTInfoHash {
     void addPeer(final byte[] addr, final int port);
 
     /**
-     * @return BigInteger
+     * @return byte[]
      */
-    BigInteger getInfoHash();
+    byte[] getInfoHash();
 
     /**
      * Set Info Hash.
      * @param infoHashId  Info Hash
      */
-    void setInfoHash(final BigInteger infoHashId);
+    void setInfoHash(final byte[] infoHashId);
 }

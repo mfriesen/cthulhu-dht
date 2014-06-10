@@ -286,11 +286,12 @@ public final class DHTConversionUnitTest {
         byte[] addr0 = new byte[] {73, 54, 93, 12 };
         BigInteger bi0 = new BigInteger(
                 "FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF", 16);
-        DHTNode n0 = DHTNodeFactory.create(bi0, addr0, 123,
+        DHTNode n0 = DHTNodeFactory.create(bi0.toByteArray(), addr0, 123,
                 DHTNode.State.UNKNOWN);
 
         byte[] addr1 = new byte[] {34, 64, 43, 51 };
-        DHTNode n1 = DHTNodeFactory.create(new BigInteger("13242"), addr1, 8080,
+        DHTNode n1 = DHTNodeFactory.create(
+                new BigInteger("13242").toByteArray(), addr1, 8080,
                 DHTNode.State.UNKNOWN);
 
         List<DHTNode> nodes = java.util.Arrays.asList(n0, n1);
@@ -417,16 +418,17 @@ public final class DHTConversionUnitTest {
         Iterator<DHTNode> itr = results.iterator();
 
         DHTNode node0 = itr.next();
+        BigInteger b0 = DHTConversion.toBigInteger(node0.getInfoHash());
         assertEquals("1461501637330902918203684832716283019655932542975",
-                node0.getInfoHash().toString());
+                b0.toString());
 
         assertEquals("73.54.93.12",
                 DHTConversion.toInetAddressString(node0.getAddress()));
         assertEquals(123, node0.getPort());
 
         DHTNode node1 = itr.next();
-        assertEquals("13242",
-                node1.getInfoHash().toString());
+        BigInteger b1 = DHTConversion.toBigInteger(node1.getInfoHash());
+        assertEquals("13242", b1.toString());
 
         assertEquals("34.64.43.51",
                 DHTConversion.toInetAddressString(node1.getAddress()));

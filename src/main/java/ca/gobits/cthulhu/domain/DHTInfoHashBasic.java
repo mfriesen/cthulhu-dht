@@ -1,6 +1,5 @@
 package ca.gobits.cthulhu.domain;
 
-import java.math.BigInteger;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -15,7 +14,7 @@ import org.apache.commons.lang3.builder.ToStringBuilder;
 public final class DHTInfoHashBasic implements DHTInfoHash {
 
     /** InfoHash identifier. */
-    private BigInteger infoHash;
+    private byte[] infoHash;
 
     /** Collection of Peers that "announced" to the InfoHash. */
     private Set<DHTPeer> peers;
@@ -30,7 +29,7 @@ public final class DHTInfoHashBasic implements DHTInfoHash {
      * constructor.
      * @param hashInfoId Info hash identifier
      */
-    public DHTInfoHashBasic(final BigInteger hashInfoId) {
+    public DHTInfoHashBasic(final byte[] hashInfoId) {
         this.infoHash = hashInfoId;
     }
 
@@ -102,10 +101,10 @@ public final class DHTInfoHashBasic implements DHTInfoHash {
     }
 
     /**
-     * @return BigInteger
+     * @return byte[]
      */
     @Override
-    public BigInteger getInfoHash() {
+    public byte[] getInfoHash() {
         return infoHash;
     }
 
@@ -114,7 +113,7 @@ public final class DHTInfoHashBasic implements DHTInfoHash {
      * @param infoHashId  Info Hash
      */
     @Override
-    public void setInfoHash(final BigInteger infoHashId) {
+    public void setInfoHash(final byte[] infoHashId) {
         this.infoHash = infoHashId;
     }
 }

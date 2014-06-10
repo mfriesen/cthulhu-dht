@@ -16,7 +16,6 @@
 
 package ca.gobits.cthulhu.domain;
 
-import java.math.BigInteger;
 import java.net.InetAddress;
 import java.util.Date;
 
@@ -41,7 +40,7 @@ public final class DHTNodeFactory {
      * @param state  State
      * @return DHTNode
      */
-    public static DHTNode create(final BigInteger infoHash, final State state) {
+    public static DHTNode create(final byte[] infoHash, final State state) {
         DHTNodeBasic node = new DHTNodeBasic();
         node.setLastUpdated(new Date());
         node.setInfoHash(infoHash);
@@ -52,26 +51,12 @@ public final class DHTNodeFactory {
     /**
      * Creates DHTNode.
      * @param infoHash  InfoHash
-     * @param addr InetAddress
-     * @param port  port
-     * @param state  State
-     * @return DHTNode
-     */
-    public static DHTNode create(final byte[] infoHash,
-            final InetAddress addr, final int port, final State state) {
-
-        return create(new BigInteger(infoHash), addr, port, state);
-    }
-
-    /**
-     * Creates DHTNode.
-     * @param infoHash  InfoHash
      * @param addr  InetAddress
      * @param port  port
      * @param state  State
      * @return DHTNode
      */
-    public static DHTNode create(final BigInteger infoHash,
+    public static DHTNode create(final byte[] infoHash,
             final InetAddress addr, final int port, final State state) {
 
         return create(infoHash, addr.getAddress(),
@@ -86,7 +71,7 @@ public final class DHTNodeFactory {
      * @param state  State
      * @return DHTNode
      */
-    public static DHTNode create(final BigInteger infoHash,
+    public static DHTNode create(final byte[] infoHash,
             final byte[] addr, final int port, final State state) {
 
         DHTNodeBasic node = new DHTNodeBasic();

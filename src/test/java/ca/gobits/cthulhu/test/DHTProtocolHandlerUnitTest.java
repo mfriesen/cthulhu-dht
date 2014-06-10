@@ -99,6 +99,10 @@ public final class DHTProtocolHandlerUnitTest extends EasyMockSupport {
     /** Port. */
     private final int port = 64568;
 
+    /** Node Id: mnopqrstuvwxyz123456. */
+    private final byte[] nodeId12345 = new byte[] {109, 110, 111, 112, 113, 114,
+            115, 116, 117, 118, 119, 120, 121, 122, 49, 50, 51, 52, 53, 54 };
+
     /**
      * before().
      * @throws Exception Exception
@@ -148,16 +152,23 @@ public final class DHTProtocolHandlerUnitTest extends EasyMockSupport {
     @Test
     public void testHandle02() throws Exception {
         // given
-        BigInteger nodeId = new BigInteger(
-                "1019541382561204384426858321430530264477101611793");
-        BigInteger target = new BigInteger(
-                "1461501637330902918203684832716283019655932542975");
+        // 1019541382561204384426858321430530264477101611793")
+        byte[] nodeId = new byte[] {-78, -107, -47, 23, 19, 90, -105, 99, -38,
+                40, 46, 125, -82, 115, -91, -54, 125, 62, 91, 17 };
+        // 1461501637330902918203684832716283019655932542975
+        byte[] target = new byte[] {-1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+                -1, -1, -1, -1, -1, -1, -1, -1, -1, -1 };
+
+        assertEquals(20, nodeId.length);
+        assertEquals(20, target.length);
+
         DatagramPacket packet = createFindNodeRequest();
 
         // when
-        expect(routingTable.findExactNode(nodeId)).andReturn(null);
+        expect(routingTable.findExactNode(aryEq(nodeId))).andReturn(null);
 
-        expect(routingTable.findClosestNodes(target)).andReturn(getFindNodes());
+        expect(routingTable.findClosestNodes(aryEq(target))).andReturn(
+                getFindNodes());
 
         replayAll();
         byte[] bytes = handler.handle(packet);
@@ -282,7 +293,6 @@ public final class DHTProtocolHandlerUnitTest extends EasyMockSupport {
     @Test
     public void testHandle06() throws Exception {
         // given
-        BigInteger nodeId = new BigInteger("mnopqrstuvwxyz123456".getBytes());
         String dat = "d1:ad2:id20:abcdefghij01234567899:info_hash20:"
                 + "mnopqrstuvwxyz123456e1:q9:get_peers1:t2:aa1:y1:qe";
         byte[] bb = dat.getBytes();
@@ -294,7 +304,7 @@ public final class DHTProtocolHandlerUnitTest extends EasyMockSupport {
         Collection<DHTPeer> peers = Arrays.asList(peer);
 
         // when
-        expect(peerRoutingTable.findPeers(nodeId)).andReturn(peers);
+        expect(peerRoutingTable.findPeers(aryEq(nodeId12345))).andReturn(peers);
         expectUpdateNodeStatusToGood();
 
         replayAll();
@@ -335,7 +345,6 @@ public final class DHTProtocolHandlerUnitTest extends EasyMockSupport {
     @Test
     public void testHandle07() throws Exception {
         // given
-        BigInteger nodeId = new BigInteger("mnopqrstuvwxyz123456".getBytes());
         String dat = "d1:ad2:id20:abcdefghij01234567899:info_hash20:"
                 + "mnopqrstuvwxyz123456e1:q9:get_peers1:t2:aa1:y1:qe";
         byte[] bb = dat.getBytes();
@@ -344,8 +353,9 @@ public final class DHTProtocolHandlerUnitTest extends EasyMockSupport {
 
         // when
         expectUpdateNodeStatusToGood();
-        expect(peerRoutingTable.findPeers(nodeId)).andReturn(null);
-        expect(routingTable.findClosestNodes(nodeId)).andReturn(getFindNodes());
+        expect(peerRoutingTable.findPeers(aryEq(nodeId12345))).andReturn(null);
+        expect(routingTable.findClosestNodes(aryEq(nodeId12345))).andReturn(
+                getFindNodes());
 
         replayAll();
         byte[] bytes = handler.handle(packet);
@@ -390,7 +400,6 @@ public final class DHTProtocolHandlerUnitTest extends EasyMockSupport {
         // given
         int p = 6881;
         byte[] secret = "aoeusnth".getBytes();
-        BigInteger nodeId = new BigInteger("mnopqrstuvwxyz123456".getBytes());
         String dat = "d1:ad2:id20:abcdefghij01234567899:info_hash20:"
                 + "mnopqrstuvwxyz1234564:porti6881e5:token8:aoeusnthe1:q13:"
                 + "announce_peer1:t2:aa1:y1:qe";
@@ -402,7 +411,8 @@ public final class DHTProtocolHandlerUnitTest extends EasyMockSupport {
         expectUpdateNodeStatusToGood();
         expect(tokenTable.valid(eq(iaddr), eq(p), aryEq(secret))).andReturn(
                 true);
-        peerRoutingTable.addPeer(eq(nodeId), aryEq(iaddr.getAddress()), eq(p));
+        peerRoutingTable.addPeer(aryEq(nodeId12345), aryEq(iaddr.getAddress()),
+                eq(p));
 
         replayAll();
         byte[] bytes = handler.handle(packet);
@@ -423,7 +433,6 @@ public final class DHTProtocolHandlerUnitTest extends EasyMockSupport {
         // given
         int p = 6881;
         byte[] secret = "aoeusnth".getBytes();
-        BigInteger nodeId = new BigInteger("mnopqrstuvwxyz123456".getBytes());
         String dat = "d1:ad2:id20:abcdefghij01234567899:info_hash20:"
                 + "mnopqrstuvwxyz12345612:implied_porti0e4:porti6881e5:"
                 + "token8:aoeusnthe1:q13:announce_peer1:t2:aa1:y1:qe";
@@ -435,7 +444,8 @@ public final class DHTProtocolHandlerUnitTest extends EasyMockSupport {
         expectUpdateNodeStatusToGood();
         expect(tokenTable.valid(eq(iaddr), eq(6881), aryEq(secret))).andReturn(
                 true);
-        peerRoutingTable.addPeer(eq(nodeId), aryEq(iaddr.getAddress()), eq(p));
+        peerRoutingTable.addPeer(aryEq(nodeId12345), aryEq(iaddr.getAddress()),
+                eq(p));
 
         replayAll();
         byte[] bytes = handler.handle(packet);
@@ -455,7 +465,6 @@ public final class DHTProtocolHandlerUnitTest extends EasyMockSupport {
     public void testHandle10() throws Exception {
         // given
         byte[] secret = "aoeusnth".getBytes();
-        BigInteger nodeId = new BigInteger("mnopqrstuvwxyz123456".getBytes());
         String dat = "d1:ad2:id20:abcdefghij01234567899:info_hash20:"
                 + "mnopqrstuvwxyz12345612:implied_porti1e4:porti6881e5:"
                 + "token8:aoeusnthe1:q13:announce_peer1:t2:aa1:y1:qe";
@@ -468,7 +477,7 @@ public final class DHTProtocolHandlerUnitTest extends EasyMockSupport {
         expect(tokenTable.valid(eq(iaddr), eq(port), aryEq(secret))).andReturn(
                 true);
 
-        peerRoutingTable.addPeer(eq(nodeId), aryEq(iaddr.getAddress()),
+        peerRoutingTable.addPeer(aryEq(nodeId12345), aryEq(iaddr.getAddress()),
                 eq(port));
 
         replayAll();
@@ -563,8 +572,8 @@ public final class DHTProtocolHandlerUnitTest extends EasyMockSupport {
     @Test
     public void testHandle14() throws Exception {
         // given
-        BigInteger id = new BigInteger(
-                "624742783717797424288959994005102614424044451126");
+        byte[] id = new byte[] {109, 110, 111, 112, 113, 114, 115, 116, 117,
+                118, 119, 120, 121, 122, 49, 50, 51, 52, 53, 54 };
         String s = "d1:rd2:id20:mnopqrstuvwxyz123456e1:t2:aa1:y1:re";
         byte[] bb = s.getBytes();
         DatagramPacket packet = new DatagramPacket(bb, bb.length, iaddr, port);
@@ -573,7 +582,7 @@ public final class DHTProtocolHandlerUnitTest extends EasyMockSupport {
         assertNull(node.getState());
 
         // when
-        expect(routingTable.findExactNode(id)).andReturn(node);
+        expect(routingTable.findExactNode(aryEq(id))).andReturn(node);
         replayAll();
 
         byte[] bytes = handler.handle(packet);
@@ -595,16 +604,17 @@ public final class DHTProtocolHandlerUnitTest extends EasyMockSupport {
 
         // given
         DHTNode node = null;
-        BigInteger id = new BigInteger(
-                "624742783717797424288959994005102614424044451126");
+        byte[] id = new byte[] {109, 110, 111, 112, 113, 114, 115, 116, 117,
+                118, 119, 120, 121, 122, 49, 50, 51, 52, 53, 54 };
+
         String s = "d1:rd2:id20:mnopqrstuvwxyz123456e1:t2:aa1:y1:re";
         byte[] bb = s.getBytes();
         DatagramPacket packet = new DatagramPacket(bb, bb.length, iaddr, port);
 
         // when
-        expect(routingTable.findExactNode(id)).andReturn(node);
+        expect(routingTable.findExactNode(aryEq(id))).andReturn(node);
         expect(tokenTable.isValidTransactionId("aa")).andReturn(true);
-        routingTable.addNode(id, iaddr, port, State.GOOD);
+        routingTable.addNode(aryEq(id), eq(iaddr), eq(port), eq(State.GOOD));
 
         replayAll();
 
@@ -626,14 +636,14 @@ public final class DHTProtocolHandlerUnitTest extends EasyMockSupport {
 
         // given
         DHTNode node = null;
-        BigInteger id = new BigInteger(
-                "624742783717797424288959994005102614424044451126");
+        byte[] id = new byte[] {109, 110, 111, 112, 113, 114, 115, 116, 117,
+                118, 119, 120, 121, 122, 49, 50, 51, 52, 53, 54 };
         String s = "d1:rd2:id20:mnopqrstuvwxyz123456e1:t2:aa1:y1:re";
         byte[] bb = s.getBytes();
         DatagramPacket packet = new DatagramPacket(bb, bb.length, iaddr, port);
 
         // when
-        expect(routingTable.findExactNode(id)).andReturn(node);
+        expect(routingTable.findExactNode(aryEq(id))).andReturn(node);
         expect(tokenTable.isValidTransactionId("aa")).andReturn(false);
 
         replayAll();
@@ -757,8 +767,8 @@ public final class DHTProtocolHandlerUnitTest extends EasyMockSupport {
     private DHTNode createDHTNode(final String id, final String address,
             final int portNo) throws UnknownHostException {
         byte[] addr = InetAddress.getByName(address).getAddress();
-        return DHTNodeFactory.create(new BigInteger(id), addr, portNo,
-                DHTNode.State.UNKNOWN);
+        return DHTNodeFactory.create(new BigInteger(id).toByteArray(), addr,
+                portNo, DHTNode.State.UNKNOWN);
     }
 
     /**
@@ -817,9 +827,9 @@ public final class DHTProtocolHandlerUnitTest extends EasyMockSupport {
      * expect Update Node Status to Good.
      */
     private void expectUpdateNodeStatusToGood() {
-        expect(
-                routingTable.findExactNode(new BigInteger(
-                        "555966236078696110491139251576793858856027895865")))
-                .andReturn(null);
+        byte[] bytes = new BigInteger(
+                "555966236078696110491139251576793858856027895865")
+                .toByteArray();
+        expect(routingTable.findExactNode(aryEq(bytes))).andReturn(null);
     }
 }

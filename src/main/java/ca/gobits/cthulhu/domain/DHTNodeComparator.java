@@ -18,6 +18,8 @@ package ca.gobits.cthulhu.domain;
 
 import java.util.Comparator;
 
+import com.google.common.primitives.UnsignedBytes;
+
 /**
  * DHTNode Comparator.
  *
@@ -42,6 +44,7 @@ public final class DHTNodeComparator implements Comparator<DHTNode> {
 
     @Override
     public int compare(final DHTNode o1, final DHTNode o2) {
-        return o1.getInfoHash().compareTo(o2.getInfoHash());
+        return UnsignedBytes.lexicographicalComparator()
+            .compare(o1.getInfoHash(), o2.getInfoHash());
     }
 }

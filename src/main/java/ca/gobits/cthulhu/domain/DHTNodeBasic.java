@@ -16,7 +16,6 @@
 
 package ca.gobits.cthulhu.domain;
 
-import java.math.BigInteger;
 import java.util.Date;
 
 import org.apache.commons.lang3.builder.EqualsBuilder;
@@ -34,7 +33,7 @@ public final class DHTNodeBasic implements DHTNode {
     private static final long serialVersionUID = -9209374329583239161L;
 
     /** Node identifier. */
-    private BigInteger infoHash;
+    private byte[] infoHash;
 
     /** Compact IP-address. */
     private long[] address;
@@ -109,10 +108,10 @@ public final class DHTNodeBasic implements DHTNode {
     }
 
     /**
-     * @return BigInteger
+     * @return byte[]
      */
     @Override
-    public BigInteger getInfoHash() {
+    public byte[] getInfoHash() {
         return infoHash;
     }
 
@@ -120,7 +119,7 @@ public final class DHTNodeBasic implements DHTNode {
      * Sets the Info Hash.
      * @param infoHashId  infoHash
      */
-    public void setInfoHash(final BigInteger infoHashId) {
+    public void setInfoHash(final byte[] infoHashId) {
         this.infoHash = infoHashId;
     }
 

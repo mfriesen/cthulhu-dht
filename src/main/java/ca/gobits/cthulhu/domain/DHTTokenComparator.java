@@ -18,6 +18,8 @@ package ca.gobits.cthulhu.domain;
 
 import java.util.Comparator;
 
+import com.google.common.primitives.UnsignedBytes;
+
 /**
  * DHTToken Comparator.
  *
@@ -43,6 +45,7 @@ public final class DHTTokenComparator implements Comparator<DHTToken> {
 
     @Override
     public int compare(final DHTToken o1, final DHTToken o2) {
-        return o1.getInfoHash().compareTo(o2.getInfoHash());
+        return UnsignedBytes.lexicographicalComparator()
+                .compare(o1.getInfoHash(), o2.getInfoHash());
     }
 }

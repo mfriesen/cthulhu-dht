@@ -20,9 +20,11 @@ import static ca.gobits.cthulhu.domain.DHTNodeFactory.create;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 
 import java.math.BigInteger;
 import java.net.InetAddress;
+import java.util.Arrays;
 import java.util.List;
 
 import org.apache.log4j.Level;
@@ -80,7 +82,7 @@ public final class DHTNodeBucketRoutingTableUnitTest {
         // given
         Logger.getLogger(DHTNodeBucketRoutingTable.class).setLevel(Level.DEBUG);
         DHTNodeBucketRoutingTable rt = new DHTNodeBucketRoutingTable();
-        DHTNode node = create(new BigInteger("1"), addr, port,
+        DHTNode node = create(new BigInteger("1").toByteArray(), addr, port,
                 State.GOOD);
 
         // when
@@ -122,7 +124,7 @@ public final class DHTNodeBucketRoutingTableUnitTest {
         // given
         DHTNodeBucketRoutingTable rt = new DHTNodeBucketRoutingTable();
         byte[] id = new BigInteger("1").toByteArray();
-        DHTNode node = create(new BigInteger("1"),
+        DHTNode node = create(new BigInteger("1").toByteArray(),
             addr, port, State.GOOD);
 
         // when
@@ -143,27 +145,30 @@ public final class DHTNodeBucketRoutingTableUnitTest {
     public void testAddNode04() {
         // given
         DHTNodeBucketRoutingTable rt = new DHTNodeBucketRoutingTable();
-        DHTNode node0 = create(new BigInteger("1"), addr, port,
-                State.GOOD);
-        DHTNode node1 = create(new BigInteger(
-            "217572328821850967755762913845138112465869557436"),
-            addr, port, State.GOOD);
-        DHTNode node2 = create(new BigInteger(
-            "253718933283387888344146948372599275024431560999"),
-            addr, port, State.GOOD);
-        DHTNode node3 = create(new BigInteger(
-            "909396897490697132528408310795708133687135388426"),
-            addr, port, DHTNode.State.GOOD);
+        byte[] bytes0 = new byte[] {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+                0, 0, 0, 0, 0, 1 };
+        byte[] bytes1 = new byte[] {38, 28, 71, -40, -112, 54, -31, -10, 100,
+                78, 13, -100, 26, -96, -94, -118, 2, -23, 78, -68 };
+        byte[] bytes2 = new byte[] {44, 113, 38, -125, -19, -98, 103, 105, 60,
+                -95, 53, -68, -98, -9, -48, 122, -31, -47, -71, 39 };
+        byte[] bytes3 = new byte[] {-97, 74, -60, 105, 35, -102, 80, -77, 40,
+                -2, -19, 64, 127, 15, -105, -44, -84, 125, 67, 10 };
+
+        DHTNode node0 = create(bytes0, addr, port, State.GOOD);
+        DHTNode node1 = create(bytes1, addr, port, State.GOOD);
+        DHTNode node2 = create(bytes2, addr, port, State.GOOD);
+        DHTNode node3 = create(bytes3, addr, port, DHTNode.State.GOOD);
 
         // when
-        rt.addNode(node0.getInfoHash().toByteArray(), iaddr, port, State.GOOD);
-        rt.addNode(node3.getInfoHash().toByteArray(), iaddr, port, State.GOOD);
-        rt.addNode(node2.getInfoHash().toByteArray(), iaddr, port, State.GOOD);
-        rt.addNode(node1.getInfoHash().toByteArray(), iaddr, port, State.GOOD);
+        rt.addNode(node0.getInfoHash(), iaddr, port, State.GOOD);
+        rt.addNode(node3.getInfoHash(), iaddr, port, State.GOOD);
+        rt.addNode(node2.getInfoHash(), iaddr, port, State.GOOD);
+        rt.addNode(node1.getInfoHash(), iaddr, port, State.GOOD);
 
         // then
         assertEquals(4, rt.getTotalNodeCount());
         SortedCollection<DHTNode> nodes = rt.getNodes();
+
         assertEquals(node0, nodes.get(0));
         assertEquals(node1, nodes.get(1));
         assertEquals(node2, nodes.get(2));
@@ -178,10 +183,10 @@ public final class DHTNodeBucketRoutingTableUnitTest {
         // given
         Logger.getLogger(DHTNodeBucketRoutingTable.class).setLevel(Level.DEBUG);
         DHTNodeBucketRoutingTable rt = new DHTNodeBucketRoutingTable();
-        DHTNode node = create(new BigInteger("1"), State.GOOD);
+        DHTNode node = create(new BigInteger("1").toByteArray(), State.GOOD);
 
         // when
-        rt.addNode(node.getInfoHash().toByteArray(), iaddr, port, State.GOOD);
+        rt.addNode(node.getInfoHash(), iaddr, port, State.GOOD);
 
         // then
         assertEquals(1, rt.getTotalNodeCount());
@@ -198,7 +203,7 @@ public final class DHTNodeBucketRoutingTableUnitTest {
     @Test
     public void testFindClosestNodes01() {
         // given
-        DHTNode n = create(new BigInteger("11"), addr, port,
+        DHTNode n = create(new BigInteger("11").toByteArray(), addr, port,
                 State.UNKNOWN);
         DHTNodeBucketRoutingTable rt = new DHTNodeBucketRoutingTable();
 
@@ -209,14 +214,14 @@ public final class DHTNodeBucketRoutingTableUnitTest {
 
         // then
         assertEquals(8, results.size());
-        assertEquals("4", results.get(0).getInfoHash().toString());
-        assertEquals("6", results.get(1).getInfoHash().toString());
-        assertEquals("8", results.get(2).getInfoHash().toString());
-        assertEquals("10", results.get(3).getInfoHash().toString());
-        assertEquals("12", results.get(4).getInfoHash().toString());
-        assertEquals("14", results.get(5).getInfoHash().toString());
-        assertEquals("16", results.get(6).getInfoHash().toString());
-        assertEquals("18", results.get(7).getInfoHash().toString());
+        assertEquals("[4]", Arrays.toString(results.get(0).getInfoHash()));
+        assertEquals("[6]", Arrays.toString(results.get(1).getInfoHash()));
+        assertEquals("[8]", Arrays.toString(results.get(2).getInfoHash()));
+        assertEquals("[10]", Arrays.toString(results.get(3).getInfoHash()));
+        assertEquals("[12]", Arrays.toString(results.get(4).getInfoHash()));
+        assertEquals("[14]", Arrays.toString(results.get(5).getInfoHash()));
+        assertEquals("[16]", Arrays.toString(results.get(6).getInfoHash()));
+        assertEquals("[18]", Arrays.toString(results.get(7).getInfoHash()));
     }
 
     /**
@@ -226,7 +231,7 @@ public final class DHTNodeBucketRoutingTableUnitTest {
     @Test
     public void testFindClosestNodes02() {
         // given
-        DHTNode n = create(new BigInteger("1"), addr, port,
+        DHTNode n = create(new BigInteger("1").toByteArray(), addr, port,
                 DHTNode.State.UNKNOWN);
         DHTNodeBucketRoutingTable rt = new DHTNodeBucketRoutingTable();
 
@@ -237,14 +242,14 @@ public final class DHTNodeBucketRoutingTableUnitTest {
 
         // then
         assertEquals(8, results.size());
-        assertEquals("0", results.get(0).getInfoHash().toString());
-        assertEquals("2", results.get(1).getInfoHash().toString());
-        assertEquals("4", results.get(2).getInfoHash().toString());
-        assertEquals("6", results.get(3).getInfoHash().toString());
-        assertEquals("8", results.get(4).getInfoHash().toString());
-        assertEquals("10", results.get(5).getInfoHash().toString());
-        assertEquals("12", results.get(6).getInfoHash().toString());
-        assertEquals("14", results.get(7).getInfoHash().toString());
+        assertEquals("[0]", Arrays.toString(results.get(0).getInfoHash()));
+        assertEquals("[2]", Arrays.toString(results.get(1).getInfoHash()));
+        assertEquals("[4]", Arrays.toString(results.get(2).getInfoHash()));
+        assertEquals("[6]", Arrays.toString(results.get(3).getInfoHash()));
+        assertEquals("[8]", Arrays.toString(results.get(4).getInfoHash()));
+        assertEquals("[10]", Arrays.toString(results.get(5).getInfoHash()));
+        assertEquals("[12]", Arrays.toString(results.get(6).getInfoHash()));
+        assertEquals("[14]", Arrays.toString(results.get(7).getInfoHash()));
     }
 
     /**
@@ -254,7 +259,7 @@ public final class DHTNodeBucketRoutingTableUnitTest {
     @Test
     public void testFindClosestNodes03() {
         // given
-        DHTNode n = create(new BigInteger("41"), addr, port,
+        DHTNode n = create(new BigInteger("41").toByteArray(), addr, port,
                 DHTNode.State.UNKNOWN);
         DHTNodeBucketRoutingTable rt = new DHTNodeBucketRoutingTable();
 
@@ -265,14 +270,14 @@ public final class DHTNodeBucketRoutingTableUnitTest {
 
         // then
         assertEquals(8, results.size());
-        assertEquals("24", results.get(0).getInfoHash().toString());
-        assertEquals("26", results.get(1).getInfoHash().toString());
-        assertEquals("28", results.get(2).getInfoHash().toString());
-        assertEquals("30", results.get(3).getInfoHash().toString());
-        assertEquals("32", results.get(4).getInfoHash().toString());
-        assertEquals("34", results.get(5).getInfoHash().toString());
-        assertEquals("36", results.get(6).getInfoHash().toString());
-        assertEquals("38", results.get(7).getInfoHash().toString());
+        assertEquals("[24]", Arrays.toString(results.get(0).getInfoHash()));
+        assertEquals("[26]", Arrays.toString(results.get(1).getInfoHash()));
+        assertEquals("[28]", Arrays.toString(results.get(2).getInfoHash()));
+        assertEquals("[30]", Arrays.toString(results.get(3).getInfoHash()));
+        assertEquals("[32]", Arrays.toString(results.get(4).getInfoHash()));
+        assertEquals("[34]", Arrays.toString(results.get(5).getInfoHash()));
+        assertEquals("[36]", Arrays.toString(results.get(6).getInfoHash()));
+        assertEquals("[38]", Arrays.toString(results.get(7).getInfoHash()));
     }
 
     /**
@@ -281,7 +286,7 @@ public final class DHTNodeBucketRoutingTableUnitTest {
     @Test
     public void testFindClosestNodes04() {
         // given
-        DHTNode n = create(new BigInteger("22"), addr, port,
+        DHTNode n = create(new BigInteger("22").toByteArray(), addr, port,
                 DHTNode.State.UNKNOWN);
         DHTNodeBucketRoutingTable rt = new DHTNodeBucketRoutingTable();
 
@@ -292,14 +297,14 @@ public final class DHTNodeBucketRoutingTableUnitTest {
 
         // then
         assertEquals(8, results.size());
-        assertEquals("14", results.get(0).getInfoHash().toString());
-        assertEquals("16", results.get(1).getInfoHash().toString());
-        assertEquals("18", results.get(2).getInfoHash().toString());
-        assertEquals("20", results.get(3).getInfoHash().toString());
-        assertEquals("22", results.get(4).getInfoHash().toString());
-        assertEquals("24", results.get(5).getInfoHash().toString());
-        assertEquals("26", results.get(6).getInfoHash().toString());
-        assertEquals("28", results.get(7).getInfoHash().toString());
+        assertEquals("[14]", Arrays.toString(results.get(0).getInfoHash()));
+        assertEquals("[16]", Arrays.toString(results.get(1).getInfoHash()));
+        assertEquals("[18]", Arrays.toString(results.get(2).getInfoHash()));
+        assertEquals("[20]", Arrays.toString(results.get(3).getInfoHash()));
+        assertEquals("[22]", Arrays.toString(results.get(4).getInfoHash()));
+        assertEquals("[24]", Arrays.toString(results.get(5).getInfoHash()));
+        assertEquals("[26]", Arrays.toString(results.get(6).getInfoHash()));
+        assertEquals("[28]", Arrays.toString(results.get(7).getInfoHash()));
     }
 
     /**
@@ -308,7 +313,7 @@ public final class DHTNodeBucketRoutingTableUnitTest {
     @Test
     public void testFindClosestNodes05() {
         // given
-        DHTNode n = create(new BigInteger("0"), addr, port,
+        DHTNode n = create(new BigInteger("0").toByteArray(), addr, port,
                 DHTNode.State.UNKNOWN);
         DHTNodeBucketRoutingTable rt = new DHTNodeBucketRoutingTable();
 
@@ -331,7 +336,7 @@ public final class DHTNodeBucketRoutingTableUnitTest {
         BigInteger nodeId = new BigInteger("5");
 
         // when
-        DHTNode result = rt.findExactNode(nodeId);
+        DHTNode result = rt.findExactNode(nodeId.toByteArray());
 
         // then
         assertNull(result);
@@ -348,7 +353,7 @@ public final class DHTNodeBucketRoutingTableUnitTest {
         addNodes(rt);
 
         // when
-        DHTNode result = rt.findExactNode(nodeId);
+        DHTNode result = rt.findExactNode(nodeId.toByteArray());
 
         // then
         assertNull(result);
@@ -361,15 +366,15 @@ public final class DHTNodeBucketRoutingTableUnitTest {
     public void testFindExactNode03() {
         // given
         DHTNodeBucketRoutingTable rt = new DHTNodeBucketRoutingTable();
-        BigInteger nodeId = new BigInteger("4");
+        byte[] bytes0 = new byte[] {4};
         addNodes(rt);
 
         // when
-        DHTNode result = rt.findExactNode(nodeId);
+        DHTNode result = rt.findExactNode(bytes0);
 
         // then
         assertNotNull(result);
-        assertEquals(nodeId, result.getInfoHash());
+        assertTrue(Arrays.equals(bytes0, result.getInfoHash()));
     }
 
     /**

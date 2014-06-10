@@ -18,8 +18,8 @@ package ca.gobits.cthulhu;
 
 import static ca.gobits.dht.DHTConversion.toInetAddress;
 
-import java.math.BigInteger;
 import java.net.InetAddress;
+import java.util.Arrays;
 import java.util.List;
 
 import org.apache.log4j.Logger;
@@ -28,7 +28,6 @@ import ca.gobits.cthulhu.domain.DHTNode;
 import ca.gobits.cthulhu.domain.DHTNode.State;
 import ca.gobits.cthulhu.domain.DHTNodeComparator;
 import ca.gobits.cthulhu.domain.DHTNodeFactory;
-import ca.gobits.dht.DHTConversion;
 
 /**
  * Implementation of DHT Bucket Routing Table.
@@ -59,17 +58,24 @@ public final class DHTNodeBucketRoutingTable implements DHTNodeRoutingTable {
     @Override
     public void addNode(final byte[] infoHash, final InetAddress addr,
             final int port, final State state) {
-        addNode(DHTConversion.toBigInteger(infoHash), addr, port, state);
+
+        DHTNode node = DHTNodeFactory.create(infoHash, addr, port,
+                state);
+
+        addNode(node, addr, port, state);
     }
 
-    @Override
-    public void addNode(final BigInteger infoHash, final InetAddress addr,
+    /**
+     * Add Node to Bucket.
+     * @param node  DHTNode
+     * @param addr  InetAddress
+     * @param port  port
+     * @param state  State
+     */
+    private void addNode(final DHTNode node, final InetAddress addr,
             final int port, final State state) {
 
         if (nodes.size() < MAX_NUMBER_OF_NODES) {
-
-            DHTNode node = DHTNodeFactory.create(infoHash, addr, port,
-                    state);
 
             addNodeLoggerDebug(node);
             nodes.add(node);
@@ -128,12 +134,12 @@ public final class DHTNodeBucketRoutingTable implements DHTNodeRoutingTable {
     }
 
     @Override
-    public List<DHTNode> findClosestNodes(final BigInteger nodeId) {
+    public List<DHTNode> findClosestNodes(final byte[] nodeId) {
         return findClosestNodes(nodeId, DEFAULT_SEARCH_COUNT);
     }
 
     @Override
-    public DHTNode findExactNode(final BigInteger nodeId) {
+    public DHTNode findExactNode(final byte[] nodeId) {
 
         DHTNode nodeMatch = null;
         DHTNode node = DHTNodeFactory.create(nodeId, DHTNode.State.UNKNOWN);
@@ -141,7 +147,7 @@ public final class DHTNodeBucketRoutingTable implements DHTNodeRoutingTable {
 
         if (index >= 0 && index < this.nodes.size()) {
             DHTNode foundNode = this.nodes.get(index);
-            if (foundNode.getInfoHash().equals(nodeId)) {
+            if (Arrays.equals(foundNode.getInfoHash(), nodeId)) {
                 nodeMatch = foundNode;
             }
         }
@@ -150,7 +156,7 @@ public final class DHTNodeBucketRoutingTable implements DHTNodeRoutingTable {
     }
 
     @Override
-    public List<DHTNode> findClosestNodes(final BigInteger nodeId,
+    public List<DHTNode> findClosestNodes(final byte[] nodeId,
             final int returnCount) {
 
         DHTNode node = findExactNode(nodeId);

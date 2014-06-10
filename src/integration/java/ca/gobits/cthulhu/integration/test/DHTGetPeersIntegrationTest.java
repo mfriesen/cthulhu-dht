@@ -139,7 +139,7 @@ public final class DHTGetPeersIntegrationTest {
 
             InetAddress addr = DHTConversion.toInetAddress(node.getAddress());
 
-            nodeRoutingTable.addNode(node.getInfoHash().toByteArray(), addr,
+            nodeRoutingTable.addNode(node.getInfoHash(), addr,
                 node.getPort(), State.GOOD);
         }
     }

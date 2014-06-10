@@ -16,7 +16,6 @@
 
 package ca.gobits.cthulhu.domain;
 
-import java.math.BigInteger;
 import java.util.Date;
 
 import org.apache.commons.lang3.builder.EqualsBuilder;
@@ -32,7 +31,7 @@ import ca.gobits.dht.DHTConversion;
 public final class DHTTokenBasic implements DHTToken {
 
     /** Node identifier. */
-    private BigInteger infoHash;
+    private byte[] infoHash;
 
     /** "Compact IP-address". */
     private long[] address;
@@ -56,7 +55,7 @@ public final class DHTTokenBasic implements DHTToken {
      * @param addr IP address
      * @param lport listening port
      */
-    public DHTTokenBasic(final BigInteger nodeId, final byte[] addr,
+    public DHTTokenBasic(final byte[] nodeId, final byte[] addr,
             final int lport) {
         this();
         this.infoHash = nodeId;
@@ -103,12 +102,12 @@ public final class DHTTokenBasic implements DHTToken {
     }
 
     @Override
-    public BigInteger getInfoHash() {
+    public byte[] getInfoHash() {
         return infoHash;
     }
 
     @Override
-    public void setInfoHash(final BigInteger infoHashId) {
+    public void setInfoHash(final byte[] infoHashId) {
         this.infoHash = infoHashId;
     }
 

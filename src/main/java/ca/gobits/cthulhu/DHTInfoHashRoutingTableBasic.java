@@ -16,7 +16,6 @@
 
 package ca.gobits.cthulhu;
 
-import java.math.BigInteger;
 import java.util.Collection;
 
 import org.apache.log4j.Logger;
@@ -49,7 +48,7 @@ public final class DHTInfoHashRoutingTableBasic implements
     }
 
     @Override
-    public Collection<DHTPeer> findPeers(final BigInteger infoHash) {
+    public Collection<DHTPeer> findPeers(final byte[] infoHash) {
 
         Collection<DHTPeer> peers = null;
 
@@ -70,7 +69,7 @@ public final class DHTInfoHashRoutingTableBasic implements
     }
 
     @Override
-    public void addPeer(final BigInteger infoHashId, final byte[] address,
+    public void addPeer(final byte[] infoHashId, final byte[] address,
             final int port) {
 
         LOGGER.debug("addPeer: " + infoHashId + " "
@@ -94,7 +93,7 @@ public final class DHTInfoHashRoutingTableBasic implements
     }
 
     @Override
-    public DHTInfoHash findInfoHash(final BigInteger infoHash) {
+    public DHTInfoHash findInfoHash(final byte[] infoHash) {
         return this.infoHashes.get(new DHTInfoHashBasic(infoHash));
     }
 }

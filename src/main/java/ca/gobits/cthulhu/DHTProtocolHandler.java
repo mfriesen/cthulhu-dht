@@ -19,7 +19,6 @@ package ca.gobits.cthulhu;
 import static ca.gobits.dht.DHTConversion.toByteArrayFromDHTPeer;
 
 import java.io.IOException;
-import java.math.BigInteger;
 import java.net.DatagramPacket;
 import java.net.InetAddress;
 import java.util.Collection;
@@ -134,8 +133,7 @@ public class DHTProtocolHandler {
 
             if (request1.containsKey("id")) {
 
-                BigInteger id = DHTConversion.toBigInteger(
-                        (byte[]) request1.get("id"));
+                byte[] id = (byte[]) request1.get("id");
 
                 if (!updateNodeStatusToGood(id, State.GOOD)) {
 
@@ -152,15 +150,15 @@ public class DHTProtocolHandler {
 
     /**
      * Updates DHTNode's state.
-     * @param id  infohash
+     * @param infohash  infohash
      * @param state  state to update to
      * @return boolean
      */
-    private boolean updateNodeStatusToGood(final BigInteger id,
+    private boolean updateNodeStatusToGood(final byte[] infohash,
             final State state) {
 
         boolean updated = false;
-        DHTNode node = routingTable.findExactNode(id);
+        DHTNode node = routingTable.findExactNode(infohash);
 
         if (node != null) {
             node.setState(state);
@@ -197,8 +195,7 @@ public class DHTProtocolHandler {
             DHTArgumentRequest arguments = new DHTArgumentRequest(
                     (Map<String, Object>) request.get("a"));
 
-            updateNodeStatusToGood(
-                    DHTConversion.toBigInteger(arguments.getId()), State.GOOD);
+            updateNodeStatusToGood(arguments.getId(), State.GOOD);
 
             if (action.equals("ping")) {
 
@@ -252,8 +249,7 @@ public class DHTProtocolHandler {
 
         if (tokenTable.valid(packet.getAddress(), port, arguments.getToken())) {
 
-            BigInteger infoHash = DHTConversion.toBigInteger(arguments
-                    .getInfoHash());
+            byte[] infoHash = arguments.getInfoHash();
 
             InetAddress addr = packet.getAddress();
             byte[] address = addr.getAddress();
@@ -300,8 +296,7 @@ public class DHTProtocolHandler {
 
         Map<String, Object> responseParameter = new HashMap<String, Object>();
 
-        BigInteger infoHash = DHTConversion.toBigInteger(arguments
-                .getInfoHash());
+        byte[] infoHash = arguments.getInfoHash();
 
         Collection<DHTPeer> peers = peerRoutingTable.findPeers(infoHash);
 
@@ -373,9 +368,7 @@ public class DHTProtocolHandler {
      * @return List<DHTNode>
      */
     private List<DHTNode> findClosestNodes(final byte[] targetBytes) {
-
-        BigInteger target = DHTConversion.toBigInteger(targetBytes);
-        return routingTable.findClosestNodes(target);
+        return routingTable.findClosestNodes(targetBytes);
     }
 
     /**

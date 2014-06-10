@@ -34,7 +34,7 @@ public final class DHTInfoHashRoutingTableBasicUnitTest {
         BigInteger infoHash = new BigInteger("123123");
 
         // when
-        Collection<DHTPeer> result = rt.findPeers(infoHash);
+        Collection<DHTPeer> result = rt.findPeers(infoHash.toByteArray());
 
         // then
         assertNull(result);
@@ -50,10 +50,10 @@ public final class DHTInfoHashRoutingTableBasicUnitTest {
         byte[] address = new byte[] {127, 0, 0, 1 };
         int port = 1234;
 
-        rt.addPeer(infoHash, address, port);
+        rt.addPeer(infoHash.toByteArray(), address, port);
 
         // when
-        Collection<DHTPeer> result = rt.findPeers(infoHash);
+        Collection<DHTPeer> result = rt.findPeers(infoHash.toByteArray());
 
         // then
         assertEquals(1, result.size());
@@ -74,9 +74,9 @@ public final class DHTInfoHashRoutingTableBasicUnitTest {
         int port = 1234;
 
         // when
-        assertNull(rt.findInfoHash(infoHash));
-        rt.addPeer(infoHash, address, port);
-        DHTInfoHash result = rt.findInfoHash(infoHash);
+        assertNull(rt.findInfoHash(infoHash.toByteArray()));
+        rt.addPeer(infoHash.toByteArray(), address, port);
+        DHTInfoHash result = rt.findInfoHash(infoHash.toByteArray());
 
         // then
         assertNotNull(result);
@@ -91,7 +91,7 @@ public final class DHTInfoHashRoutingTableBasicUnitTest {
     @Test
     public void testAddPeer02() {
         // given
-        BigInteger infoHash = new BigInteger("12341");
+        byte[] infoHash = new BigInteger("12341").toByteArray();
         byte[] address = new byte[] {127, 0, 0, 1 };
         int port = 1234;
 

@@ -37,8 +37,10 @@ public final class DHTNodeComparatorUnitTest {
     @Test
     public void testCompare01() {
         // given
-        DHTNode node0 = create(new BigInteger("2"), DHTNode.State.UNKNOWN);
-        DHTNode node1 = create(new BigInteger("2"), DHTNode.State.UNKNOWN);
+        DHTNode node0 = create(new BigInteger("2").toByteArray(),
+                DHTNode.State.UNKNOWN);
+        DHTNode node1 = create(new BigInteger("2").toByteArray(),
+                DHTNode.State.UNKNOWN);
 
         // when
         int result = DHTNodeComparator.getInstance().compare(node0, node1);
@@ -53,14 +55,16 @@ public final class DHTNodeComparatorUnitTest {
     @Test
     public void testCompare02() {
         // given
-        DHTNode node0 = create(new BigInteger("2"), DHTNode.State.UNKNOWN);
-        DHTNode node1 = create(new BigInteger("5"), DHTNode.State.UNKNOWN);
+        DHTNode node0 = create(new BigInteger("2").toByteArray(),
+                DHTNode.State.UNKNOWN);
+        DHTNode node1 = create(new BigInteger("5").toByteArray(),
+                DHTNode.State.UNKNOWN);
 
         // when
         int result = DHTNodeComparator.getInstance().compare(node0, node1);
 
         // then
-        assertEquals(-1, result);
+        assertEquals(-3, result);
     }
 
     /**
@@ -69,13 +73,15 @@ public final class DHTNodeComparatorUnitTest {
     @Test
     public void testCompare03() {
         // given
-        DHTNode node0 = create(new BigInteger("5"), DHTNode.State.UNKNOWN);
-        DHTNode node1 = create(new BigInteger("2"), DHTNode.State.UNKNOWN);
+        DHTNode node0 = create(new BigInteger("5").toByteArray(),
+                DHTNode.State.UNKNOWN);
+        DHTNode node1 = create(new BigInteger("2").toByteArray(),
+                DHTNode.State.UNKNOWN);
 
         // when
         int result = DHTNodeComparator.getInstance().compare(node0, node1);
 
         // then
-        assertEquals(1, result);
+        assertEquals(3, result);
     }
 }

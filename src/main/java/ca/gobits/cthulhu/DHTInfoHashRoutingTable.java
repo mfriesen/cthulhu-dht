@@ -16,7 +16,6 @@
 
 package ca.gobits.cthulhu;
 
-import java.math.BigInteger;
 import java.util.Collection;
 
 import ca.gobits.cthulhu.domain.DHTInfoHash;
@@ -31,7 +30,7 @@ public interface DHTInfoHashRoutingTable {
      * @param infoHash  info_hash
      * @return Collection<DHTPeer>
      */
-    Collection<DHTPeer> findPeers(final BigInteger infoHash);
+    Collection<DHTPeer> findPeers(final byte[] infoHash);
 
     /**
      * adds Peer to an info_hash.
@@ -39,7 +38,7 @@ public interface DHTInfoHashRoutingTable {
      * @param address peer address
      * @param port  peer port
      */
-    void addPeer(final BigInteger infoHash, final byte[] address,
+    void addPeer(final byte[] infoHash, final byte[] address,
             final int port);
 
     /**
@@ -47,5 +46,5 @@ public interface DHTInfoHashRoutingTable {
      * @param infoHash  info_hash
      * @return DHTInfoHash
      */
-    DHTInfoHash findInfoHash(final BigInteger infoHash);
+    DHTInfoHash findInfoHash(final byte[] infoHash);
 }

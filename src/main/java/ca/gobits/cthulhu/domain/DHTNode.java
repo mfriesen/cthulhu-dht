@@ -17,7 +17,6 @@
 package ca.gobits.cthulhu.domain;
 
 import java.io.Serializable;
-import java.math.BigInteger;
 import java.util.Date;
 
 /**
@@ -43,9 +42,9 @@ public interface DHTNode extends Serializable {
     Date getLastUpdated();
 
     /**
-     * @return BigInteger
+     * @return byte[]
      */
-    BigInteger getInfoHash();
+    byte[] getInfoHash();
 
     /**
      * @return long[]

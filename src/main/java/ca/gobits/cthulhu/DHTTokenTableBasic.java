@@ -16,7 +16,6 @@
 
 package ca.gobits.cthulhu;
 
-import java.math.BigInteger;
 import java.net.InetAddress;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -173,8 +172,7 @@ public final class DHTTokenTableBasic implements DHTTokenTable {
      */
     private DHTToken createToken(final InetAddress addr, final int port,
             final byte[] secret) {
-        BigInteger id = DHTConversion.toBigInteger(secret);
-        DHTToken dhtToken = new DHTTokenBasic(id, addr.getAddress(), port);
+        DHTToken dhtToken = new DHTTokenBasic(secret, addr.getAddress(), port);
         return dhtToken;
     }
 

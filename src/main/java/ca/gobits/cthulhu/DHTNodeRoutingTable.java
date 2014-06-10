@@ -16,7 +16,6 @@
 
 package ca.gobits.cthulhu;
 
-import java.math.BigInteger;
 import java.net.InetAddress;
 import java.util.List;
 
@@ -42,27 +41,18 @@ public interface DHTNodeRoutingTable {
     void addNode(byte[] infoHash, InetAddress addr, int port, State state);
 
     /**
-     * Adds node to RoutingTable.
-     * @param infoHash  node identifier
-     * @param addr   address of node
-     * @param port  port
-     * @param state  State of Node
-     */
-    void addNode(BigInteger infoHash, InetAddress addr, int port, State state);
-
-    /**
      * Find the node with matching ID or NULL.
      * @param nodeId to find closest nodes to.
      * @return DHTNode
      */
-    DHTNode findExactNode(BigInteger nodeId);
+    DHTNode findExactNode(byte[] nodeId);
 
     /**
      * Find the closest X nodes to the nodeId.
      * @param nodeId to find closest nodes to.
      * @return List<DHTNode>
      */
-    List<DHTNode> findClosestNodes(BigInteger nodeId);
+    List<DHTNode> findClosestNodes(byte[] nodeId);
 
     /**
      * Find the closest X nodes to the nodeId.
@@ -70,7 +60,7 @@ public interface DHTNodeRoutingTable {
      * @param returnCount  max number of nodes to return.
      * @return List<DHTNode>
      */
-    List<DHTNode> findClosestNodes(BigInteger nodeId, int returnCount);
+    List<DHTNode> findClosestNodes(byte[] nodeId, int returnCount);
 
     /**
      * @return int
