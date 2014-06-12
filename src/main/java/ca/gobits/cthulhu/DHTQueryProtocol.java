@@ -19,8 +19,6 @@ package ca.gobits.cthulhu;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.springframework.beans.factory.annotation.Autowired;
-
 import ca.gobits.dht.BEncoder;
 
 /**
@@ -28,26 +26,20 @@ import ca.gobits.dht.BEncoder;
  */
 public class DHTQueryProtocol {
 
-    /** DHTServerConfig. */
-    @Autowired
-    private DHTServerConfig config;
-
-    /** DHT Tokens handler. */
-    @Autowired
-    private DHTTokenTable tokens;
-
     /**
      * Generates a Ping Request.
+     * @param transactionId   TransactionId
+     * @param id   idd
      * @return byte[]
      */
-    public byte[] pingQuery() {
+    public byte[] pingQuery(final String transactionId, final byte[] id) {
         Map<Object, Object> map = new HashMap<Object, Object>();
-        map.put("t", tokens.getTransactionId());
+        map.put("t", transactionId);
         map.put("y", "q");
         map.put("q", "ping");
 
         Map<Object, Object> a = new HashMap<Object, Object>();
-        a.put("id", config.getNodeId());
+        a.put("id", id);
         map.put("a", a);
 
         byte[] bytes = BEncoder.bencoding(map);
@@ -56,17 +48,20 @@ public class DHTQueryProtocol {
 
     /**
      * Creates a find request.
+     * @param transactionId   TransactionId
+     * @param id  id identifier
      * @param target  target identifier
      * @return Map<String, Object>
      */
-    public byte[] findNodeQuery(final int[] target) {
+    public byte[] findNodeQuery(final String transactionId, final byte[] id,
+            final byte[] target) {
         Map<String, Object> map = new HashMap<String, Object>();
-        map.put("t", tokens.getTransactionId());
+        map.put("t", transactionId);
         map.put("y", "q");
         map.put("q", "find_node");
 
         Map<String, Object> map2 = new HashMap<String, Object>();
-        map2.put("id", config.getNodeId());
+        map2.put("id", id);
         map2.put("target", target);
         map.put("a", map2);
 

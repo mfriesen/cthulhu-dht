@@ -128,8 +128,8 @@ public final class DHTNodeBucketRoutingTable implements DHTNodeRoutingTable {
                 LOGGER.info(e, e);
             }
 
-            LOGGER.debug("adding node " + node.getInfoHash() + " "
-                + host + ":" + node.getPort());
+            LOGGER.debug("adding node " + Arrays.toString(node.getInfoHash())
+                + " " + host + ":" + node.getPort());
         }
     }
 

@@ -21,7 +21,6 @@ import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
-import java.util.HashMap;
 import java.util.Map;
 
 import org.apache.commons.codec.binary.Base64;
@@ -36,7 +35,6 @@ import ca.gobits.cthulhu.DHTConfiguration;
 import ca.gobits.cthulhu.DHTQueryProtocol;
 import ca.gobits.cthulhu.DHTServerConfig;
 import ca.gobits.dht.BDecoder;
-import ca.gobits.dht.BEncoder;
 import ca.gobits.dht.DHTConversion;
 
 /**
@@ -81,10 +79,10 @@ public final class DHTPingIntegrationTest {
         Map<String, Object> realResponse = (Map<String, Object>) new BDecoder()
             .decode(getRealPingResponse());
 
-        Map<String, Object> request = createRequest("aa", id.getBytes());
+        byte[] request = queryProtocol.pingQuery("aa", id.getBytes());
 
         // when
-        byte[] results = sendUDPPacket(BEncoder.bencoding(request));
+        byte[] results = sendUDPPacket(request);
 
         // then
         Map<String, Object> response = (Map<String, Object>) new BDecoder()
@@ -102,25 +100,6 @@ public final class DHTPingIntegrationTest {
         Map<String, Object> r = (Map<String, Object>) response.get("r");
         assertEquals(1, r.size());
         assertArrayEquals(config.getNodeId(), (byte[]) r.get("id"));
-    }
-
-    /**
-     * Create "ping" request.
-     * @param t t
-     * @param id id
-     * @return Map<String, Object>
-     */
-    private Map<String, Object> createRequest(final String t, final byte[] id) {
-        Map<String, Object> request = new HashMap<String, Object>();
-        request.put("t", t);
-        request.put("y", "q");
-        request.put("q", "ping");
-
-        Map<String, Object> a = new HashMap<String, Object>();
-        a.put("id", id);
-        request.put("a", a);
-
-        return request;
     }
 
     /**

@@ -20,6 +20,7 @@ import static ca.gobits.dht.DHTConversion.toByteArrayFromDHTPeer;
 
 import java.io.IOException;
 import java.net.DatagramPacket;
+import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.util.Collection;
 import java.util.HashMap;
@@ -29,6 +30,7 @@ import java.util.Random;
 
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.util.CollectionUtils;
 
 import ca.gobits.cthulhu.domain.DHTNode;
@@ -70,6 +72,14 @@ public class DHTProtocolHandler {
     /** DHTServerConfig. */
     @Autowired
     private DHTServerConfig config;
+
+    /** Reference to Node Status Thread Pool. */
+    @Autowired
+    private ThreadPoolTaskExecutor nodeStatusThreadPool;
+
+    /** DatagramSocket instance. */
+    @Autowired
+    private DatagramSocket socket;
 
     /**
      * Read DatagramPacket.
@@ -113,8 +123,8 @@ public class DHTProtocolHandler {
      */
     private boolean isValid(final Map<String, Object> request) {
 
-        boolean valid = request.containsKey("t");
-        return valid;
+        return request.containsKey("t")
+                && request.containsKey("y");
     }
 
     /**
@@ -135,13 +145,16 @@ public class DHTProtocolHandler {
 
                 byte[] id = (byte[]) request1.get("id");
 
-                if (!updateNodeStatusToGood(id, State.GOOD)) {
+                String transId = new String((byte[]) request.get("t"));
+                if (tokenTable.isValidTransactionId(transId)) {
 
-                    String transId = new String((byte[]) request.get("t"));
-                    if (tokenTable.isValidTransactionId(transId)) {
+                    DHTNode node = routingTable.findExactNode(id);
 
+                    if (node != null) {
+                        node.setState(State.GOOD);
+                    } else {
                         routingTable.addNode(id, packet.getAddress(),
-                                packet.getPort(), State.GOOD);
+                            packet.getPort(), State.GOOD);
                     }
                 }
             }
@@ -149,23 +162,36 @@ public class DHTProtocolHandler {
     }
 
     /**
-     * Updates DHTNode's state.
+     * Updates DHTNode's state to Good if exists in RoutingTable
+     * or Sends Ping Request.
      * @param infohash  infohash
-     * @param state  state to update to
-     * @return boolean
+     * @param addr  InetAddress
+     * @param port  port
      */
-    private boolean updateNodeStatusToGood(final byte[] infohash,
-            final State state) {
+    private void updateNodeStatusOrPing(final byte[] infohash,
+            final InetAddress addr, final int port) {
 
-        boolean updated = false;
         DHTNode node = routingTable.findExactNode(infohash);
 
         if (node != null) {
-            node.setState(state);
-            updated = true;
+            node.setState(State.GOOD);
+        } else {
+//            nodeStatusThreadPool.execute(new Runnable() {
+//                @Override
+//                public void run() {
+//                    byte[] bytes = queryProtocol.pingQuery(
+//                            tokenTable.getTransactionId(), config.getNodeId());
+//                    DatagramPacket packet = new DatagramPacket(bytes,
+//                            bytes.length, addr, port);
+//
+//                    try {
+//                        socket.send(packet);
+//                    } catch (IOException e) {
+//                        LOGGER.trace(e, e);
+//                    }
+//                }
+//            });
         }
-
-        return updated;
     }
 
     /**
@@ -195,7 +221,7 @@ public class DHTProtocolHandler {
             DHTArgumentRequest arguments = new DHTArgumentRequest(
                     (Map<String, Object>) request.get("a"));
 
-            updateNodeStatusToGood(arguments.getId(), State.GOOD);
+            updateNodeStatusOrPing(arguments.getId(), addr, port);
 
             if (action.equals("ping")) {
 

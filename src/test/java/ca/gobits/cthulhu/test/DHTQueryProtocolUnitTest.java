@@ -1,6 +1,5 @@
 package ca.gobits.cthulhu.test;
 
-import static org.easymock.EasyMock.expect;
 import static org.junit.Assert.assertEquals;
 
 import java.util.Map;
@@ -8,14 +7,11 @@ import java.util.Map;
 import org.apache.commons.codec.binary.Base64;
 import org.easymock.EasyMockRunner;
 import org.easymock.EasyMockSupport;
-import org.easymock.Mock;
 import org.easymock.TestSubject;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
 import ca.gobits.cthulhu.DHTQueryProtocol;
-import ca.gobits.cthulhu.DHTServerConfig;
-import ca.gobits.cthulhu.DHTTokenTable;
 import ca.gobits.dht.BDecoder;
 import ca.gobits.dht.DHTIdentifier;
 
@@ -29,14 +25,6 @@ public final class DHTQueryProtocolUnitTest extends EasyMockSupport {
     /** DHTQueryProtocol. */
     @TestSubject
     private final DHTQueryProtocol dht = new DHTQueryProtocol();
-
-    /** Mock DHTTokenTable. */
-    @Mock
-    private DHTTokenTable tokens;
-
-    /** DHTServerConfig. */
-    @Mock
-    private DHTServerConfig config;
 
     /** Dummy NodeId. */
     private final byte[] nodeId = DHTIdentifier.sha1("test".getBytes());
@@ -52,11 +40,8 @@ public final class DHTQueryProtocolUnitTest extends EasyMockSupport {
         String transactionId = "aa";
 
         // when
-        expect(config.getNodeId()).andReturn(nodeId);
-        expect(tokens.getTransactionId()).andReturn(transactionId);
-
         replayAll();
-        byte[] result = dht.pingQuery();
+        byte[] result = dht.pingQuery(transactionId, nodeId);
 
         // then
         verifyAll();
@@ -83,15 +68,12 @@ public final class DHTQueryProtocolUnitTest extends EasyMockSupport {
 
         // given
         String transactionId = "aa";
-        int[] target = new int[] {-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+        byte[] target = new byte[] {-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
                 -1, -1, -1, -1, -1, -1, -1, -1, -1 };
 
         // when
-        expect(config.getNodeId()).andReturn(nodeId);
-        expect(tokens.getTransactionId()).andReturn(transactionId);
-
         replayAll();
-        byte[] result = dht.findNodeQuery(target);
+        byte[] result = dht.findNodeQuery(transactionId, nodeId, target);
 
         // then
         verifyAll();

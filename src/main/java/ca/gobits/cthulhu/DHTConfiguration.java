@@ -120,14 +120,6 @@ public class DHTConfiguration {
     }
 
     /**
-     * @return DHTNodeStatusQueue
-     */
-    @Bean
-    public DHTNodeStatusQueue dhtNodeStatusQueue() {
-        return new DHTNodeStatusQueue();
-    }
-
-    /**
      * @return DatagramSocket
      * @throws SocketException  SocketException
      */
