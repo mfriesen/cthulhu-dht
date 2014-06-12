@@ -125,6 +125,6 @@ public class DHTConfiguration {
      */
     @Bean
     public DatagramSocket datagramSocket() throws SocketException {
-        return  new DatagramSocket(config.getPort());
+        return  new DatagramSocket(this.config.getPort());
     }
 }

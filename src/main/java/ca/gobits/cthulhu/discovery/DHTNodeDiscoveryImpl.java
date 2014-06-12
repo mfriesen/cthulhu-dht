@@ -17,6 +17,10 @@
 package ca.gobits.cthulhu.discovery;
 
 import java.net.InetAddress;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.DelayQueue;
+
+import ca.gobits.dht.DHTConversion;
 
 /**
  * DHTNodeDiscovery Implementation.
@@ -24,11 +28,17 @@ import java.net.InetAddress;
  */
 public class DHTNodeDiscoveryImpl implements DHTNodeDiscovery {
 
-//    private final BlockingQueue<PostponedWorkItem> delayed = new DelayQueue<PostponedWorkItem>();
+    private final static int DEFAULT_DELAY_MILLIS = 60000;
+
+    /** Queue of DHTNode to contact. */
+    private final BlockingQueue<DelayObject<byte[]>> delayed = new DelayQueue<DelayObject<byte[]>>();
 
     @Override
     public void addNode(final InetAddress addr, final int port) {
-
+        // TODO add test
+        byte[] payload = DHTConversion.compactAddress(addr.getAddress(), port);
+        DelayObject<byte[]> obj = new DelayObject<byte[]>(payload, DEFAULT_DELAY_MILLIS);
+        this.delayed.offer(obj);
     }
 
 }

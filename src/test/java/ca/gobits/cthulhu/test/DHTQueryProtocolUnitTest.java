@@ -41,7 +41,7 @@ public final class DHTQueryProtocolUnitTest extends EasyMockSupport {
 
         // when
         replayAll();
-        byte[] result = dht.pingQuery(transactionId, nodeId);
+        byte[] result = this.dht.pingQuery(transactionId, this.nodeId);
 
         // then
         verifyAll();
@@ -55,7 +55,7 @@ public final class DHTQueryProtocolUnitTest extends EasyMockSupport {
 
         Map<Object, Object> a = (Map<Object, Object>) map.get("a");
         assertEquals(20, ((byte[]) a.get("id")).length);
-        assertEquals(Base64.encodeBase64String(nodeId),
+        assertEquals(Base64.encodeBase64String(this.nodeId),
                 Base64.encodeBase64String((byte[]) a.get("id")));
     }
 
@@ -73,7 +73,7 @@ public final class DHTQueryProtocolUnitTest extends EasyMockSupport {
 
         // when
         replayAll();
-        byte[] result = dht.findNodeQuery(transactionId, nodeId, target);
+        byte[] result = this.dht.findNodeQuery(transactionId, this.nodeId, target);
 
         // then
         verifyAll();
@@ -88,7 +88,7 @@ public final class DHTQueryProtocolUnitTest extends EasyMockSupport {
         Map<Object, Object> a = (Map<Object, Object>) map.get("a");
         assertEquals(20, ((byte[]) a.get("id")).length);
         assertEquals(20, ((byte[]) a.get("target")).length);
-        assertEquals(Base64.encodeBase64String(nodeId),
+        assertEquals(Base64.encodeBase64String(this.nodeId),
                 Base64.encodeBase64String((byte[]) a.get("id")));
     }
 }

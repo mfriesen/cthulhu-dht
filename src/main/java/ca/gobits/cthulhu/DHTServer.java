@@ -61,7 +61,7 @@ public class DHTServer /*implements Lifecycle*/ {
      */
     public void run() throws Exception {
 
-        LOGGER.info("starting cthulhu on " + serverSocket.getLocalPort());
+        LOGGER.info("starting cthulhu on " + this.serverSocket.getLocalPort());
 
         try {
 
@@ -72,12 +72,12 @@ public class DHTServer /*implements Lifecycle*/ {
                 DatagramPacket receivePacket = new DatagramPacket(
                         receiveData, receiveData.length);
 
-                serverSocket.receive(receivePacket);
+                this.serverSocket.receive(receivePacket);
 
-                socketThreadPool.execute(new DHTProtocolRunnable(serverSocket,
-                        dhtHandler, receivePacket));
+                this.socketThreadPool.execute(new DHTProtocolRunnable(this.serverSocket,
+                        this.dhtHandler, receivePacket));
 
-                if (stop) {
+                if (this.stop) {
                     break;
                 }
             }
@@ -91,11 +91,11 @@ public class DHTServer /*implements Lifecycle*/ {
      * Gracefully shutdown server.
      */
     public final void shutdownGracefully() {
-        stop = true;
-        socketThreadPool.shutdown();
+        this.stop = true;
+        this.socketThreadPool.shutdown();
 
-        if (serverSocket != null) {
-            serverSocket.close();
+        if (this.serverSocket != null) {
+            this.serverSocket.close();
         }
     }
 }

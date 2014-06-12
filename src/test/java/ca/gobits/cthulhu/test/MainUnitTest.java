@@ -78,15 +78,15 @@ public final class MainUnitTest {
         DHTServer mockServer = createMock(DHTServer.class);
 
         // when
-        ac.register(DHTServerConfig.class);
-        ac.refresh();
-        expect(ac.getBean(DHTServer.class)).andReturn(mockServer);
+        this.ac.register(DHTServerConfig.class);
+        this.ac.refresh();
+        expect(this.ac.getBean(DHTServer.class)).andReturn(mockServer);
         mockServer.run();
-        replay(ac);
-        Main.main(args, ac);
+        replay(this.ac);
+        Main.main(args, this.ac);
 
         // verify
-        verify(ac);
+        verify(this.ac);
     }
 
     /**
@@ -99,15 +99,15 @@ public final class MainUnitTest {
         final String[] args = new String[]{};
 
         // when
-        ac.register(DHTServerConfig.class);
-        ac.refresh();
-        expect(ac.getBean(DHTServer.class))
+        this.ac.register(DHTServerConfig.class);
+        this.ac.refresh();
+        expect(this.ac.getBean(DHTServer.class))
                 .andThrow(new RuntimeException());
-        replay(ac);
-        Main.main(args, ac);
+        replay(this.ac);
+        Main.main(args, this.ac);
 
         // verify
-        verify(ac);
+        verify(this.ac);
     }
 
     /**

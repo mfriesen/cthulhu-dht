@@ -55,7 +55,7 @@ public final class DHTPeerBasic implements DHTPeer {
     @Override
     public int hashCode() {
         return new HashCodeBuilder()
-            .append(address)
+            .append(this.address)
             .toHashCode();
     }
 
@@ -75,15 +75,15 @@ public final class DHTPeerBasic implements DHTPeer {
 
         DHTPeer rhs = (DHTPeer) obj;
         return new EqualsBuilder()
-            .append(address, rhs.getAddress())
+            .append(this.address, rhs.getAddress())
             .isEquals();
     }
 
     @Override
     public String toString() {
         ToStringBuilder builder = new ToStringBuilder(this);
-        builder.append("address", DHTConversion.toInetAddressString(address));
-        builder.append("port", port);
+        builder.append("address", DHTConversion.toInetAddressString(this.address));
+        builder.append("port", this.port);
         return builder.toString();
     }
 
@@ -92,7 +92,7 @@ public final class DHTPeerBasic implements DHTPeer {
      */
     @Override
     public long[] getAddress() {
-        return address;
+        return this.address;
     }
 
     /**
@@ -109,7 +109,7 @@ public final class DHTPeerBasic implements DHTPeer {
      */
     @Override
     public int getPort() {
-        return port;
+        return this.port;
     }
 
     /**

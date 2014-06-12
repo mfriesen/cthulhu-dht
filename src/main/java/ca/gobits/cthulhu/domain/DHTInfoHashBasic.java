@@ -37,7 +37,7 @@ public final class DHTInfoHashBasic implements DHTInfoHash {
     public String toString() {
         ToStringBuilder builder = new ToStringBuilder(this);
         builder.append("infoHash", getInfoHash());
-        builder.append("# of peers", peers != null ? peers.size() : 0);
+        builder.append("# of peers", this.peers != null ? this.peers.size() : 0);
         return builder.toString();
     }
 
@@ -47,7 +47,7 @@ public final class DHTInfoHashBasic implements DHTInfoHash {
      */
     @Override
     public Set<DHTPeer> getPeers() {
-        return peers;
+        return this.peers;
     }
 
     /**
@@ -76,7 +76,7 @@ public final class DHTInfoHashBasic implements DHTInfoHash {
     @Override
     public int hashCode() {
         return new HashCodeBuilder()
-            .append(infoHash)
+            .append(this.infoHash)
             .toHashCode();
     }
 
@@ -96,7 +96,7 @@ public final class DHTInfoHashBasic implements DHTInfoHash {
 
         DHTInfoHash rhs = (DHTInfoHash) obj;
         return new EqualsBuilder()
-            .append(infoHash, rhs.getInfoHash())
+            .append(this.infoHash, rhs.getInfoHash())
             .isEquals();
     }
 
@@ -105,7 +105,7 @@ public final class DHTInfoHashBasic implements DHTInfoHash {
      */
     @Override
     public byte[] getInfoHash() {
-        return infoHash;
+        return this.infoHash;
     }
 
     /**

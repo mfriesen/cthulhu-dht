@@ -48,7 +48,7 @@ public final class SortedList<E> implements SortedCollection<E>, Serializable {
      * @param duplicates  whether to allow duplicates or not
      */
     public SortedList(final Comparator<E> compare, final boolean duplicates) {
-        list = new ArrayList<E>();
+        this.list = new ArrayList<E>();
         this.allowDuplicates = duplicates;
         this.comparable = compare;
     }
@@ -61,7 +61,7 @@ public final class SortedList<E> implements SortedCollection<E>, Serializable {
      */
     public SortedList(final int initialCapacity, final Comparator<E> compare,
             final boolean duplicates) {
-        list = new ArrayList<E>(initialCapacity);
+        this.list = new ArrayList<E>(initialCapacity);
         this.allowDuplicates = duplicates;
         this.comparable = compare;
     }
@@ -84,11 +84,11 @@ public final class SortedList<E> implements SortedCollection<E>, Serializable {
     @Override
     public boolean add(final E e) {
 
-        int position = indexOf(e, allowDuplicates);
+        int position = indexOf(e, this.allowDuplicates);
         boolean added = position > -1;
 
         if (added) {
-            list.add(position, e);
+            this.list.add(position, e);
         }
 
         return added;
@@ -116,13 +116,13 @@ public final class SortedList<E> implements SortedCollection<E>, Serializable {
     private int indexOf(final E e, final boolean duplicates) {
 
         int imin = 0;
-        int imax = list.size();
+        int imax = this.list.size();
         // continue searching while [imin,imax] is not empty
-        while (list.size() > 0 && imax > imin) {
+        while (this.list.size() > 0 && imax > imin) {
             // calculate the midpoint for roughly equal partition
             int imid = imin + ((imax - imin) / 2);
 
-            int c = comparable.compare(e, list.get(imid));
+            int c = this.comparable.compare(e, this.list.get(imid));
 
             if (c == 0) {
                 // key found at index imid
@@ -137,8 +137,8 @@ public final class SortedList<E> implements SortedCollection<E>, Serializable {
             }
         }
 
-        if (list.size() > imin) {
-            int c = comparable.compare(e, list.get(imin));
+        if (this.list.size() > imin) {
+            int c = this.comparable.compare(e, this.list.get(imin));
             if (c > 0) {
                 imin++;
             }
@@ -158,8 +158,8 @@ public final class SortedList<E> implements SortedCollection<E>, Serializable {
         E nodeMatch = null;
         int index = this.indexOf(e);
 
-        if (index >= 0 && index < list.size()) {
-            E foundNode = list.get(index);
+        if (index >= 0 && index < this.list.size()) {
+            E foundNode = this.list.get(index);
             if (foundNode.equals(e)) {
                 nodeMatch = foundNode;
             }
@@ -170,46 +170,46 @@ public final class SortedList<E> implements SortedCollection<E>, Serializable {
 
     @Override
     public int size() {
-        return list.size();
+        return this.list.size();
     }
 
     @Override
     public Object[] toArray() {
-        return list.toArray();
+        return this.list.toArray();
     }
 
     @Override
     public E get(final int index) {
-        return list.get(index);
+        return this.list.get(index);
     }
 
     @Override
     public List<E> subList(final int fromIndex, final int toIndex) {
-        return list.subList(fromIndex, toIndex);
+        return this.list.subList(fromIndex, toIndex);
     }
 
     @Override
     public Iterator<E> iterator() {
-        return list.iterator();
+        return this.list.iterator();
     }
 
     @Override
     public void clear() {
-        list.clear();
+        this.list.clear();
     }
 
     @Override
     public boolean isEmpty() {
-        return list.isEmpty();
+        return this.list.isEmpty();
     }
 
     @Override
     public boolean remove(final E o) {
-        return list.remove(o);
+        return this.list.remove(o);
     }
 
     @Override
     public boolean removeAll(final Collection<E> c) {
-        return list.removeAll(c);
+        return this.list.removeAll(c);
     }
 }

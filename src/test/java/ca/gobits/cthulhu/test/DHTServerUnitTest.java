@@ -66,17 +66,17 @@ public final class DHTServerUnitTest extends EasyMockSupport {
     public void testRun01() throws Exception {
         // given
         int port = 6881;
-        ReflectionTestUtils.setField(server, "stop", Boolean.TRUE);
+        ReflectionTestUtils.setField(this.server, "stop", Boolean.TRUE);
 
         // when
-        expect(serverSocket.getLocalPort()).andReturn(port);
-        serverSocket.receive(isA(DatagramPacket.class));
-        socketThreadPool.execute(isA(Runnable.class));
-        socketThreadPool.shutdown();
-        serverSocket.close();
+        expect(this.serverSocket.getLocalPort()).andReturn(port);
+        this.serverSocket.receive(isA(DatagramPacket.class));
+        this.socketThreadPool.execute(isA(Runnable.class));
+        this.socketThreadPool.shutdown();
+        this.serverSocket.close();
 
         replayAll();
-        server.run();
+        this.server.run();
 
         // then
         verifyAll();

@@ -39,10 +39,10 @@ public final class ConcurrentSortedList<E> implements SortedCollection<E>,
     private final ReentrantReadWriteLock locking = new ReentrantReadWriteLock();
 
     /** Read Lock. */
-    private final Lock readLock = locking.readLock();
+    private final Lock readLock = this.locking.readLock();
 
     /** Write Lock. */
-    private final Lock writeLock = locking.writeLock();
+    private final Lock writeLock = this.locking.writeLock();
 
     /** SortedList reference. */
     private final SortedCollection<E> list;
@@ -54,7 +54,7 @@ public final class ConcurrentSortedList<E> implements SortedCollection<E>,
      */
     public ConcurrentSortedList(final Comparator<E> compare,
             final boolean duplicates) {
-        list = new SortedList<E>(compare, duplicates);
+        this.list = new SortedList<E>(compare, duplicates);
     }
 
     /**
@@ -65,7 +65,7 @@ public final class ConcurrentSortedList<E> implements SortedCollection<E>,
      */
     public ConcurrentSortedList(final int initialCapacity,
             final Comparator<E> compare, final boolean duplicates) {
-        list = new SortedList<E>(initialCapacity, compare, duplicates);
+        this.list = new SortedList<E>(initialCapacity, compare, duplicates);
     }
 
     /**
@@ -79,19 +79,19 @@ public final class ConcurrentSortedList<E> implements SortedCollection<E>,
      */
     public ConcurrentSortedList(final Collection<? extends E> c,
         final Comparator<E> compare, final boolean duplicates) {
-        list = new SortedList<>(c,  compare, duplicates);
+        this.list = new SortedList<>(c,  compare, duplicates);
     }
 
     @Override
     public boolean add(final E e) {
 
         boolean result = false;
-        writeLock.lock();
+        this.writeLock.lock();
 
         try {
             result = this.list.add(e);
         } finally {
-            writeLock.unlock();
+            this.writeLock.unlock();
         }
 
         return result;
@@ -101,12 +101,12 @@ public final class ConcurrentSortedList<E> implements SortedCollection<E>,
     public boolean addAll(final Collection<? extends E> c) {
 
         boolean result = false;
-        readLock.lock();
+        this.readLock.lock();
 
         try {
             result = this.list.addAll(c);
         } finally {
-            readLock.unlock();
+            this.readLock.unlock();
         }
 
         return result;
@@ -115,126 +115,126 @@ public final class ConcurrentSortedList<E> implements SortedCollection<E>,
     @Override
     public int indexOf(final E o) {
 
-        readLock.lock();
+        this.readLock.lock();
 
         try {
-            return list.indexOf(o);
+            return this.list.indexOf(o);
         } finally {
-            readLock.unlock();
+            this.readLock.unlock();
         }
     }
 
     @Override
     public E get(final E e) {
-        readLock.lock();
+        this.readLock.lock();
 
         try {
-            return list.get(e);
+            return this.list.get(e);
         } finally {
-            readLock.unlock();
+            this.readLock.unlock();
         }
     }
 
     @Override
     public int size() {
-        readLock.lock();
+        this.readLock.lock();
 
         try {
-            return list.size();
+            return this.list.size();
         } finally {
-            readLock.unlock();
+            this.readLock.unlock();
         }
 
     }
 
     @Override
     public Object[] toArray() {
-        readLock.lock();
+        this.readLock.lock();
 
         try {
-            return list.toArray();
+            return this.list.toArray();
         } finally {
-            readLock.unlock();
+            this.readLock.unlock();
         }
 
     }
 
     @Override
     public E get(final int index) {
-        readLock.lock();
+        this.readLock.lock();
 
         try {
-            return list.get(index);
+            return this.list.get(index);
         } finally {
-            readLock.unlock();
+            this.readLock.unlock();
         }
 
     }
 
     @Override
     public List<E> subList(final int fromIndex, final int toIndex) {
-        readLock.lock();
+        this.readLock.lock();
 
         try {
-            return list.subList(fromIndex, toIndex);
+            return this.list.subList(fromIndex, toIndex);
         } finally {
-            readLock.unlock();
+            this.readLock.unlock();
         }
 
     }
 
     @Override
     public Iterator<E> iterator() {
-        readLock.lock();
+        this.readLock.lock();
 
         try {
-            return list.iterator();
+            return this.list.iterator();
         } finally {
-            readLock.unlock();
+            this.readLock.unlock();
         }
     }
 
     @Override
     public void clear() {
-        writeLock.lock();
+        this.writeLock.lock();
 
         try {
             this.list.clear();
         } finally {
-            writeLock.unlock();
+            this.writeLock.unlock();
         }
     }
 
     @Override
     public boolean isEmpty() {
-        readLock.lock();
+        this.readLock.lock();
 
         try {
-            return list.isEmpty();
+            return this.list.isEmpty();
         } finally {
-            readLock.unlock();
+            this.readLock.unlock();
         }
     }
 
     @Override
     public boolean remove(final E o) {
-        writeLock.lock();
+        this.writeLock.lock();
 
         try {
-            return list.remove(o);
+            return this.list.remove(o);
         } finally {
-            writeLock.unlock();
+            this.writeLock.unlock();
         }
     }
 
     @Override
     public boolean removeAll(final Collection<E> c) {
-        writeLock.lock();
+        this.writeLock.lock();
 
         try {
-            return list.removeAll(c);
+            return this.list.removeAll(c);
         } finally {
-            writeLock.unlock();
+            this.writeLock.unlock();
         }
     }
 }

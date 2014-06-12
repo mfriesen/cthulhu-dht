@@ -146,14 +146,14 @@ public class DHTProtocolHandler {
                 byte[] id = (byte[]) request1.get("id");
 
                 String transId = new String((byte[]) request.get("t"));
-                if (tokenTable.isValidTransactionId(transId)) {
+                if (this.tokenTable.isValidTransactionId(transId)) {
 
-                    DHTNode node = routingTable.findExactNode(id);
+                    DHTNode node = this.routingTable.findExactNode(id);
 
                     if (node != null) {
                         node.setState(State.GOOD);
                     } else {
-                        routingTable.addNode(id, packet.getAddress(),
+                        this.routingTable.addNode(id, packet.getAddress(),
                             packet.getPort(), State.GOOD);
                     }
                 }
@@ -171,7 +171,7 @@ public class DHTProtocolHandler {
     private void updateNodeStatusOrPing(final byte[] infohash,
             final InetAddress addr, final int port) {
 
-        DHTNode node = routingTable.findExactNode(infohash);
+        DHTNode node = this.routingTable.findExactNode(infohash);
 
         if (node != null) {
             node.setState(State.GOOD);
@@ -273,14 +273,14 @@ public class DHTProtocolHandler {
         int port = isImpliedPort(arguments) ? packet.getPort()
                 : arguments.getPort().intValue();
 
-        if (tokenTable.valid(packet.getAddress(), port, arguments.getToken())) {
+        if (this.tokenTable.valid(packet.getAddress(), port, arguments.getToken())) {
 
             byte[] infoHash = arguments.getInfoHash();
 
             InetAddress addr = packet.getAddress();
             byte[] address = addr.getAddress();
 
-            peerRoutingTable.addPeer(infoHash, address, port);
+            this.peerRoutingTable.addPeer(infoHash, address, port);
 
             Map<String, Object> rp = new HashMap<String, Object>();
             rp.put("id", arguments.getInfoHash());
@@ -324,7 +324,7 @@ public class DHTProtocolHandler {
 
         byte[] infoHash = arguments.getInfoHash();
 
-        Collection<DHTPeer> peers = peerRoutingTable.findPeers(infoHash);
+        Collection<DHTPeer> peers = this.peerRoutingTable.findPeers(infoHash);
 
         if (!CollectionUtils.isEmpty(peers)) {
 
@@ -333,7 +333,7 @@ public class DHTProtocolHandler {
 
         } else {
 
-            List<DHTNode> nodes = routingTable.findClosestNodes(infoHash);
+            List<DHTNode> nodes = this.routingTable.findClosestNodes(infoHash);
 
             byte[] transformNodes = DHTConversion.toByteArrayFromDHTNode(nodes);
             responseParameter.put("nodes", transformNodes);
@@ -385,7 +385,7 @@ public class DHTProtocolHandler {
             final Map<String, Object> response,
             final DatagramPacket packet) {
 
-        response.put("r", map("id", config.getNodeId()));
+        response.put("r", map("id", this.config.getNodeId()));
     }
 
     /**
@@ -394,7 +394,7 @@ public class DHTProtocolHandler {
      * @return List<DHTNode>
      */
     private List<DHTNode> findClosestNodes(final byte[] targetBytes) {
-        return routingTable.findClosestNodes(targetBytes);
+        return this.routingTable.findClosestNodes(targetBytes);
     }
 
     /**

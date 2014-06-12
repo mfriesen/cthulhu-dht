@@ -47,7 +47,7 @@ public final class BDecoder {
     public Object decode(final byte[] bytes) {
 
         Object obj = null;
-        char type = (char) bytes[position];
+        char type = (char) bytes[this.position];
 
         if (type == 'd') { // map
 
@@ -64,7 +64,7 @@ public final class BDecoder {
         } else {  // bytes
 
             int len = getInt(bytes);
-            position++; // throw away ':'
+            this.position++; // throw away ':'
             obj = getBytes(bytes, len);
         }
 
@@ -77,14 +77,14 @@ public final class BDecoder {
      * @return List<Object>
      */
     private List<Object> buildList(final byte[] bytes) {
-        position++;
+        this.position++;
         List<Object> list = new ArrayList<Object>();
 
-        while ((char) bytes[position] != 'e') {
+        while ((char) bytes[this.position] != 'e') {
             list.add(decode(bytes));
         }
 
-        position++;
+        this.position++;
 
         return list;
     }
@@ -96,21 +96,21 @@ public final class BDecoder {
      */
     private Map<Object, Object> buildMap(final byte[] bytes) {
 
-        position++;
+        this.position++;
 
         Map<Object, Object> map = new HashMap<Object, Object>();
 
-        while ((char) bytes[position] != 'e') {
+        while ((char) bytes[this.position] != 'e') {
 
             int len = getInt(bytes);
-            position++; // throw away ':'
+            this.position++; // throw away ':'
 
             String key = new String(getBytes(bytes, len));
 
             map.put(key, decode(bytes));
         }
 
-        position++;
+        this.position++;
 
         return map;
     }
@@ -121,15 +121,15 @@ public final class BDecoder {
      * @return Long
      */
     private Long buildLong(final byte[] bytes) {
-        position++;
+        this.position++;
         StringBuilder sb = new StringBuilder();
 
-        while ((char) bytes[position] != 'e') {
-            sb.append((char) bytes[position]);
-            position++;
+        while ((char) bytes[this.position] != 'e') {
+            sb.append((char) bytes[this.position]);
+            this.position++;
         }
 
-        position++;
+        this.position++;
 
         return Long.valueOf(sb.toString());
     }
@@ -142,8 +142,8 @@ public final class BDecoder {
      */
     private byte[] getBytes(final byte[] bytes, final int len) {
         byte[] dest = new byte[len];
-        System.arraycopy(bytes, position, dest, 0, len);
-        position += len;
+        System.arraycopy(bytes, this.position, dest, 0, len);
+        this.position += len;
         return dest;
     }
 
@@ -156,15 +156,15 @@ public final class BDecoder {
 
         StringBuilder sb = new StringBuilder();
 
-        while (position < bytes.length) {
+        while (this.position < bytes.length) {
 
-            if (Character.isDigit((char) bytes[position])) {
-                sb.append((char) bytes[position]);
+            if (Character.isDigit((char) bytes[this.position])) {
+                sb.append((char) bytes[this.position]);
             } else {
                 break;
             }
 
-            position++;
+            this.position++;
         }
 
         return Integer.valueOf(sb.toString()).intValue();

@@ -72,9 +72,9 @@ public final class DHTGetPeersIntegrationTest {
      */
     @Before
     public void before() throws Exception {
-        nodeRoutingTable.clear();
-        async.start();
-        async.waitForServerStart();
+        this.nodeRoutingTable.clear();
+        this.async.start();
+        this.async.waitForServerStart();
     }
 
     /**
@@ -139,7 +139,7 @@ public final class DHTGetPeersIntegrationTest {
 
             InetAddress addr = DHTConversion.toInetAddress(node.getAddress());
 
-            nodeRoutingTable.addNode(node.getInfoHash(), addr,
+            this.nodeRoutingTable.addNode(node.getInfoHash(), addr,
                 node.getPort(), State.GOOD);
         }
     }

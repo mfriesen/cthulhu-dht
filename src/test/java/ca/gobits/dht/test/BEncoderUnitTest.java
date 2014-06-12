@@ -21,7 +21,6 @@ import static org.junit.Assert.assertTrue;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Modifier;
-import java.net.Inet6Address;
 import java.net.InetAddress;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -218,7 +217,7 @@ public final class BEncoderUnitTest {
     @Test
     public void testCompactAddress02() throws Exception {
         // given
-        InetAddress addr = Inet6Address
+        InetAddress addr = InetAddress
                 .getByName("805b:2d9d:dc28:0000:0000:fc57:d4c8:1fff");
         int port = 37518;
 

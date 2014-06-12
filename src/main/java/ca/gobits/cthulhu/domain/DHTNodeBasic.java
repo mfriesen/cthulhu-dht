@@ -56,18 +56,18 @@ public final class DHTNodeBasic implements DHTNode {
     @Override
     public String toString() {
         ToStringBuilder builder = new ToStringBuilder(this);
-        builder.append("infohash", infoHash);
-        builder.append("address", DHTConversion.toInetAddressString(address));
-        builder.append("port", port);
-        builder.append("state", state);
-        builder.append("lastUpdated", lastUpdated);
+        builder.append("infohash", this.infoHash);
+        builder.append("address", DHTConversion.toInetAddressString(this.address));
+        builder.append("port", this.port);
+        builder.append("state", this.state);
+        builder.append("lastUpdated", this.lastUpdated);
         return builder.toString();
     }
 
     @Override
     public int hashCode() {
         return new HashCodeBuilder()
-            .append(infoHash)
+            .append(this.infoHash)
             .toHashCode();
     }
 
@@ -87,7 +87,7 @@ public final class DHTNodeBasic implements DHTNode {
 
         DHTNode rhs = (DHTNode) obj;
         return new EqualsBuilder()
-            .append(infoHash, rhs.getInfoHash())
+            .append(this.infoHash, rhs.getInfoHash())
             .isEquals();
     }
 
@@ -96,7 +96,7 @@ public final class DHTNodeBasic implements DHTNode {
      */
     @Override
     public Date getLastUpdated() {
-        return lastUpdated;
+        return this.lastUpdated;
     }
 
     /**
@@ -112,7 +112,7 @@ public final class DHTNodeBasic implements DHTNode {
      */
     @Override
     public byte[] getInfoHash() {
-        return infoHash;
+        return this.infoHash;
     }
 
     /**
@@ -125,7 +125,7 @@ public final class DHTNodeBasic implements DHTNode {
 
     @Override
     public long[] getAddress() {
-        return address;
+        return this.address;
     }
 
     /**
@@ -138,7 +138,7 @@ public final class DHTNodeBasic implements DHTNode {
 
     @Override
     public int getPort() {
-        return port;
+        return this.port;
     }
 
     /**
@@ -151,7 +151,7 @@ public final class DHTNodeBasic implements DHTNode {
 
     @Override
     public State getState() {
-        return state;
+        return this.state;
     }
 
     @Override

@@ -67,17 +67,17 @@ public final class DHTTokenBasic implements DHTToken {
     @Override
     public String toString() {
         ToStringBuilder builder = new ToStringBuilder(this);
-        builder.append("infohash", infoHash);
-        builder.append("address", DHTConversion.toInetAddressString(address));
-        builder.append("port", port);
-        builder.append("addedDate", addedDate);
+        builder.append("infohash", this.infoHash);
+        builder.append("address", DHTConversion.toInetAddressString(this.address));
+        builder.append("port", this.port);
+        builder.append("addedDate", this.addedDate);
         return builder.toString();
     }
 
     @Override
     public int hashCode() {
         return new HashCodeBuilder()
-            .append(infoHash)
+            .append(this.infoHash)
             .toHashCode();
     }
 
@@ -97,13 +97,13 @@ public final class DHTTokenBasic implements DHTToken {
 
         DHTToken rhs = (DHTToken) obj;
         return new EqualsBuilder()
-            .append(infoHash, rhs.getInfoHash())
+            .append(this.infoHash, rhs.getInfoHash())
             .isEquals();
     }
 
     @Override
     public byte[] getInfoHash() {
-        return infoHash;
+        return this.infoHash;
     }
 
     @Override
@@ -113,7 +113,7 @@ public final class DHTTokenBasic implements DHTToken {
 
     @Override
     public long[] getAddress() {
-        return address;
+        return this.address;
     }
 
     @Override
@@ -123,7 +123,7 @@ public final class DHTTokenBasic implements DHTToken {
 
     @Override
     public Date getAddedDate() {
-        return addedDate;
+        return this.addedDate;
     }
 
     @Override
@@ -133,7 +133,7 @@ public final class DHTTokenBasic implements DHTToken {
 
     @Override
     public int getPort() {
-        return port;
+        return this.port;
     }
 
     @Override

@@ -48,8 +48,8 @@ public final class DHTServerIntegrationTest {
      */
     @Before
     public void before() throws Exception {
-        async.start();
-        async.waitForServerStart();
+        this.async.start();
+        this.async.waitForServerStart();
     }
 
     /**

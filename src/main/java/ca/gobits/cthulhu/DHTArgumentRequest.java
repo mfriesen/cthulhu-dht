@@ -54,41 +54,41 @@ public final class DHTArgumentRequest {
      * @return byte[]
      */
     public byte[] getId() {
-        return id;
+        return this.id;
     }
 
     /**
      * @return Long
      */
     public Long getImpliedPort() {
-        return impliedPort;
+        return this.impliedPort;
     }
 
     /**
      * @return byte[]
      */
     public byte[] getInfoHash() {
-        return infoHash;
+        return this.infoHash;
     }
 
     /**
      * @return Long
      */
     public Long getPort() {
-        return port;
+        return this.port;
     }
 
     /**
      * @return byte[]
      */
     public byte[] getToken() {
-        return token;
+        return this.token;
     }
 
     /**
      * @return byte[]
      */
     public byte[] getTarget() {
-        return target;
+        return this.target;
     }
 }

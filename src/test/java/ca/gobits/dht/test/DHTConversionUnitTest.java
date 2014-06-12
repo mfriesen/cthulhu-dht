@@ -9,7 +9,6 @@ import static org.junit.Assert.assertTrue;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Modifier;
 import java.math.BigInteger;
-import java.net.Inet6Address;
 import java.net.InetAddress;
 import java.util.Collection;
 import java.util.Iterator;
@@ -69,7 +68,7 @@ public final class DHTConversionUnitTest {
     public void testToLongArray02() throws Exception {
 
         // given
-        InetAddress addr = Inet6Address
+        InetAddress addr = InetAddress
                 .getByName("805b:2d9d:dc28:0000:0000:fc57:d4c8:1fff");
 
         // when
@@ -91,7 +90,7 @@ public final class DHTConversionUnitTest {
     public void testToLongArray03() throws Exception {
 
         // given
-        InetAddress addr = Inet6Address
+        InetAddress addr = InetAddress
                 .getByName("ffff:ffff:ffff:ffff:ffff:ffff:ffff:ffff");
 
         // when

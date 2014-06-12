@@ -45,7 +45,7 @@ public final class DHTProtocolRunnableUnitTest {
 
     /** DHTProtocol Runnable instance. */
     private final DHTProtocolRunnable runnable = new DHTProtocolRunnable(
-            serverSocket, handler, packet);
+            this.serverSocket, this.handler, this.packet);
 
     /**
      * testRun01().
@@ -58,18 +58,18 @@ public final class DHTProtocolRunnableUnitTest {
         byte[] bb = "asda".getBytes();
 
         // when
-        expect(handler.handle(packet)).andReturn(bb);
-        serverSocket.send(capture(capture));
-        EasyMock.replay(serverSocket);
+        expect(this.handler.handle(this.packet)).andReturn(bb);
+        this.serverSocket.send(capture(this.capture));
+        EasyMock.replay(this.serverSocket);
         PowerMock.replayAll();
 
         this.runnable.run();
 
         // then
-        EasyMock.verify(serverSocket);
+        EasyMock.verify(this.serverSocket);
         PowerMock.verifyAll();
 
-        DatagramPacket result = capture.getValue();
+        DatagramPacket result = this.capture.getValue();
         assertEquals(bb, result.getData());
     }
 
@@ -83,9 +83,9 @@ public final class DHTProtocolRunnableUnitTest {
         // given
 
         // when
-        expect(handler.handle(packet)).andThrow(new IOException());
-        serverSocket.send(capture(capture));
-        EasyMock.replay(serverSocket);
+        expect(this.handler.handle(this.packet)).andThrow(new IOException());
+        this.serverSocket.send(capture(this.capture));
+        EasyMock.replay(this.serverSocket);
         PowerMock.replayAll();
 
         this.runnable.run();

@@ -54,22 +54,22 @@ public class DelayObject<T> implements Delayed {
 
     @Override
     public long getDelay(final TimeUnit unit) {
-        long diff = start.longValue() - System.currentTimeMillis();
+        long diff = this.start.longValue() - System.currentTimeMillis();
         return unit.convert(diff, TimeUnit.MILLISECONDS);
     }
 
     @Override
     public String toString() {
         ToStringBuilder builder = new ToStringBuilder(this);
-        builder.append("payload", payload);
-        builder.append("start", start);
+        builder.append("payload", this.payload);
+        builder.append("start", this.start);
         return builder.toString();
     }
 
     @Override
     public int hashCode() {
         return new HashCodeBuilder()
-            .append(payload)
+            .append(this.payload)
             .toHashCode();
     }
 
@@ -89,7 +89,7 @@ public class DelayObject<T> implements Delayed {
 
         @SuppressWarnings("unchecked")
         DelayObject<T> rhs = (DelayObject<T>) obj;
-        return new EqualsBuilder().append(payload, rhs.getPayload())
+        return new EqualsBuilder().append(this.payload, rhs.getPayload())
                 .isEquals();
     }
 

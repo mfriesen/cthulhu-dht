@@ -2,7 +2,6 @@ package ca.gobits.dht;
 
 import java.io.IOException;
 import java.math.BigInteger;
-import java.net.Inet6Address;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.nio.ByteBuffer;
@@ -126,7 +125,7 @@ public final class DHTConversion {
         byte[] bytes = toByteArray(longs);
 
         if (bytes.length > MAX_LONG_BYTES) {
-            addr = Inet6Address.getByAddress(bytes);
+            addr = InetAddress.getByAddress(bytes);
         } else {
             addr = InetAddress.getByAddress(bytes);
         }

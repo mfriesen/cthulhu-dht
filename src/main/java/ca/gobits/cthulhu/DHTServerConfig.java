@@ -86,14 +86,14 @@ public class DHTServerConfig {
      * @return int
      */
     public int getPort() {
-        return port;
+        return this.port;
     }
 
     /**
      * @return boolean
      */
     public boolean isShowHelp() {
-        return showHelp;
+        return this.showHelp;
     }
 
     /**

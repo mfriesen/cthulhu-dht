@@ -63,8 +63,8 @@ public final class DHTPingIntegrationTest {
      */
     @Before
     public void before() throws Exception {
-        async.start();
-        async.waitForServerStart();
+        this.async.start();
+        this.async.waitForServerStart();
     }
 
     /**
@@ -79,7 +79,7 @@ public final class DHTPingIntegrationTest {
         Map<String, Object> realResponse = (Map<String, Object>) new BDecoder()
             .decode(getRealPingResponse());
 
-        byte[] request = queryProtocol.pingQuery("aa", id.getBytes());
+        byte[] request = this.queryProtocol.pingQuery("aa", id.getBytes());
 
         // when
         byte[] results = sendUDPPacket(request);
@@ -99,7 +99,7 @@ public final class DHTPingIntegrationTest {
 
         Map<String, Object> r = (Map<String, Object>) response.get("r");
         assertEquals(1, r.size());
-        assertArrayEquals(config.getNodeId(), (byte[]) r.get("id"));
+        assertArrayEquals(this.config.getNodeId(), (byte[]) r.get("id"));
     }
 
     /**

@@ -75,10 +75,10 @@ public final class DHTNodeBucketRoutingTable implements DHTNodeRoutingTable {
     private void addNode(final DHTNode node, final InetAddress addr,
             final int port, final State state) {
 
-        if (nodes.size() < MAX_NUMBER_OF_NODES) {
+        if (this.nodes.size() < MAX_NUMBER_OF_NODES) {
 
             addNodeLoggerDebug(node);
-            nodes.add(node);
+            this.nodes.add(node);
 
         } else {
             LOGGER.warn("MAXIMUM number of noded reached "
@@ -179,14 +179,14 @@ public final class DHTNodeBucketRoutingTable implements DHTNodeRoutingTable {
     private List<DHTNode> findClosestNodes(final DHTNode node,
             final int returnCount) {
 
-        int index = nodes.indexOf(node);
+        int index = this.nodes.indexOf(node);
 
         int fromIndex = index > 0 ? index - 1 : 0;
         int toIndex = index < getTotalNodeCount() ? index + 1
                 : getTotalNodeCount();
         int count = toIndex - fromIndex;
 
-        while (count < returnCount && count < nodes.size()) {
+        while (count < returnCount && count < this.nodes.size()) {
 
             if (fromIndex > 0) {
                 fromIndex--;
@@ -200,19 +200,19 @@ public final class DHTNodeBucketRoutingTable implements DHTNodeRoutingTable {
             }
         }
 
-        return nodes.subList(fromIndex, toIndex);
+        return this.nodes.subList(fromIndex, toIndex);
     }
 
     /**
      * @return DHTBucket
      */
     public SortedCollection<DHTNode> getNodes() {
-        return nodes;
+        return this.nodes;
     }
 
     @Override
     public int getTotalNodeCount() {
-        return nodes.size();
+        return this.nodes.size();
     }
 
     @Override

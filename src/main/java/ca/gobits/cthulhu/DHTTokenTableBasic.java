@@ -145,7 +145,7 @@ public final class DHTTokenTableBasic implements DHTTokenTable {
 
         List<DHTToken> removeTokens = new ArrayList<DHTToken>();
 
-        Object[] objs = tokens.toArray();
+        Object[] objs = this.tokens.toArray();
 
         for (int i = 0; i < objs.length; i++) {
 
@@ -180,7 +180,7 @@ public final class DHTTokenTableBasic implements DHTTokenTable {
      * @return int
      */
     public int getTokenExpiryInMinutes() {
-        return tokenExpiryInMinutes;
+        return this.tokenExpiryInMinutes;
     }
 
     /**
@@ -194,7 +194,7 @@ public final class DHTTokenTableBasic implements DHTTokenTable {
     @Override
     public String getTransactionId() {
 
-        if (transactionLastUpdated == null) {
+        if (this.transactionLastUpdated == null) {
             this.transactionLastUpdated = new Date();
         }
 
@@ -222,8 +222,8 @@ public final class DHTTokenTableBasic implements DHTTokenTable {
         boolean valid = false;
 
         if (transactionId != null) {
-            valid = transactionId.equals(transactionId1)
-                    || transactionId.equals(transactionId2);
+            valid = transactionId.equals(this.transactionId1)
+                    || transactionId.equals(this.transactionId2);
         }
 
         return valid;
