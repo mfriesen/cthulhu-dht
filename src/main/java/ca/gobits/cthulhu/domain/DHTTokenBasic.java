@@ -16,6 +16,8 @@
 
 package ca.gobits.cthulhu.domain;
 
+import static ca.gobits.dht.DHTConversion.toInetAddressString;
+
 import java.util.Date;
 
 import org.apache.commons.lang3.builder.EqualsBuilder;
@@ -68,7 +70,7 @@ public final class DHTTokenBasic implements DHTToken {
     public String toString() {
         ToStringBuilder builder = new ToStringBuilder(this);
         builder.append("infohash", this.infoHash);
-        builder.append("address", DHTConversion.toInetAddressString(this.address));
+        builder.append("address", toInetAddressString(this.address));
         builder.append("port", this.port);
         builder.append("addedDate", this.addedDate);
         return builder.toString();

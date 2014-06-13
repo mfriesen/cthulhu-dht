@@ -44,7 +44,6 @@ import org.easymock.TestSubject;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.test.util.ReflectionTestUtils;
 
 import ca.gobits.cthulhu.DHTInfoHashRoutingTable;
@@ -53,6 +52,7 @@ import ca.gobits.cthulhu.DHTProtocolHandler;
 import ca.gobits.cthulhu.DHTQueryProtocol;
 import ca.gobits.cthulhu.DHTServerConfig;
 import ca.gobits.cthulhu.DHTTokenTable;
+import ca.gobits.cthulhu.discovery.DHTNodeDiscovery;
 import ca.gobits.cthulhu.domain.DHTNode;
 import ca.gobits.cthulhu.domain.DHTNode.State;
 import ca.gobits.cthulhu.domain.DHTNodeBasic;
@@ -94,9 +94,9 @@ public final class DHTProtocolHandlerUnitTest extends EasyMockSupport {
     @Mock
     private DHTServerConfig config;
 
-    /** Mock Node Status Thread Pool. */
+    /** Mock DHTNodeDiscovery. */
     @Mock
-    private ThreadPoolTaskExecutor nodeStatusThreadPool;
+    private DHTNodeDiscovery discovery;
 
     /** InetSocketAddress. */
     private InetAddress iaddr;
@@ -114,7 +114,8 @@ public final class DHTProtocolHandlerUnitTest extends EasyMockSupport {
      */
     @Before
     public void before() throws Exception {
-        ReflectionTestUtils.setField(this.handler, "routingTable", this.routingTable);
+        ReflectionTestUtils.setField(this.handler, "routingTable",
+                this.routingTable);
 
         this.iaddr = InetAddress.getByName("50.71.214.139");
     }
@@ -130,10 +131,11 @@ public final class DHTProtocolHandlerUnitTest extends EasyMockSupport {
         byte[] bb = dat.getBytes();
         byte[] id = "abcdefghij0123456789".getBytes();
 
-        DatagramPacket packet = new DatagramPacket(bb, bb.length, this.iaddr, this.port);
+        DatagramPacket packet = new DatagramPacket(bb, bb.length, this.iaddr,
+                this.port);
 
         // when
-//        nodeStatusThreadPool.execute(isA(Runnable.class));
+        this.discovery.addNode(this.iaddr, this.port);
         expect(this.config.getNodeId()).andReturn(
                 "ABCDEFGHIJKLMNOPQRST".getBytes());
         expect(this.routingTable.findExactNode(aryEq(id))).andReturn(null);
@@ -164,7 +166,8 @@ public final class DHTProtocolHandlerUnitTest extends EasyMockSupport {
 
         DHTNode node = new DHTNodeBasic();
         node.setState(State.UNKNOWN);
-        DatagramPacket packet = new DatagramPacket(bb, bb.length, this.iaddr, this.port);
+        DatagramPacket packet = new DatagramPacket(bb, bb.length, this.iaddr,
+                this.port);
 
         // when
         expect(this.config.getNodeId()).andReturn(
@@ -263,7 +266,8 @@ public final class DHTProtocolHandlerUnitTest extends EasyMockSupport {
         String dat = "d1:ad2:id20:abcdefghij0123456789e1:q4:pinA1:t2:aa1:y1:qe";
         byte[] bb = dat.getBytes();
 
-        DatagramPacket packet = new DatagramPacket(bb, bb.length, this.iaddr, this.port);
+        DatagramPacket packet = new DatagramPacket(bb, bb.length, this.iaddr,
+                this.port);
         expectUpdateNodeStatus();
 
         // when
@@ -291,12 +295,12 @@ public final class DHTProtocolHandlerUnitTest extends EasyMockSupport {
         String dat = "d1:ad2:id20:abcdefghij0123456789e1:q4:ping1:t2:aa1:y1:qe";
         byte[] bb = dat.getBytes();
 
-        DatagramPacket packet = new DatagramPacket(bb, bb.length, null, this.port);
+        DatagramPacket pkt = new DatagramPacket(bb, bb.length, null, this.port);
 
 
         // when
         replayAll();
-        byte[] bytes = this.handler.handle(packet);
+        byte[] bytes = this.handler.handle(pkt);
 
         // then
         verifyAll();
@@ -315,7 +319,8 @@ public final class DHTProtocolHandlerUnitTest extends EasyMockSupport {
         String dat = "adsadadsa";
         byte[] bb = dat.getBytes();
 
-        DatagramPacket packet = new DatagramPacket(bb, bb.length, this.iaddr, this.port);
+        DatagramPacket packet = new DatagramPacket(bb, bb.length, this.iaddr,
+                this.port);
 
         // when
         replayAll();
@@ -339,14 +344,16 @@ public final class DHTProtocolHandlerUnitTest extends EasyMockSupport {
                 + "mnopqrstuvwxyz123456e1:q9:get_peers1:t2:aa1:y1:qe";
         byte[] bb = dat.getBytes();
 
-        DatagramPacket packet = new DatagramPacket(bb, bb.length, this.iaddr, this.port);
+        DatagramPacket packet = new DatagramPacket(bb, bb.length, this.iaddr,
+                this.port);
 
         DHTPeer peer = new DHTPeerBasic(InetAddress.getByName("240.120.222.12")
                 .getAddress(), 23);
         Collection<DHTPeer> peers = Arrays.asList(peer);
 
         // when
-        expect(this.peerRoutingTable.findPeers(aryEq(this.nodeId12345))).andReturn(peers);
+        expect(this.peerRoutingTable.findPeers(aryEq(this.nodeId12345)))
+                .andReturn(peers);
         expectUpdateNodeStatus();
 
         replayAll();
@@ -391,13 +398,15 @@ public final class DHTProtocolHandlerUnitTest extends EasyMockSupport {
                 + "mnopqrstuvwxyz123456e1:q9:get_peers1:t2:aa1:y1:qe";
         byte[] bb = dat.getBytes();
 
-        DatagramPacket packet = new DatagramPacket(bb, bb.length, this.iaddr, this.port);
+        DatagramPacket packet = new DatagramPacket(bb, bb.length, this.iaddr,
+                this.port);
 
         // when
         expectUpdateNodeStatus();
-        expect(this.peerRoutingTable.findPeers(aryEq(this.nodeId12345))).andReturn(null);
-        expect(this.routingTable.findClosestNodes(aryEq(this.nodeId12345))).andReturn(
-                getFindNodes());
+        expect(this.peerRoutingTable.findPeers(aryEq(this.nodeId12345)))
+                .andReturn(null);
+        expect(this.routingTable.findClosestNodes(aryEq(this.nodeId12345)))
+                .andReturn(getFindNodes());
 
         replayAll();
         byte[] bytes = this.handler.handle(packet);
@@ -447,14 +456,15 @@ public final class DHTProtocolHandlerUnitTest extends EasyMockSupport {
                 + "announce_peer1:t2:aa1:y1:qe";
         byte[] bb = dat.getBytes();
 
-        DatagramPacket packet = new DatagramPacket(bb, bb.length, this.iaddr, this.port);
+        DatagramPacket packet = new DatagramPacket(bb, bb.length, this.iaddr,
+                this.port);
 
         // when
         expectUpdateNodeStatus();
-        expect(this.tokenTable.valid(eq(this.iaddr), eq(p), aryEq(secret))).andReturn(
-                true);
-        this.peerRoutingTable.addPeer(aryEq(this.nodeId12345), aryEq(this.iaddr.getAddress()),
-                eq(p));
+        expect(this.tokenTable.valid(eq(this.iaddr), eq(p), aryEq(secret)))
+                .andReturn(true);
+        this.peerRoutingTable.addPeer(aryEq(this.nodeId12345),
+                aryEq(this.iaddr.getAddress()), eq(p));
 
         replayAll();
         byte[] bytes = this.handler.handle(packet);
@@ -480,14 +490,15 @@ public final class DHTProtocolHandlerUnitTest extends EasyMockSupport {
                 + "token8:aoeusnthe1:q13:announce_peer1:t2:aa1:y1:qe";
         byte[] bb = dat.getBytes();
 
-        DatagramPacket packet = new DatagramPacket(bb, bb.length, this.iaddr, this.port);
+        DatagramPacket packet = new DatagramPacket(bb, bb.length, this.iaddr,
+                this.port);
 
         // when
         expectUpdateNodeStatus();
-        expect(this.tokenTable.valid(eq(this.iaddr), eq(6881), aryEq(secret))).andReturn(
-                true);
-        this.peerRoutingTable.addPeer(aryEq(this.nodeId12345), aryEq(this.iaddr.getAddress()),
-                eq(p));
+        expect(this.tokenTable.valid(eq(this.iaddr), eq(6881), aryEq(secret)))
+                .andReturn(true);
+        this.peerRoutingTable.addPeer(aryEq(this.nodeId12345),
+                aryEq(this.iaddr.getAddress()), eq(p));
 
         replayAll();
         byte[] bytes = this.handler.handle(packet);
@@ -512,15 +523,17 @@ public final class DHTProtocolHandlerUnitTest extends EasyMockSupport {
                 + "token8:aoeusnthe1:q13:announce_peer1:t2:aa1:y1:qe";
         byte[] bb = dat.getBytes();
 
-        DatagramPacket packet = new DatagramPacket(bb, bb.length, this.iaddr, this.port);
+        DatagramPacket packet = new DatagramPacket(bb, bb.length, this.iaddr,
+                this.port);
 
         // when
         expectUpdateNodeStatus();
-        expect(this.tokenTable.valid(eq(this.iaddr), eq(this.port), aryEq(secret))).andReturn(
-                true);
+        expect(
+                this.tokenTable.valid(eq(this.iaddr), eq(this.port),
+                        aryEq(secret))).andReturn(true);
 
-        this.peerRoutingTable.addPeer(aryEq(this.nodeId12345), aryEq(this.iaddr.getAddress()),
-                eq(this.port));
+        this.peerRoutingTable.addPeer(aryEq(this.nodeId12345),
+                aryEq(this.iaddr.getAddress()), eq(this.port));
 
         replayAll();
         byte[] bytes = this.handler.handle(packet);
@@ -546,12 +559,14 @@ public final class DHTProtocolHandlerUnitTest extends EasyMockSupport {
                 + "token8:aoeusnthe1:q13:announce_peer1:t2:aa1:y1:qe";
         byte[] bb = dat.getBytes();
 
-        DatagramPacket packet = new DatagramPacket(bb, bb.length, this.iaddr, this.port);
+        DatagramPacket packet = new DatagramPacket(bb, bb.length, this.iaddr,
+                this.port);
 
         // when
         expectUpdateNodeStatus();
-        expect(this.tokenTable.valid(eq(this.iaddr), eq(this.port), aryEq(secret)))
-            .andReturn(false);
+        expect(
+                this.tokenTable.valid(eq(this.iaddr), eq(this.port),
+                        aryEq(secret))).andReturn(false);
 
         replayAll();
         byte[] bytes = this.handler.handle(packet);
@@ -572,7 +587,8 @@ public final class DHTProtocolHandlerUnitTest extends EasyMockSupport {
         // given
         String s = "d1:t2:aa1:y1:re";
         byte[] bb = s.getBytes();
-        DatagramPacket packet = new DatagramPacket(bb, bb.length, this.iaddr, this.port);
+        DatagramPacket packet = new DatagramPacket(bb, bb.length, this.iaddr,
+                this.port);
 
         // when
         replayAll();
@@ -594,7 +610,8 @@ public final class DHTProtocolHandlerUnitTest extends EasyMockSupport {
         // given
         String s = "d1:rd2:ia20:mnopqrstuvwxyz123456e1:t2:aa1:y1:re";
         byte[] bb = s.getBytes();
-        DatagramPacket packet = new DatagramPacket(bb, bb.length, this.iaddr, this.port);
+        DatagramPacket packet = new DatagramPacket(bb, bb.length, this.iaddr,
+                this.port);
 
         // when
         replayAll();
@@ -618,7 +635,8 @@ public final class DHTProtocolHandlerUnitTest extends EasyMockSupport {
                 118, 119, 120, 121, 122, 49, 50, 51, 52, 53, 54 };
         String s = "d1:rd2:id20:mnopqrstuvwxyz123456e1:t2:aa1:y1:re";
         byte[] bb = s.getBytes();
-        DatagramPacket packet = new DatagramPacket(bb, bb.length, this.iaddr, this.port);
+        DatagramPacket packet = new DatagramPacket(bb, bb.length, this.iaddr,
+                this.port);
 
         DHTNode node = new DHTNodeBasic();
         assertNull(node.getState());
@@ -652,12 +670,14 @@ public final class DHTProtocolHandlerUnitTest extends EasyMockSupport {
 
         String s = "d1:rd2:id20:mnopqrstuvwxyz123456e1:t2:aa1:y1:re";
         byte[] bb = s.getBytes();
-        DatagramPacket packet = new DatagramPacket(bb, bb.length, this.iaddr, this.port);
+        DatagramPacket packet = new DatagramPacket(bb, bb.length, this.iaddr,
+                this.port);
 
         // when
         expect(this.routingTable.findExactNode(aryEq(id))).andReturn(node);
         expect(this.tokenTable.isValidTransactionId("aa")).andReturn(true);
-        this.routingTable.addNode(aryEq(id), eq(this.iaddr), eq(this.port), eq(State.GOOD));
+        this.routingTable.addNode(aryEq(id), eq(this.iaddr), eq(this.port),
+                eq(State.GOOD));
 
         replayAll();
 
@@ -680,7 +700,8 @@ public final class DHTProtocolHandlerUnitTest extends EasyMockSupport {
         // given
         String s = "d1:rd2:id20:mnopqrstuvwxyz123456e1:t2:aa1:y1:re";
         byte[] bb = s.getBytes();
-        DatagramPacket packet = new DatagramPacket(bb, bb.length, this.iaddr, this.port);
+        DatagramPacket packet = new DatagramPacket(bb, bb.length, this.iaddr,
+                this.port);
 
         // when
         expect(this.tokenTable.isValidTransactionId("aa")).andReturn(false);
@@ -705,7 +726,8 @@ public final class DHTProtocolHandlerUnitTest extends EasyMockSupport {
         String dat = "d1:ad2:id20:abcdefghij0123456789e1:q4:ping1:z2:aa1:y1:qe";
         byte[] bb = dat.getBytes();
 
-        DatagramPacket packet = new DatagramPacket(bb, bb.length, this.iaddr, this.port);
+        DatagramPacket packet = new DatagramPacket(bb, bb.length, this.iaddr,
+                this.port);
 
         // when
         replayAll();
@@ -727,7 +749,8 @@ public final class DHTProtocolHandlerUnitTest extends EasyMockSupport {
         String dat = "d1:ad2:id20:abcdefghij0123456789e1:q4:ping1:t2:aa1:z1:qe";
         byte[] bb = dat.getBytes();
 
-        DatagramPacket packet = new DatagramPacket(bb, bb.length, this.iaddr, this.port);
+        DatagramPacket packet = new DatagramPacket(bb, bb.length, this.iaddr,
+                this.port);
 
         // when
         replayAll();
@@ -860,7 +883,8 @@ public final class DHTProtocolHandlerUnitTest extends EasyMockSupport {
         Map<String, Object> map = createFindNodeRequestMap();
         byte[] bb = BEncoder.bencoding(map);
 
-        DatagramPacket packet = new DatagramPacket(bb, bb.length, this.iaddr, this.port);
+        DatagramPacket packet = new DatagramPacket(bb, bb.length, this.iaddr,
+                this.port);
         return packet;
     }
 

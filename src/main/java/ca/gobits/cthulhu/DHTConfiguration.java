@@ -26,6 +26,9 @@ import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 
+import ca.gobits.cthulhu.discovery.DHTNodeDiscovery;
+import ca.gobits.cthulhu.discovery.DHTNodeDiscoveryImpl;
+
 /**
  * DHT Configuration class.
  */
@@ -92,18 +95,6 @@ public class DHTConfiguration {
     }
 
     /**
-     * @return ThreadPoolTaskExecutor
-     */
-    @Bean(name = "nodeStatusThreadPool")
-    public ThreadPoolTaskExecutor nodeStatusThreadPool() {
-        ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
-        executor.setCorePoolSize(THREAD_CORE_POOL_SIZE);
-        executor.setMaxPoolSize(THREAD_MAX_POOL_SIZE);
-        executor.setQueueCapacity(THREAD_QUEUE_CAPACITY);
-        return executor;
-    }
-
-    /**
      * @return DHTProtocolHandler
      */
     @Bean
@@ -125,6 +116,14 @@ public class DHTConfiguration {
      */
     @Bean
     public DatagramSocket datagramSocket() throws SocketException {
-        return  new DatagramSocket(this.config.getPort());
+        return new DatagramSocket(this.config.getPort());
+    }
+
+    /**
+     * @return DHTNodeDiscovery
+     */
+    @Bean
+    public DHTNodeDiscovery nodeDiscovery() {
+        return new DHTNodeDiscoveryImpl();
     }
 }

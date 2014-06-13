@@ -20,7 +20,6 @@ import static ca.gobits.dht.DHTConversion.toByteArrayFromDHTPeer;
 
 import java.io.IOException;
 import java.net.DatagramPacket;
-import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.util.Collection;
 import java.util.HashMap;
@@ -30,9 +29,9 @@ import java.util.Random;
 
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.util.CollectionUtils;
 
+import ca.gobits.cthulhu.discovery.DHTNodeDiscovery;
 import ca.gobits.cthulhu.domain.DHTNode;
 import ca.gobits.cthulhu.domain.DHTNode.State;
 import ca.gobits.cthulhu.domain.DHTPeer;
@@ -73,13 +72,9 @@ public class DHTProtocolHandler {
     @Autowired
     private DHTServerConfig config;
 
-    /** Reference to Node Status Thread Pool. */
+    /** DHTNode Discovery Engine. */
     @Autowired
-    private ThreadPoolTaskExecutor nodeStatusThreadPool;
-
-    /** DatagramSocket instance. */
-    @Autowired
-    private DatagramSocket socket;
+    private DHTNodeDiscovery discovery;
 
     /**
      * Read DatagramPacket.
@@ -176,21 +171,7 @@ public class DHTProtocolHandler {
         if (node != null) {
             node.setState(State.GOOD);
         } else {
-//            nodeStatusThreadPool.execute(new Runnable() {
-//                @Override
-//                public void run() {
-//                    byte[] bytes = queryProtocol.pingQuery(
-//                            tokenTable.getTransactionId(), config.getNodeId());
-//                    DatagramPacket packet = new DatagramPacket(bytes,
-//                            bytes.length, addr, port);
-//
-//                    try {
-//                        socket.send(packet);
-//                    } catch (IOException e) {
-//                        LOGGER.trace(e, e);
-//                    }
-//                }
-//            });
+            this.discovery.addNode(addr, port);
         }
     }
 
@@ -273,7 +254,8 @@ public class DHTProtocolHandler {
         int port = isImpliedPort(arguments) ? packet.getPort()
                 : arguments.getPort().intValue();
 
-        if (this.tokenTable.valid(packet.getAddress(), port, arguments.getToken())) {
+        if (this.tokenTable.valid(packet.getAddress(), port,
+                arguments.getToken())) {
 
             byte[] infoHash = arguments.getInfoHash();
 

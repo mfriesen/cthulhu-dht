@@ -25,9 +25,21 @@ import java.net.InetAddress;
 public interface DHTNodeDiscovery {
 
     /**
-     * Adds a node to determine status.
+     * Adds a node to determine status.  The node is processed after
+     * the default delay has expired.
      * @param addr  InetAddress
      * @param port  port
      */
     void addNode(final InetAddress addr, final int port);
+
+    /**
+     * Processes added Nodes, once delay has expired.
+     */
+    void process();
+
+    /**
+     * Sets the delay in Milliseconds.
+     * @param delay  delay in Milliseconds
+     */
+    void setDelay(long delay);
 }

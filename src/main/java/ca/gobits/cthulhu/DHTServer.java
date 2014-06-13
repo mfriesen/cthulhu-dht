@@ -74,8 +74,8 @@ public class DHTServer /*implements Lifecycle*/ {
 
                 this.serverSocket.receive(receivePacket);
 
-                this.socketThreadPool.execute(new DHTProtocolRunnable(this.serverSocket,
-                        this.dhtHandler, receivePacket));
+                this.socketThreadPool.execute(new DHTProtocolRunnable(
+                    this.serverSocket, this.dhtHandler, receivePacket));
 
                 if (this.stop) {
                     break;

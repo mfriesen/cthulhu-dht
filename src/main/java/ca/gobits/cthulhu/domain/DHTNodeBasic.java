@@ -16,13 +16,13 @@
 
 package ca.gobits.cthulhu.domain;
 
+import static ca.gobits.dht.DHTConversion.toInetAddressString;
+
 import java.util.Date;
 
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.builder.ToStringBuilder;
-
-import ca.gobits.dht.DHTConversion;
 
 /**
  * DHTNodeBasic - basic implementation of the DHTNode.
@@ -57,7 +57,7 @@ public final class DHTNodeBasic implements DHTNode {
     public String toString() {
         ToStringBuilder builder = new ToStringBuilder(this);
         builder.append("infohash", this.infoHash);
-        builder.append("address", DHTConversion.toInetAddressString(this.address));
+        builder.append("address", toInetAddressString(this.address));
         builder.append("port", this.port);
         builder.append("state", this.state);
         builder.append("lastUpdated", this.lastUpdated);

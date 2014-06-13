@@ -16,6 +16,8 @@
 
 package ca.gobits.cthulhu.domain;
 
+import static ca.gobits.dht.DHTConversion.toInetAddressString;
+
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.builder.ToStringBuilder;
@@ -82,7 +84,7 @@ public final class DHTPeerBasic implements DHTPeer {
     @Override
     public String toString() {
         ToStringBuilder builder = new ToStringBuilder(this);
-        builder.append("address", DHTConversion.toInetAddressString(this.address));
+        builder.append("address", toInetAddressString(this.address));
         builder.append("port", this.port);
         return builder.toString();
     }

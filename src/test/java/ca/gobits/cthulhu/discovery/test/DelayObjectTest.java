@@ -97,8 +97,8 @@ public final class DelayObjectTest {
         String result = obj.toString();
 
         // then
-        System.out.println (result);
-        assertTrue(result.startsWith("ca.gobits.cthulhu.discovery.DelayObject"));
+        assertTrue(result.startsWith(
+                "ca.gobits.cthulhu.discovery.DelayObject"));
         assertTrue(result.contains("[payload=test,start="));
     }
 

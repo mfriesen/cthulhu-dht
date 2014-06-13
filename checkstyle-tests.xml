@@ -82,4 +82,14 @@
     <property name="format" value="\s+$"/>
     <property name="message" value="Line has trailing spaces."/>
   </module>
+  <module name="RegexpSingleline">
+      <property name="format" value="Licensed under the Apache License, Version 2.0"/>
+    <property name="minimum" value="1"/>
+    <!--  Need to specify a maximum, so 10 times is more than enough. -->
+    <property name="maximum" value="10"/>
+  </module>
+  <module name="RegexpMultiline">
+  <property name="format"
+   value="System\.(out)|(err)\.print(ln)?\("/>
+</module>
 </module>
