@@ -1,3 +1,19 @@
+//
+// Copyright 2014 Mike Friesen
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+// http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+//
+
 package ca.gobits.dht.test;
 
 import static ca.gobits.dht.DHTConversion.COMPACT_ADDR_LENGTH;
@@ -102,6 +118,22 @@ public final class DHTConversionUnitTest {
         assertEquals(4294967295L, result[1]);
         assertEquals(4294967295L, result[2]);
         assertEquals(4294967295L, result[3]);
+    }
+
+    /**
+     * testToLong01().
+     */
+    @Test
+    public void testToLong01() {
+        // given
+        byte[] bytes = new byte[] {37, 76, -96, 28};
+
+        // when
+        long result = DHTConversion.toLong(bytes);
+
+        // then
+        assertEquals(625778716, result);
+        assertArrayEquals(bytes, DHTConversion.toByteArray(result));
     }
 
     /**

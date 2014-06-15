@@ -18,6 +18,7 @@ package ca.gobits.cthulhu.test;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
@@ -379,7 +380,7 @@ public final class DHTTokenTableBasicUnitTest {
 
         // verify
         assertEquals(2, result.length());
-        assertFalse(result.equals(transactionId));
+        assertNotEquals(result, transactionId);
     }
 
     /**

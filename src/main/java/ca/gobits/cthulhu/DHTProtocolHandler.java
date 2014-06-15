@@ -16,17 +16,26 @@
 
 package ca.gobits.cthulhu;
 
+import static ca.gobits.dht.DHTConversion.compactAddress;
+import static ca.gobits.dht.DHTConversion.toByteArray;
+import static ca.gobits.dht.DHTConversion.toByteArrayFromDHTNode;
 import static ca.gobits.dht.DHTConversion.toByteArrayFromDHTPeer;
+import static ca.gobits.dht.DHTConversion.toDHTNode;
+import static ca.gobits.dht.DHTConversion.toInetAddress;
+import static ca.gobits.dht.DHTConversion.transformToUnsignedBytes;
 
 import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
 
+import org.apache.commons.lang3.ArrayUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.util.CollectionUtils;
@@ -37,7 +46,6 @@ import ca.gobits.cthulhu.domain.DHTNode.State;
 import ca.gobits.cthulhu.domain.DHTPeer;
 import ca.gobits.dht.BDecoder;
 import ca.gobits.dht.BEncoder;
-import ca.gobits.dht.DHTConversion;
 
 /**
  * DHTProtocolHandler  implementation of the BitTorrent protocol.
@@ -153,6 +161,31 @@ public class DHTProtocolHandler {
                     }
                 }
             }
+
+            // find_nodes
+            byte[] nodesBytes = (byte[]) request1.get("nodes");
+            if (!ArrayUtils.isEmpty(nodesBytes)) {
+                Collection<DHTNode> nodes = toDHTNode(nodesBytes);
+
+                for (DHTNode node : nodes) {
+
+                    int port = node.getPort();
+
+                    try {
+
+                        InetAddress address = toInetAddress(node.getAddress());
+                        this.discovery.addNode(address, port);
+
+                    } catch (UnknownHostException e) {
+
+                        byte[] addr = toByteArray(node.getAddress());
+                        int[] ints = transformToUnsignedBytes(addr);
+                        String s = StringUtils.join(ints, ".");
+                        LOGGER.info("Cannot add " + s + ":" + port
+                                + " to discovery, unknown host");
+                    }
+                }
+            }
         }
     }
 
@@ -195,8 +228,7 @@ public class DHTProtocolHandler {
 
             response.put("y", "r");
             response.put("t", request.get("t"));
-            response.put("ip",
-                    DHTConversion.compactAddress(addr.getAddress(), port));
+            response.put("ip", compactAddress(addr.getAddress(), port));
 
             @SuppressWarnings("unchecked")
             DHTArgumentRequest arguments = new DHTArgumentRequest(
@@ -317,7 +349,7 @@ public class DHTProtocolHandler {
 
             List<DHTNode> nodes = this.routingTable.findClosestNodes(infoHash);
 
-            byte[] transformNodes = DHTConversion.toByteArrayFromDHTNode(nodes);
+            byte[] transformNodes = toByteArrayFromDHTNode(nodes);
             responseParameter.put("nodes", transformNodes);
         }
 
@@ -353,7 +385,7 @@ public class DHTProtocolHandler {
 
         List<DHTNode> nodes = findClosestNodes(arguments.getTarget());
 
-        byte[] transformNodes = DHTConversion.toByteArrayFromDHTNode(nodes);
+        byte[] transformNodes = toByteArrayFromDHTNode(nodes);
         responseParameter.put("nodes", transformNodes);
     }
 

@@ -481,7 +481,7 @@ public final class DHTProtocolHandlerUnitTest extends EasyMockSupport {
      * @throws Exception Exception
      */
     @Test
-    public void testHandle010() throws Exception {
+    public void testHandle10() throws Exception {
         // given
         int p = 6881;
         byte[] secret = "aoeusnth".getBytes();
@@ -753,6 +753,47 @@ public final class DHTProtocolHandlerUnitTest extends EasyMockSupport {
                 this.port);
 
         // when
+        replayAll();
+        byte[] result = this.handler.handle(packet);
+
+        // then
+        verifyAll();
+
+        assertNull(result);
+    }
+
+    /**
+     * Handles DHT Query "find_nodes" Response.
+     * @throws Exception  Exception
+     */
+    @Test
+    public void testHandle20() throws Exception {
+        // given
+        byte[] bb = Base64.decodeBase64(getBase64FindNodeResponse());
+        DatagramPacket packet = new DatagramPacket(bb, bb.length, this.iaddr,
+                this.port);
+
+        expect(this.tokenTable.isValidTransactionId("aa")).andReturn(
+                Boolean.FALSE);
+
+        // when
+        this.discovery.addNode(InetAddress.getByName("37.76.160.28"), 37518);
+        this.discovery.addNode(InetAddress.getByName("182.59.176.199"), 11503);
+        this.discovery.addNode(InetAddress.getByName("178.124.205.49"), 16911);
+        this.discovery.addNode(InetAddress.getByName("5.13.218.214"), 56116);
+        this.discovery.addNode(InetAddress.getByName("79.163.109.76"), 29037);
+        this.discovery.addNode(InetAddress.getByName("2.190.222.79"), 58106);
+        this.discovery.addNode(InetAddress.getByName("92.237.93.69"), 17271);
+        this.discovery.addNode(InetAddress.getByName("5.129.229.16"), 21853);
+        this.discovery.addNode(InetAddress.getByName("67.166.50.31"), 53162);
+        this.discovery.addNode(InetAddress.getByName("178.222.162.23"), 18274);
+        this.discovery.addNode(InetAddress.getByName("31.216.162.240"), 20383);
+        this.discovery.addNode(InetAddress.getByName("31.181.56.194"), 59935);
+        this.discovery.addNode(InetAddress.getByName("80.233.181.214"), 12230);
+        this.discovery.addNode(InetAddress.getByName("79.22.67.76"), 38518);
+        this.discovery.addNode(InetAddress.getByName("92.99.87.123"), 26120);
+        this.discovery.addNode(InetAddress.getByName("176.12.59.50"), 61553);
+
         replayAll();
         byte[] result = this.handler.handle(packet);
 

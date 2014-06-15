@@ -85,7 +85,7 @@ public final class DHTConversion {
      * @param bytes  bytes array
      * @return long
      */
-    private static long toLong(final byte[] bytes) {
+    public static long toLong(final byte[] bytes) {
 
         long l = 0;
         for (byte b : bytes) {
@@ -365,11 +365,11 @@ public final class DHTConversion {
                 DHTNode node = DHTNodeFactory.create(nodeId,
                         java.util.Arrays.copyOfRange(addr, 0, addr.length - 2),
                         port, DHTNode.State.UNKNOWN);
+
                 nodes.add(node);
             }
 
             return nodes;
-
         }
 
         throw new IllegalArgumentException("invalid byte length");
