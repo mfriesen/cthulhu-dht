@@ -298,4 +298,36 @@ public final class DHTConversionUnitTest {
 
         // then
     }
+
+    /**
+     * testDecodeCompactIP01() - decodes IPv4 compact IP.
+     * @throws Exception   Exception
+     */
+    @Test
+    public void testDecodeCompactIP01() throws Exception {
+        // given
+        byte[] bytes = new byte[]{37, 76, -96, 28, -110, -114};
+
+        // when
+        String result = DHTConversion.decodeCompactAddressToString(bytes);
+
+        // then
+        assertEquals("37.76.160.28:37518", result);
+    }
+
+    /**
+     * testDecodeCompactIP02() - decodes IPv6 compact IP.
+     * @throws Exception   Exception
+     */
+    @Test
+    public void testDecodeCompactIP02() throws Exception {
+        // given
+        byte[] bytes = new byte[] {37, 76, -96, -96, 28, 28, -110, -114 };
+
+        // when
+        String result = DHTConversion.decodeCompactAddressToString(bytes);
+
+        // then
+        assertEquals("37.76.160.160.28.28:37518", result);
+    }
 }

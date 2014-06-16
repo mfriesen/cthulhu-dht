@@ -25,7 +25,6 @@ import java.util.Map;
 import org.junit.Test;
 
 import ca.gobits.dht.BDecoder;
-import ca.gobits.dht.DHTConversion;
 
 
 /**
@@ -129,35 +128,4 @@ public final class BDecoderUnitTest {
         assertEquals("s", new String((byte[]) list.get(0)));
         assertEquals(Long.valueOf(12), list.get(1));
     }
-
-    /**
-     * testDecodeCompactIP01() - decodes IPv4 compact IP.
-     */
-    @Test
-    public void testDecodeCompactIP01() {
-        // given
-        byte[] bytes = new byte[]{37, 76, -96, 28, -110, -114};
-
-        // when
-        String result = DHTConversion.decodeCompactAddressToString(bytes);
-
-        // then
-        assertEquals("37.76.160.28:37518", result);
-    }
-
-    /**
-     * testDecodeCompactIP02() - decodes IPv6 compact IP.
-     */
-    @Test
-    public void testDecodeCompactIP02() {
-        // given
-        byte[] bytes = new byte[] {37, 76, -96, -96, 28, 28, -110, -114 };
-
-        // when
-        String result = DHTConversion.decodeCompactAddressToString(bytes);
-
-        // then
-        assertEquals("37.76.160.160.28.28:37518", result);
-    }
-
 }
