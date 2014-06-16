@@ -16,8 +16,11 @@
 
 package ca.gobits.cthulhu.domain;
 
-import static ca.gobits.dht.DHTConversion.toInetAddressString;
+import static ca.gobits.dht.DHTConversion.toInetAddress;
+import static ca.gobits.dht.DHTConversion.toInetAddressAsString;
 
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.util.Date;
 
 import org.apache.commons.lang3.builder.EqualsBuilder;
@@ -25,6 +28,8 @@ import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 
 import ca.gobits.dht.DHTConversion;
+
+import com.google.common.primitives.UnsignedLong;
 
 /**
  * Basic implementation of a DHTToken.
@@ -35,8 +40,11 @@ public final class DHTTokenBasic implements DHTToken {
     /** Node identifier. */
     private byte[] infoHash;
 
-    /** "Compact IP-address". */
-    private long[] address;
+    /** Compact IP-address format  0 - 63 bytes. */
+    private UnsignedLong highAddress;
+
+    /** Compact IP-address format  64 - 128 bytes. */
+    private UnsignedLong lowAddress;
 
     /** Port info. */
     private int port;
@@ -62,7 +70,10 @@ public final class DHTTokenBasic implements DHTToken {
         this();
         this.infoHash = nodeId;
 
-        this.address = DHTConversion.toLongArray(addr);
+        UnsignedLong[] address = DHTConversion.toUnsignedLong(addr);
+        this.highAddress = address[0];
+        this.lowAddress = address.length > 1 ? address[1] : null;
+
         this.port = lport;
     }
 
@@ -70,7 +81,8 @@ public final class DHTTokenBasic implements DHTToken {
     public String toString() {
         ToStringBuilder builder = new ToStringBuilder(this);
         builder.append("infohash", this.infoHash);
-        builder.append("address", toInetAddressString(this.address));
+        builder.append("address",
+                toInetAddressAsString(this.highAddress, this.lowAddress));
         builder.append("port", this.port);
         builder.append("addedDate", this.addedDate);
         return builder.toString();
@@ -109,18 +121,8 @@ public final class DHTTokenBasic implements DHTToken {
     }
 
     @Override
-    public void setInfoHash(final byte[] infoHashId) {
-        this.infoHash = infoHashId;
-    }
-
-    @Override
-    public long[] getAddress() {
-        return this.address;
-    }
-
-    @Override
-    public void setAddress(final long[] addr) {
-        this.address = addr;
+    public InetAddress getAddress() throws UnknownHostException {
+        return toInetAddress(this.highAddress, this.lowAddress);
     }
 
     @Override
@@ -129,18 +131,15 @@ public final class DHTTokenBasic implements DHTToken {
     }
 
     @Override
-    public void setAddedDate(final Date date) {
-        this.addedDate = date;
-    }
-
-    @Override
     public int getPort() {
         return this.port;
     }
 
-    @Override
-    public void setPort(final int lport) {
-        this.port = lport;
+    /**
+     * Set Added Date.
+     * @param date Date
+     */
+    public void setAddedDate(final Date date) {
+        this.addedDate = date;
     }
-
 }

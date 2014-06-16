@@ -216,7 +216,7 @@ public final class DHTTokenTableBasicUnitTest {
 
         Calendar c = Calendar.getInstance();
         c.add(Calendar.MINUTE, -1 * tt.getTokenExpiryInMinutes() - 1);
-        DHTToken t0 = new DHTTokenBasic(new byte[]{1}, addr, 10);
+        DHTTokenBasic t0 = new DHTTokenBasic(new byte[]{1}, addr, 10);
         t0.setAddedDate(c.getTime());
 
         DHTToken t1 = new DHTTokenBasic(new byte[]{2}, addr, 10);
@@ -314,7 +314,7 @@ public final class DHTTokenTableBasicUnitTest {
             public void run() {
                 for (int i = 0; i < 100; i++) {
                     tt.add(addr, port, "secret".getBytes());
-                    DHTToken t0 = new DHTTokenBasic(new byte[] {(byte) i},
+                    DHTTokenBasic t0 = new DHTTokenBasic(new byte[] {(byte) i},
                             addr.getAddress(), 10);
                     t0.setAddedDate(expired.getTime());
                     list.add(t0);

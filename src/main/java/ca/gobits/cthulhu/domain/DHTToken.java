@@ -16,6 +16,8 @@
 
 package ca.gobits.cthulhu.domain;
 
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.util.Date;
 
 /**
@@ -30,21 +32,10 @@ public interface DHTToken {
     byte[] getInfoHash();
 
     /**
-     * Sets InfoHash.
-     * @param infoHashId  infoHash
+     * @return InetAddress
+     * @throws UnknownHostException  UnknownHostException
      */
-    void setInfoHash(final byte[] infoHashId);
-
-    /**
-     * @return long[]
-     */
-    long[] getAddress();
-
-    /**
-     * Set the address.
-     * @param addr address
-     */
-    void setAddress(final long[] addr);
+    InetAddress getAddress() throws UnknownHostException;
 
     /**
      * @return Date
@@ -52,19 +43,7 @@ public interface DHTToken {
     Date getAddedDate();
 
     /**
-     * Sets Added Date.
-     * @param date  Added Date
-     */
-    void setAddedDate(final Date date);
-
-    /**
      * @return int
      */
     int getPort();
-
-    /**
-     * Sets the Port.
-     * @param port  port
-     */
-    void setPort(final int port);
 }

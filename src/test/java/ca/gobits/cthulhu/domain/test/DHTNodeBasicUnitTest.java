@@ -20,14 +20,15 @@ import static ca.gobits.cthulhu.domain.DHTNodeFactory.create;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
 import java.math.BigInteger;
+import java.net.InetAddress;
 
 import org.junit.Test;
 
 import ca.gobits.cthulhu.domain.DHTNode;
+import ca.gobits.cthulhu.domain.DHTNode.State;
 import ca.gobits.cthulhu.domain.DHTNodeBasic;
 
 /**
@@ -37,9 +38,10 @@ public final class DHTNodeBasicUnitTest {
 
     /**
      * testConstructor01().
+     * @throws Exception   Exception
      */
     @Test
-    public void testConstructor01() {
+    public void testConstructor01() throws Exception {
         // given
         byte[] nodeId = new BigInteger("123").toByteArray();
         byte[] address = new byte[] {127, 0, 0, 1 };
@@ -51,37 +53,45 @@ public final class DHTNodeBasicUnitTest {
 
         // then
         assertEquals(nodeId, result.getInfoHash());
-        assertEquals(2130706433L, result.getAddress()[0]);
+        assertEquals("127.0.0.1", result.getAddress().getHostAddress());
         assertEquals(752, result.hashCode());
         assertNotNull(result.getLastUpdated());
+        assertEquals(State.UNKNOWN, result.getState());
     }
 
     /**
-     * testConstructor02(). Null address
+     * testConstructor02() - sets IPv4 Address.
+     * @throws Exception   Exception
      */
     @Test
-    public void testConstructor02() {
+    public void testConstructor02() throws Exception {
         // given
         byte[] nodeId = new BigInteger("123").toByteArray();
+        InetAddress address = InetAddress.getByName("54.23.54.12");
+        int nodePort = 0;
 
         // when
-        DHTNode result = create(nodeId, DHTNode.State.UNKNOWN);
+        DHTNodeBasic result = new DHTNodeBasic();
+        result.setInfoHash(nodeId);
+        result.setAddress(address);
+        result.setPort(nodePort);
 
         // then
         assertEquals(nodeId, result.getInfoHash());
-        assertNull(result.getAddress());
-        assertEquals(752, result.hashCode());
-        assertNotNull(result.getLastUpdated());
+        assertEquals(address, result.getAddress());
+        assertEquals(nodePort, result.getPort());
     }
 
     /**
-     * testConstructor03().
+     * testConstructor03() - sets IPv6 Address.
+     * @throws Exception   Exception
      */
     @Test
-    public void testConstructor03() {
+    public void testConstructor03() throws Exception {
         // given
         byte[] nodeId = new BigInteger("123").toByteArray();
-        long[] address = new long[] {1L };
+        InetAddress address = InetAddress
+                .getByName("805b:2d9d:dc28:0000:0000:fc57:d4c8:1fff");
         int nodePort = 0;
 
         // when

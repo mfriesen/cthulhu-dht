@@ -22,6 +22,8 @@ import java.util.Date;
 import ca.gobits.cthulhu.domain.DHTNode.State;
 import ca.gobits.dht.DHTConversion;
 
+import com.google.common.primitives.UnsignedLong;
+
 /**
  * DHTNode Factory class.
  *
@@ -59,8 +61,15 @@ public final class DHTNodeFactory {
     public static DHTNode create(final byte[] infoHash,
             final InetAddress addr, final int port, final State state) {
 
-        return create(infoHash, addr.getAddress(),
-                port, state);
+        DHTNodeBasic node = new DHTNodeBasic();
+        node.setLastUpdated(new Date());
+        node.setInfoHash(infoHash);
+        node.setState(state);
+
+        node.setAddress(addr);
+        node.setPort(port);
+
+        return node;
     }
 
     /**
@@ -79,8 +88,10 @@ public final class DHTNodeFactory {
         node.setInfoHash(infoHash);
         node.setState(state);
 
-        long[] address = DHTConversion.toLongArray(addr);
-        node.setAddress(address);
+        UnsignedLong[] address = DHTConversion.toUnsignedLong(addr);
+        UnsignedLong low = address.length > 1 ? address[1] : null;
+
+        node.setAddress(address[0], low);
         node.setPort(port);
 
         return node;

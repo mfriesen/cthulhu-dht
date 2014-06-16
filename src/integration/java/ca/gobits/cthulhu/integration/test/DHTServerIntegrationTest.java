@@ -66,9 +66,9 @@ public final class DHTServerIntegrationTest {
         byte[] result = sendUDPPacket(dat.getBytes());
 
         // then
+        assertEquals(DATA_PACKET_LENGTH, result.length);
         String r = new String(result);
         r.contains(":rd3:20414:Method Unknowne1:t2:aa1:y1:ee");
-        assertEquals(DATA_PACKET_LENGTH, new String(result).length());
     }
 
     /**
@@ -82,10 +82,11 @@ public final class DHTServerIntegrationTest {
         String dat = "adsadadsa";
 
         // when
-        String result = sendUDPPacket(dat);
+        byte[] result = sendUDPPacket(dat.getBytes());
 
         // then
-        assertTrue(result.startsWith("d1:rd3:20212:Server Errore1:y1:ee"));
-        assertEquals(DATA_PACKET_LENGTH, result.length());
+        assertEquals(DATA_PACKET_LENGTH, result.length);
+        String r = new String(result);
+        assertTrue(r.startsWith("d1:rd3:20212:Server Errore1:y1:ee"));
     }
 }

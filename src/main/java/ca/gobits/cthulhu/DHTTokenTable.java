@@ -17,6 +17,7 @@
 package ca.gobits.cthulhu;
 
 import java.net.InetAddress;
+import java.net.UnknownHostException;
 
 import ca.gobits.cthulhu.domain.DHTToken;
 
@@ -48,8 +49,10 @@ public interface DHTTokenTable {
      * @param port  port
      * @param secret  secret
      * @return boolean
+     * @throws UnknownHostException  UnknownHostException
      */
-    boolean valid(InetAddress addr, int port, byte[] secret);
+    boolean valid(InetAddress addr, int port, byte[] secret)
+            throws UnknownHostException;
 
     /**
      * Every message has a key "t" with a string value representing a

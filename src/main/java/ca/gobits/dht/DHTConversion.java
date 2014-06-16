@@ -20,14 +20,19 @@ import java.io.IOException;
 import java.math.BigInteger;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
-import java.nio.ByteBuffer;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
+
+import org.apache.commons.lang3.StringUtils;
+import org.apache.log4j.Logger;
 
 import ca.gobits.cthulhu.domain.DHTNode;
 import ca.gobits.cthulhu.domain.DHTNodeFactory;
 import ca.gobits.cthulhu.domain.DHTPeer;
+
+import com.google.common.primitives.UnsignedLong;
 
 /**
  * DHT Data Conversion Helper class.
@@ -35,24 +40,34 @@ import ca.gobits.cthulhu.domain.DHTPeer;
  */
 public final class DHTConversion {
 
+    /** Length of IPV6 Bytes. */
+    private static final int BYTES_IPV6_LENGTH = 8;
+
+    /** Length of IPV4 Bytes. */
+    private static final int BYTES_IPV4_LENGTH = 4;
+
     /** Constant to convert byte to unsigned int. */
-    static final int BYTE_TO_INT = 0xFF;
+    private static final int BYTE_TO_INT = 0xFF;
 
     /** Constant number of Bits per Byte. */
-    static final int BITS_PER_BYTE = 8;
+    private static final int BITS_PER_BYTE = 8;
 
-    /** Bytes in Signed Long. */
-    static final int MAX_LONG_BYTES = BITS_PER_BYTE / 2;
+    /** Maxmimum number of bytes in an unsigned long. */
+    private static final int MAX_LONG_BYTES_LENGTH = 64;
 
     /** Length Node ID. */
-    public static final int NODE_ID_LENGTH = 20;
+    private static final int NODE_ID_LENGTH = 20;
 
     /** Contact information for nodes is encoded as a 26-byte string. */
-    static final int COMPACT_NODE_LENGTH = 26;
+    private static final int COMPACT_NODE_LENGTH = 26;
 
     /** Compact Node Info length. */
     public static final int COMPACT_ADDR_LENGTH = COMPACT_NODE_LENGTH
             - NODE_ID_LENGTH;
+
+    /** Logger. */
+    private static final Logger LOGGER = Logger
+            .getLogger(DHTConversion.class);
 
     /**
      * private constructor.
@@ -61,111 +76,106 @@ public final class DHTConversion {
     }
 
     /**
-     * Every 4 bytes into 1 long.
-     * @param bytes  bytes
-     * @return long[]
-     */
-    public static long[] toLongArray(final byte[] bytes) {
-
-        int pos = 0;
-        long[] arr = new long[bytes.length / MAX_LONG_BYTES];
-
-        for (int i = 0; i < bytes.length; i += MAX_LONG_BYTES) {
-            byte[] by = new byte[MAX_LONG_BYTES];
-            System.arraycopy(bytes, i, by, 0, MAX_LONG_BYTES);
-            arr[pos] = toLong(by);
-            pos++;
-        }
-
-        return arr;
-    }
-
-    /**
-     * Convert byte array to long.
+     * Convert byte array to unsigned long.
      * @param bytes  bytes array
      * @return long
      */
-    public static long toLong(final byte[] bytes) {
+    public static UnsignedLong[] toUnsignedLong(final byte[] bytes) {
 
-        long l = 0;
+        UnsignedLong high = null;
+        UnsignedLong low = null;
+        StringBuilder sb = new StringBuilder();
+
         for (byte b : bytes) {
-            l = l << BITS_PER_BYTE;
-            l += b & BYTE_TO_INT;
+            int i = b & BYTE_TO_INT;
+            sb.append(StringUtils.leftPad(Integer.toBinaryString(i),
+                    BITS_PER_BYTE, '0'));
         }
 
-        return l;
-    }
+        int len = sb.length();
 
-    /**
-     * Converts a long array to byte array.
-     *
-     * @param longs   long array
-     * @return byte[]
-     */
-    public static byte[] toByteArray(final long[] longs) {
+        String highString = sb.substring(0,
+                Math.min(len, MAX_LONG_BYTES_LENGTH));
+        high = UnsignedLong.valueOf(new BigInteger(highString, 2));
 
-        byte[] r = new byte[longs.length * MAX_LONG_BYTES];
-
-        for (int i = 0; i < longs.length; i++) {
-            byte[] bb = toByteArray(longs[i]);
-            System.arraycopy(bb, 0, r, i * MAX_LONG_BYTES, bb.length);
+        if (len > MAX_LONG_BYTES_LENGTH) {
+            String lowString = sb.substring(MAX_LONG_BYTES_LENGTH);
+            low = UnsignedLong.valueOf(new BigInteger(lowString, 2));
         }
 
-        return r;
+        return low != null ? new UnsignedLong[] {high, low}
+                : new UnsignedLong[] {high};
     }
 
     /**
-     * Converts a long to byte array.
-     *
-     * @param l   long
-     * @return byte[]
-     */
-    public static byte[] toByteArray(final long l) {
-
-        byte[] bytes = ByteBuffer.allocate(BITS_PER_BYTE).putLong(l).array();
-
-        int count = BITS_PER_BYTE / 2; // remove signed bit
-        return java.util.Arrays.copyOfRange(bytes, count, bytes.length);
-    }
-
-    /**
-     * Convert long array to InetAddress.
-     * @param longs  longs array
+     * Convert UnsignedLong to InetAddress support ipv4 or ipv6.
+     * @param high   Most significant (max 64 bits) of the IPv4 or IPv6 Address
+     * (IPv4 only 32 bits).
+     * @param low    Least significant (max 64 bits) of the IPv6 Address
      * @return InetAddress
      * @throws UnknownHostException  UnknownHostException
      */
-    public static InetAddress toInetAddress(final long[] longs)
-            throws UnknownHostException {
+    public static InetAddress toInetAddress(final UnsignedLong high,
+            final UnsignedLong low) throws UnknownHostException {
 
-        InetAddress addr = null;
-        byte[] bytes = toByteArray(longs);
+        byte[] bytes = toByteArray(high, low);
 
-        if (bytes.length > MAX_LONG_BYTES) {
-            addr = InetAddress.getByAddress(bytes);
-        } else {
-            addr = InetAddress.getByAddress(bytes);
-        }
-
-        return addr;
+        return InetAddress.getByAddress(bytes);
     }
 
     /**
-     * Converts longs[] to IP Address.
-     * @param longs  address
+     * Convert UnsignedLong to String.
+     * @param high   Most significant (max 64 bits) of the IPv4 or IPv6 Address
+     * (IPv4 only 32 bits).
+     * @param low    Least significant (max 64 bits) of the IPv6 Address
      * @return String
      */
-    public static String toInetAddressString(final long[] longs) {
+    public static String toInetAddressAsString(final UnsignedLong high,
+            final UnsignedLong low) {
 
-        String s = null;
+        String ret = null;
+        byte[] bytes = toByteArray(high, low);
 
         try {
-            InetAddress addr = toInetAddress(longs);
-            s = addr.getHostAddress();
+            ret = InetAddress.getByAddress(bytes).getHostAddress();
         } catch (UnknownHostException e) {
-            s = "unknown";
+            ret = "unknown host " + Arrays.toString(bytes);
         }
 
-        return s;
+        return ret;
+    }
+
+    /**
+     * Convert UnsignedLong to InetAddress support ipv4 or ipv6.
+     * @param high   Most significant (max 64 bits) of the IPv4 or IPv6 Address
+     * (IPv4 only 32 bits).
+     * @param low    Least significant (max 64 bits) of the IPv6 Address
+     * @return byte[]
+     */
+    private static byte[] toByteArray(final UnsignedLong high,
+            final UnsignedLong low) {
+        boolean isIPV6 = low != null;
+        int bcount = isIPV6 ? BYTES_IPV6_LENGTH : BYTES_IPV4_LENGTH;
+        byte[] bytes = isIPV6 ? new byte[bcount * 2] : new byte[bcount];
+        int destPos = 0;
+
+        byte[] bi = new BigInteger(high.toString()).toByteArray();
+        int srcpos = Math.max(bi.length - bcount, 0);
+        int len = Math.min(bi.length, bcount);
+
+        System.arraycopy(bi, srcpos, bytes, destPos + (bcount - len), len);
+        destPos += bcount;
+
+        if (low != null) {
+
+            bi = new BigInteger(low.toString()).toByteArray();
+            srcpos = Math.max(bi.length - bcount, 0);
+            len = Math.min(bi.length, bcount);
+
+            System.arraycopy(bi, srcpos, bytes, destPos + (bcount - len), len);
+            destPos += bcount;
+        }
+        return bytes;
     }
 
     /**
@@ -179,8 +189,13 @@ public final class DHTConversion {
         List<byte[]> list = new ArrayList<byte[]>();
 
         for (DHTPeer peer : peers) {
-            byte[] bytes = compactAddress(peer.getAddress(), peer.getPort());
-            list.add(bytes);
+
+            try {
+                byte[] bb = compactAddress(peer.getAddress(), peer.getPort());
+                list.add(bb);
+            } catch (UnknownHostException e) {
+                LOGGER.trace("Unknown Peer Host: " + peer.toString());
+            }
         }
 
         return list;
@@ -231,7 +246,7 @@ public final class DHTConversion {
         int destpos = NODE_ID_LENGTH > len ? NODE_ID_LENGTH - len : 0;
         System.arraycopy(ids, srcpos, dest, destpos, length);
 
-        byte[] addr = toByteArray(node.getAddress());
+        byte[] addr = node.getAddress().getAddress();
         byte[] addrBytes = compactAddress(addr, node.getPort());
 
         System.arraycopy(addrBytes, addrBytes.length - COMPACT_ADDR_LENGTH,
@@ -249,9 +264,9 @@ public final class DHTConversion {
      * @param port  port number
      * @return byte[]
      */
-    public static byte[] compactAddress(final long[] address,
+    public static byte[] compactAddress(final InetAddress address,
             final int port) {
-        byte[] bytes = toByteArray(address);
+        byte[] bytes = address.getAddress();
         return compactAddress(bytes, port);
     }
 
@@ -373,53 +388,5 @@ public final class DHTConversion {
         }
 
         throw new IllegalArgumentException("invalid byte length");
-    }
-
-    /**
-     * Transforms byte[] to an unsigned byte (int[]).
-     * @param bytes  bytes
-     * @return int[]
-     */
-    public static int[] transformToUnsignedBytes(final byte[] bytes) {
-
-        int i = 0;
-        int start = 0;
-        int[] ints = null;
-
-        if (bytes[0] == 0) {
-            ints = new int[bytes.length - 1];
-            start = 1;
-        } else {
-            ints = new int[bytes.length];
-        }
-
-        for (int ii = start; ii < bytes.length; ii++) {
-            ints[i] = bytes[ii] & BYTE_TO_INT;
-            i++;
-        }
-
-        return ints;
-    }
-
-    /**
-     * Transforms int[] to unsigned bytes.
-     * @param ints  ints
-     * @return bytes[]
-     */
-    public static byte[] transformFromUnsignedBytes(final int[] ints) {
-
-        byte[] bytes = new byte[ints.length];
-
-        for (int i = 0; i < ints.length; i++) {
-            bytes[i] = (byte) ints[i];
-        }
-
-        if (bytes[0] < 0) {
-            byte[] bb = new byte[bytes.length + 1];
-            System.arraycopy(bytes, 0, bb, 1, bytes.length);
-            return bb;
-        }
-
-        return bytes;
     }
 }

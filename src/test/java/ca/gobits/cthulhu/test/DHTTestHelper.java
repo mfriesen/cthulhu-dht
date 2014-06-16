@@ -17,7 +17,6 @@
 package ca.gobits.cthulhu.test;
 
 import static ca.gobits.dht.DHTConversion.COMPACT_ADDR_LENGTH;
-import static ca.gobits.dht.DHTConversion.NODE_ID_LENGTH;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
@@ -31,6 +30,9 @@ import ca.gobits.dht.DHTConversion;
  * Test Helper Class.
  */
 public final class DHTTestHelper {
+
+    /** Length Node ID. */
+    private static final int NODE_ID_LENGTH = 20;
 
     /**
      * private constructor.

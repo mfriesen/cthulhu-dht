@@ -1,3 +1,19 @@
+//
+// Copyright 2014 Mike Friesen
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+// http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+//
+
 package ca.gobits.cthulhu.test;
 
 import static org.junit.Assert.assertEquals;
@@ -42,9 +58,10 @@ public final class DHTInfoHashRoutingTableBasicUnitTest {
 
     /**
      * testFindPeers02() - peer found.
+     * @throws Exception   Exception
      */
     @Test
-    public void testFindPeers02() {
+    public void testFindPeers02() throws Exception {
         // given
         BigInteger infoHash = new BigInteger("123123");
         byte[] address = new byte[] {127, 0, 0, 1 };
@@ -58,16 +75,16 @@ public final class DHTInfoHashRoutingTableBasicUnitTest {
         // then
         assertEquals(1, result.size());
         DHTPeer peer = result.iterator().next();
-        assertEquals(1, peer.getAddress().length);
-        assertEquals(2130706433L, peer.getAddress()[0]);
+        assertEquals("127.0.0.1", peer.getAddress().getHostAddress());
         assertEquals(port, peer.getPort());
     }
 
     /**
      * testAddPeer01() - InfoHash is missing.
+     * @throws Exception   Exception
      */
     @Test
-    public void testAddPeer01() {
+    public void testAddPeer01() throws Exception {
         // given
         BigInteger infoHash = new BigInteger("12341");
         byte[] address = new byte[] {127, 0, 0, 1 };
@@ -82,14 +99,15 @@ public final class DHTInfoHashRoutingTableBasicUnitTest {
         assertNotNull(result);
         assertEquals(1, result.getPeers().size());
         DHTPeer l = result.getPeers().iterator().next();
-        assertEquals(2130706433L, l.getAddress()[0]);
+        assertEquals("127.0.0.1", l.getAddress().getHostAddress());
     }
 
     /**
      * testAddPeer02() - InfoHash exists.
+     * @throws Exception   Exception
      */
     @Test
-    public void testAddPeer02() {
+    public void testAddPeer02() throws Exception {
         // given
         byte[] infoHash = new BigInteger("12341").toByteArray();
         byte[] address = new byte[] {127, 0, 0, 1 };
@@ -105,6 +123,6 @@ public final class DHTInfoHashRoutingTableBasicUnitTest {
         assertNotNull(result);
         assertEquals(1, result.getPeers().size());
         Iterator<DHTPeer> itr = result.getPeers().iterator();
-        assertEquals(2130706433L, itr.next().getAddress()[0]);
+        assertEquals("127.0.0.1", itr.next().getAddress().getHostAddress());
     }
 }

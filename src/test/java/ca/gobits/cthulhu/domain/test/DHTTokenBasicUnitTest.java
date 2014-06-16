@@ -1,3 +1,19 @@
+//
+// Copyright 2014 Mike Friesen
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+// http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+//
+
 package ca.gobits.cthulhu.domain.test;
 
 import static org.junit.Assert.assertEquals;
@@ -6,7 +22,7 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
 import java.math.BigInteger;
-import java.util.Date;
+import java.net.InetAddress;
 
 import org.junit.Test;
 
@@ -21,9 +37,10 @@ public final class DHTTokenBasicUnitTest {
 
     /**
      * testConstructor01.
+     * @throws Exception  Exception
      */
     @Test
-    public void testConstructor01() {
+    public void testConstructor01() throws Exception {
         // given
         byte[] nodeId = new BigInteger("1").toByteArray();
         byte[] addr = new byte[] {12, 12, 12, 12 };
@@ -34,7 +51,7 @@ public final class DHTTokenBasicUnitTest {
 
         // then
         assertEquals(nodeId, result.getInfoHash());
-        assertEquals(202116108L, result.getAddress()[0]);
+        assertEquals("12.12.12.12", result.getAddress().getHostAddress());
         assertEquals(630, result.hashCode());
         assertNotNull(result.getAddedDate());
         assertTrue(result.toString().contains(
@@ -43,30 +60,26 @@ public final class DHTTokenBasicUnitTest {
 
     /**
      * testConstructor02.
+     * @throws Exception  Exception
      */
     @Test
-    public void testConstructor02() {
+    public void testConstructor02() throws Exception {
         // given
         byte[] nodeId = new BigInteger("1").toByteArray();
-        long[] addr = new long[] {12 };
+        InetAddress addr = InetAddress.getByName("54.23.54.12");
         int port = 80;
-        Date addedDate = new Date();
 
         // when
-        DHTToken result = new DHTTokenBasic();
-        result.setInfoHash(nodeId);
-        result.setAddress(addr);
-        result.setPort(port);
-        result.setAddedDate(addedDate);
+        DHTToken result = new DHTTokenBasic(nodeId, addr.getAddress(), port);
 
         // then
         assertEquals(nodeId, result.getInfoHash());
-        assertEquals(12L, result.getAddress()[0]);
+        assertEquals("54.23.54.12", result.getAddress().getHostAddress());
         assertEquals(630, result.hashCode());
         assertEquals(port, result.getPort());
         assertNotNull(result.getAddedDate());
         assertTrue(result.toString().contains(
-                "infohash={1},address=0.0.0.12,port=80,addedDate="));
+                "infohash={1},address=54.23.54.12,port=80,addedDate="));
     }
 
     /**

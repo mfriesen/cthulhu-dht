@@ -16,8 +16,6 @@
 
 package ca.gobits.cthulhu;
 
-import static ca.gobits.dht.DHTConversion.toInetAddress;
-
 import java.net.InetAddress;
 import java.util.Arrays;
 import java.util.List;
@@ -120,7 +118,7 @@ public final class DHTNodeBucketRoutingTable implements DHTNodeRoutingTable {
 
             try {
 
-                InetAddress addr = toInetAddress(node.getAddress());
+                InetAddress addr = node.getAddress();
                 host = addr.getHostAddress();
 
             } catch (Exception e) {

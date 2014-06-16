@@ -17,6 +17,8 @@
 package ca.gobits.cthulhu.domain;
 
 import java.io.Serializable;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.util.Date;
 
 /**
@@ -47,9 +49,10 @@ public interface DHTNode extends Serializable {
     byte[] getInfoHash();
 
     /**
-     * @return long[]
+     * @return InetAddress
+     * @throws UnknownHostException  UnknownHostException
      */
-    long[] getAddress();
+    InetAddress getAddress() throws UnknownHostException;
 
     /**
      * @return int

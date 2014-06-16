@@ -16,7 +16,11 @@
 
 package ca.gobits.cthulhu.domain;
 
-import static ca.gobits.dht.DHTConversion.toInetAddressString;
+import static ca.gobits.dht.DHTConversion.toInetAddress;
+import static ca.gobits.dht.DHTConversion.toInetAddressAsString;
+
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
@@ -24,14 +28,19 @@ import org.apache.commons.lang3.builder.ToStringBuilder;
 
 import ca.gobits.dht.DHTConversion;
 
+import com.google.common.primitives.UnsignedLong;
+
 /**
  * Basic implementation of DHTPeer.
  *
  */
 public final class DHTPeerBasic implements DHTPeer {
 
-    /** "Compact IP-address". */
-    private long[] address;
+    /** Compact IP-address format  0 - 63 bytes. */
+    private UnsignedLong highAddress;
+
+    /** Compact IP-address format  64 - 128 bytes. */
+    private UnsignedLong lowAddress;
 
     /** Listening port. */
     private int port;
@@ -50,14 +59,18 @@ public final class DHTPeerBasic implements DHTPeer {
     public DHTPeerBasic(final byte[] addr, final int lport) {
         this();
 
-        this.address = DHTConversion.toLongArray(addr);
+        UnsignedLong[] address = DHTConversion.toUnsignedLong(addr);
+        this.highAddress = address[0];
+        this.lowAddress = address.length > 1 ? address[1] : null;
+
         this.port = lport;
     }
 
     @Override
     public int hashCode() {
         return new HashCodeBuilder()
-            .append(this.address)
+            .append(this.highAddress)
+            .append(this.lowAddress)
             .toHashCode();
     }
 
@@ -76,34 +89,35 @@ public final class DHTPeerBasic implements DHTPeer {
         }
 
         DHTPeer rhs = (DHTPeer) obj;
-        return new EqualsBuilder()
-            .append(this.address, rhs.getAddress())
-            .isEquals();
+
+        try {
+            InetAddress addr0 = this.getAddress();
+            InetAddress addr1 = rhs.getAddress();
+
+            return new EqualsBuilder()
+                .append(addr0, addr1)
+                .isEquals();
+        } catch (UnknownHostException e) {
+            return false;
+        }
     }
 
     @Override
     public String toString() {
         ToStringBuilder builder = new ToStringBuilder(this);
-        builder.append("address", toInetAddressString(this.address));
+        builder.append("address",
+                toInetAddressAsString(this.highAddress, this.lowAddress));
         builder.append("port", this.port);
         return builder.toString();
     }
 
     /**
      * @return long[]
+     * @throws UnknownHostException  UnknownHostException
      */
     @Override
-    public long[] getAddress() {
-        return this.address;
-    }
-
-    /**
-     * Sets the address.
-     * @param addr address
-     */
-    @Override
-    public void setAddress(final long[] addr) {
-        this.address = addr;
+    public InetAddress getAddress() throws UnknownHostException {
+        return toInetAddress(this.highAddress, this.lowAddress);
     }
 
     /**
@@ -112,14 +126,5 @@ public final class DHTPeerBasic implements DHTPeer {
     @Override
     public int getPort() {
         return this.port;
-    }
-
-    /**
-     * Sets the port.
-     * @param lport  port
-     */
-    @Override
-    public void setPort(final int lport) {
-        this.port = lport;
     }
 }

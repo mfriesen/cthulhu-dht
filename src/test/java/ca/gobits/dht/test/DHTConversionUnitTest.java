@@ -17,7 +17,6 @@
 package ca.gobits.dht.test;
 
 import static ca.gobits.dht.DHTConversion.COMPACT_ADDR_LENGTH;
-import static ca.gobits.dht.DHTConversion.NODE_ID_LENGTH;
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
@@ -38,11 +37,16 @@ import ca.gobits.cthulhu.domain.DHTPeer;
 import ca.gobits.cthulhu.domain.DHTPeerBasic;
 import ca.gobits.dht.DHTConversion;
 
+import com.google.common.primitives.UnsignedLong;
+
 /**
  * DHT DataConversion Unit Tests.
  *
  */
 public final class DHTConversionUnitTest {
+
+    /** Length Node ID. */
+    private static final int NODE_ID_LENGTH = 20;
 
     /**
      * testConstructorIsPrivate().
@@ -63,17 +67,19 @@ public final class DHTConversionUnitTest {
      * @throws Exception  Exception
      */
     @Test
-    public void testToLongArray01() throws Exception {
+    public void testToUnsignedLong01() throws Exception {
 
         // given
         InetAddress addr = InetAddress.getByName("255.255.255.255");
 
         // when
-        long[] result = DHTConversion.toLongArray(addr.getAddress());
+        UnsignedLong[] result = DHTConversion.toUnsignedLong(addr.getAddress());
 
         // then
         assertEquals(1, result.length);
-        assertEquals(4294967295L, result[0]);
+        assertEquals("4294967295", result[0].toString());
+        assertArrayEquals(addr.getAddress(),
+                DHTConversion.toInetAddress(result[0], null).getAddress());
     }
 
     /**
@@ -81,21 +87,21 @@ public final class DHTConversionUnitTest {
      * @throws Exception  Exception
      */
     @Test
-    public void testToLongArray02() throws Exception {
+    public void testToUnsignedLong02() throws Exception {
 
         // given
         InetAddress addr = InetAddress
                 .getByName("805b:2d9d:dc28:0000:0000:fc57:d4c8:1fff");
 
         // when
-        long[] result = DHTConversion.toLongArray(addr.getAddress());
+        UnsignedLong[] result = DHTConversion.toUnsignedLong(addr.getAddress());
 
         // then
-        assertEquals(4, result.length);
-        assertEquals(2153459101L, result[0]);
-        assertEquals(3693608960L, result[1]);
-        assertEquals(64599L, result[2]);
-        assertEquals(3569885183L, result[3]);
+        assertEquals(2, result.length);
+        assertEquals("9249036415762169856", result[0].toString());
+        assertEquals("277454162239487", result[1].toString());
+        assertArrayEquals(addr.getAddress(),
+                DHTConversion.toInetAddress(result[0], result[1]).getAddress());
     }
 
     /**
@@ -110,200 +116,14 @@ public final class DHTConversionUnitTest {
                 .getByName("ffff:ffff:ffff:ffff:ffff:ffff:ffff:ffff");
 
         // when
-        long[] result = DHTConversion.toLongArray(addr.getAddress());
+        UnsignedLong[] result = DHTConversion.toUnsignedLong(addr.getAddress());
 
         // then
-        assertEquals(4, result.length);
-        assertEquals(4294967295L, result[0]);
-        assertEquals(4294967295L, result[1]);
-        assertEquals(4294967295L, result[2]);
-        assertEquals(4294967295L, result[3]);
-    }
-
-    /**
-     * testToLong01().
-     */
-    @Test
-    public void testToLong01() {
-        // given
-        byte[] bytes = new byte[] {37, 76, -96, 28};
-
-        // when
-        long result = DHTConversion.toLong(bytes);
-
-        // then
-        assertEquals(625778716, result);
-        assertArrayEquals(bytes, DHTConversion.toByteArray(result));
-    }
-
-    /**
-     * Test converting long back to byte array.
-     */
-    @Test
-    public void testToByteArray01() {
-        // given
-        long l = 4294967295L;
-
-        // when
-        byte[] result = DHTConversion.toByteArray(l);
-
-        // then
-        assertEquals(4, result.length);
-        assertEquals(-1, result[0]);
-        assertEquals(-1, result[1]);
-        assertEquals(-1, result[2]);
-        assertEquals(-1, result[3]);
-    }
-
-    /**
-     * Test converting long back to byte array.
-     */
-    @Test
-    public void testToByteArray02() {
-        // given
-        long[] l = new long[] {4294967295L, 4294967295L,
-                4294967295L, 4294967295L };
-
-        // when
-        byte[] result = DHTConversion.toByteArray(l);
-
-        // then
-        assertEquals(16, result.length);
-        assertEquals(-1, result[0]);
-        assertEquals(-1, result[1]);
-        assertEquals(-1, result[2]);
-        assertEquals(-1, result[3]);
-        assertEquals(-1, result[4]);
-        assertEquals(-1, result[5]);
-        assertEquals(-1, result[6]);
-        assertEquals(-1, result[7]);
-        assertEquals(-1, result[8]);
-        assertEquals(-1, result[9]);
-        assertEquals(-1, result[10]);
-        assertEquals(-1, result[11]);
-        assertEquals(-1, result[12]);
-        assertEquals(-1, result[13]);
-        assertEquals(-1, result[14]);
-        assertEquals(-1, result[15]);
-    }
-
-    /**
-     * Test IPv6 address.
-     * @throws Exception  Exception
-     */
-    @Test
-    public void testToInetAddress01() throws Exception {
-        // given
-        long[] l = new long[] {4294967295L, 4294967295L,
-                4294967295L, 4294967295L };
-
-        // when
-        InetAddress result = DHTConversion.toInetAddress(l);
-
-        // then
-        assertEquals("ffff:ffff:ffff:ffff:ffff:ffff:ffff:ffff",
-                result.getHostAddress());
-    }
-
-    /**
-     * Test IPv6 address.
-     * @throws Exception  Exception
-     */
-    @Test
-    public void testToInetAddress02() throws Exception {
-        // given
-        long[] l = new long[] {2153459101L, 3693608960L,
-                64599L, 3569885183L };
-
-        // when
-        InetAddress result = DHTConversion.toInetAddress(l);
-
-        // then
-        assertEquals("805b:2d9d:dc28:0:0:fc57:d4c8:1fff",
-                result.getHostAddress());
-    }
-
-    /**
-     * Test IPv4 address.
-     * @throws Exception  Exception
-     */
-    @Test
-    public void testToInetAddress03() throws Exception {
-        // given
-        long[] l = new long[] {4294967295L };
-
-        // when
-        InetAddress result = DHTConversion.toInetAddress(l);
-
-        // then
-        assertEquals("255.255.255.255",
-                result.getHostAddress());
-    }
-
-    /**
-     * Test IPv4 address.
-     * @throws Exception  Exception
-     */
-    @Test
-    public void testToInetAddress04() throws Exception {
-        // given
-        long[] l = new long[] {2294367295L };
-
-        // when
-        InetAddress result = DHTConversion.toInetAddress(l);
-
-        // then
-        assertEquals("136.193.68.63",
-                result.getHostAddress());
-    }
-
-    /**
-     * Test IPv4 address.
-     * @throws Exception  Exception
-     */
-    @Test
-    public void testToInetAddressString01() throws Exception {
-        // given
-        long[] l = new long[] {2294367295L };
-
-        // when
-        String result = DHTConversion.toInetAddressString(l);
-
-        // then
-        assertEquals("136.193.68.63", result);
-    }
-
-    /**
-     * Test IPv6 address.
-     * @throws Exception  Exception
-     */
-    @Test
-    public void testToInetAddressString02() throws Exception {
-        // given
-        long[] l = new long[] {2153459101L, 3693608960L,
-                64599L, 3569885183L };
-
-        // when
-        String result = DHTConversion.toInetAddressString(l);
-
-        // then
-        assertEquals("805b:2d9d:dc28:0:0:fc57:d4c8:1fff", result);
-    }
-
-    /**
-     * Test UnknownHostException.
-     * @throws Exception  Exception
-     */
-    @Test
-    public void testToInetAddressString03() throws Exception {
-        // given
-        long[] l = new long[] {};
-
-        // when
-        String result = DHTConversion.toInetAddressString(l);
-
-        // then
-        assertEquals("unknown", result);
+        assertEquals(2, result.length);
+        assertEquals("18446744073709551615", result[0].toString());
+        assertEquals("18446744073709551615", result[1].toString());
+        assertArrayEquals(addr.getAddress(),
+                DHTConversion.toInetAddress(result[0], result[1]).getAddress());
     }
 
     /**
@@ -432,9 +252,10 @@ public final class DHTConversionUnitTest {
 
     /**
      * testToDHTNode01() - transform bytes to DHTNode.
+     * @throws Exception   Exception
      */
     @Test
-    public void testToDHTNode01() {
+    public void testToDHTNode01() throws Exception {
         // given
         byte[] bytes = new byte[] {-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
                 -1, -1, -1, -1, -1, -1, -1, -1, -1, 73, 54, 93, 12, 0, 123, 0,
@@ -453,16 +274,14 @@ public final class DHTConversionUnitTest {
         assertEquals("1461501637330902918203684832716283019655932542975",
                 b0.toString());
 
-        assertEquals("73.54.93.12",
-                DHTConversion.toInetAddressString(node0.getAddress()));
+        assertEquals("73.54.93.12", node0.getAddress().getHostAddress());
         assertEquals(123, node0.getPort());
 
         DHTNode node1 = itr.next();
         BigInteger b1 = DHTConversion.toBigInteger(node1.getInfoHash());
         assertEquals("13242", b1.toString());
 
-        assertEquals("34.64.43.51",
-                DHTConversion.toInetAddressString(node1.getAddress()));
+        assertEquals("34.64.43.51", node1.getAddress().getHostAddress());
         assertEquals(8080, node1.getPort());
     }
 
@@ -478,73 +297,5 @@ public final class DHTConversionUnitTest {
         DHTConversion.toDHTNode(bytes);
 
         // then
-    }
-
-    /**
-     * testTransformToUnsignedBytes01() - test 2^160.
-     */
-    @Test
-    public void testTransformToUnsignedBytes01() {
-        // given
-        byte[] bytes = new BigInteger(
-            "1461501637330902918203684832716283019655932542975")
-            .toByteArray();
-
-        // when
-        int[] results = DHTConversion.transformToUnsignedBytes(bytes);
-
-        // then
-        assertEquals(20, results.length);
-        assertArrayEquals(new int[] {255, 255, 255, 255, 255, 255, 255, 255,
-                255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255 },
-                results);
-
-        byte[] resultBytes = DHTConversion.transformFromUnsignedBytes(results);
-        assertArrayEquals(resultBytes, bytes);
-    }
-
-    /**
-     * testTransformToUnsignedBytes02() - test 2^160 / 2.
-     */
-    @Test
-    public void testTransformToUnsignedBytes02() {
-        // given
-        byte[] bytes = new BigInteger(
-            "730750818665451459101842416358141509827966271487")
-            .toByteArray();
-
-        // when
-        int[] results = DHTConversion.transformToUnsignedBytes(bytes);
-
-        // then
-        assertEquals(20, results.length);
-        assertArrayEquals(new int[] {127, 255, 255, 255, 255, 255, 255, 255,
-                255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255 },
-                results);
-
-        byte[] resultBytes = DHTConversion.transformFromUnsignedBytes(results);
-        assertArrayEquals(resultBytes, bytes);
-    }
-
-    /**
-     * testTransformToUnsignedBytes02() - test 2^160 / 2 - 1.
-     */
-    @Test
-    public void testTransformToUnsignedBytes03() {
-        // given
-        byte[] bytes = new BigInteger(
-            "730750818665451459101842416358141509827966271488")
-            .toByteArray();
-
-        // when
-        int[] results = DHTConversion.transformToUnsignedBytes(bytes);
-
-        // then
-        assertEquals(20, results.length);
-        assertArrayEquals(new int[] {128, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-                0, 0, 0, 0, 0, 0, 0 }, results);
-
-        byte[] resultBytes = DHTConversion.transformFromUnsignedBytes(results);
-        assertArrayEquals(resultBytes, bytes);
     }
 }

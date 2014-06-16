@@ -16,6 +16,9 @@
 
 package ca.gobits.cthulhu.domain;
 
+import java.net.InetAddress;
+import java.net.UnknownHostException;
+
 
 /**
  * DHTPeer - holder for information about a DHT Peer.
@@ -24,24 +27,13 @@ package ca.gobits.cthulhu.domain;
 public interface DHTPeer {
 
     /**
-     * @return long[]
+     * @return InetAddress
+     * @throws UnknownHostException   UnknownHostException
      */
-    long[] getAddress();
-
-    /**
-     * Sets the address.
-     * @param addr address
-     */
-    void setAddress(final long[] addr);
+    InetAddress getAddress() throws UnknownHostException;
 
     /**
      * @return int
      */
     int getPort();
-
-    /**
-     * Sets the port.
-     * @param port  port
-     */
-    void setPort(final int port);
 }

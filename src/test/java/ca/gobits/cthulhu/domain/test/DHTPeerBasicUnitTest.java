@@ -1,8 +1,26 @@
+//
+// Copyright 2014 Mike Friesen
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+// http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+//
+
 package ca.gobits.cthulhu.domain.test;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
+
+import java.net.InetAddress;
 
 import org.junit.Test;
 
@@ -17,9 +35,10 @@ public final class DHTPeerBasicUnitTest {
 
     /**
      * testConstructor01().
+     * @throws Exception   Exception
      */
     @Test
-    public void testConstructor01() {
+    public void testConstructor01() throws Exception {
         // given
         byte[] addr = new byte[] {3, 4, 5, 6 };
         int port = 8000;
@@ -28,26 +47,26 @@ public final class DHTPeerBasicUnitTest {
         DHTPeer result = new DHTPeerBasic(addr, port);
 
         // then
-        assertEquals(1, result.getAddress().length);
-        assertEquals(50595078L, result.getAddress()[0]);
+        assertEquals("3.4.5.6", result.getAddress().getHostAddress());
     }
 
     /**
      * testToString01().
+     * @throws Exception   Exception
      */
     @Test
-    public void testToString01() {
+    public void testToString01() throws Exception {
         // given
-        DHTPeer peer = new DHTPeerBasic();
-        peer.setAddress(new long[] {3315799039808L });
-        peer.setPort(123);
+        int port = 123;
+        InetAddress addr = InetAddress.getByName("127.0.0.1");
+        DHTPeer peer = new DHTPeerBasic(addr.getAddress(), port);
 
         // when
         String result = peer.toString();
 
         // then
         assertTrue(result.startsWith("ca.gobits.cthulhu.domain.DHTPeer"));
-        assertTrue(result.endsWith("address=5.6.31.64,port=123]"));
+        assertTrue(result.endsWith("address=127.0.0.1,port=123]"));
         assertEquals(123, peer.getPort());
     }
 

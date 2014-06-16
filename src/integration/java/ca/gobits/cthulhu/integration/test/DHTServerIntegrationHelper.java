@@ -47,16 +47,6 @@ public final class DHTServerIntegrationHelper {
 
     /**
      * Sends UDP Packet to Server.
-     * @param msg  String
-     * @return String response
-     * @throws IOException  IOException
-     */
-    public static String sendUDPPacket(final String msg) throws IOException {
-        return new String(sendUDPPacket(msg.getBytes()));
-    }
-
-    /**
-     * Sends UDP Packet to Server.
      * @param bytes  bytes array
      * @return bytes[] response
      * @throws IOException  IOException

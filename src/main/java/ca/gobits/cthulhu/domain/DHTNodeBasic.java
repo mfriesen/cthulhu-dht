@@ -16,13 +16,20 @@
 
 package ca.gobits.cthulhu.domain;
 
-import static ca.gobits.dht.DHTConversion.toInetAddressString;
+import static ca.gobits.dht.DHTConversion.toInetAddress;
+import static ca.gobits.dht.DHTConversion.toInetAddressAsString;
 
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.util.Date;
 
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.builder.ToStringBuilder;
+
+import ca.gobits.dht.DHTConversion;
+
+import com.google.common.primitives.UnsignedLong;
 
 /**
  * DHTNodeBasic - basic implementation of the DHTNode.
@@ -35,8 +42,11 @@ public final class DHTNodeBasic implements DHTNode {
     /** Node identifier. */
     private byte[] infoHash;
 
-    /** Compact IP-address. */
-    private long[] address;
+    /** Compact IP-address format  0 - 63 bytes. */
+    private UnsignedLong highAddress;
+
+    /** Compact IP-address format  64 - 128 bytes. */
+    private UnsignedLong lowAddress;
 
     /** IP Port. */
     private int port;
@@ -57,7 +67,8 @@ public final class DHTNodeBasic implements DHTNode {
     public String toString() {
         ToStringBuilder builder = new ToStringBuilder(this);
         builder.append("infohash", this.infoHash);
-        builder.append("address", toInetAddressString(this.address));
+        builder.append("address",
+                toInetAddressAsString(this.highAddress, this.lowAddress));
         builder.append("port", this.port);
         builder.append("state", this.state);
         builder.append("lastUpdated", this.lastUpdated);
@@ -124,16 +135,31 @@ public final class DHTNodeBasic implements DHTNode {
     }
 
     @Override
-    public long[] getAddress() {
-        return this.address;
+    public InetAddress getAddress() throws UnknownHostException {
+        return toInetAddress(this.highAddress, this.lowAddress);
     }
 
     /**
      * Sets Address.
-     * @param addr  compact address
+     * @param addr InetAddress
      */
-    public void setAddress(final long[] addr) {
-        this.address = addr;
+    public void setAddress(final InetAddress addr) {
+        UnsignedLong[] ul = DHTConversion.toUnsignedLong(addr.getAddress());
+        this.highAddress = ul[0];
+
+        if (ul.length > 1) {
+            this.lowAddress = ul[1];
+        }
+    }
+
+    /**
+     * Sets Address.
+     * @param high  UnsignedLong most sig
+     * @param low   UnsignedLong least sig
+     */
+    public void setAddress(final UnsignedLong high, final UnsignedLong low) {
+        this.highAddress = high;
+        this.lowAddress = low;
     }
 
     @Override

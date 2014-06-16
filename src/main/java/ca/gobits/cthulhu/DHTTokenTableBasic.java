@@ -17,6 +17,7 @@
 package ca.gobits.cthulhu;
 
 import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
@@ -30,7 +31,6 @@ import org.springframework.scheduling.annotation.Scheduled;
 import ca.gobits.cthulhu.domain.DHTToken;
 import ca.gobits.cthulhu.domain.DHTTokenBasic;
 import ca.gobits.cthulhu.domain.DHTTokenComparator;
-import ca.gobits.dht.DHTConversion;
 
 /**
  * Basic implementation of DHTTokenTable.
@@ -93,15 +93,14 @@ public final class DHTTokenTableBasic implements DHTTokenTable {
 
     @Override
     public boolean valid(final InetAddress addr, final int port,
-            final byte[] secret) {
+            final byte[] secret) throws UnknownHostException {
 
         boolean valid = false;
         DHTToken token = this.tokens.get(createToken(addr, port, secret));
 
         if (token != null) {
 
-            byte[] addr0 = DHTConversion.toByteArray(token.getAddress());
-
+            byte[] addr0 = token.getAddress().getAddress();
             valid = isValid(token, new Date())
                     && Arrays.equals(addr0, addr.getAddress())
                     && token.getPort() == port;

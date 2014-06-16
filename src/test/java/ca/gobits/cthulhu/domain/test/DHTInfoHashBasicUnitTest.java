@@ -137,9 +137,10 @@ public final class DHTInfoHashBasicUnitTest {
 
     /**
      * testAddPeer01() - first time through.
+     * @throws Exception   Exception
      */
     @Test
-    public void testAddPeer01() {
+    public void testAddPeer01() throws Exception {
         // given
         BigInteger nodeId = new BigInteger("123");
         DHTInfoHash node = new DHTInfoHashBasic(nodeId.toByteArray());
@@ -154,8 +155,8 @@ public final class DHTInfoHashBasicUnitTest {
 
         // then
         assertEquals(1, result.size());
-        assertEquals(2130706433L,
-                result.iterator().next().getAddress()[0]);
+        assertEquals("127.0.0.1",
+                result.iterator().next().getAddress().getHostAddress());
     }
 
     /**
@@ -182,9 +183,10 @@ public final class DHTInfoHashBasicUnitTest {
 
     /**
      * testAddPeer03().
+     * @throws Exception   Exception
      */
     @Test
-    public void testAddPeer03() {
+    public void testAddPeer03() throws Exception {
         // given
         BigInteger nodeId = new BigInteger("123");
         DHTInfoHash node = new DHTInfoHashBasic(nodeId.toByteArray());
@@ -201,8 +203,8 @@ public final class DHTInfoHashBasicUnitTest {
 
         // then
         assertEquals(1, node.getPeers().size());
-        assertEquals(2130706433L,
-            node.getPeers().iterator().next().getAddress()[0]);
+        assertEquals("127.0.0.1",
+            node.getPeers().iterator().next().getAddress().getHostAddress());
     }
 
     /**
