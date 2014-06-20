@@ -289,40 +289,16 @@ public final class DHTConversion {
     }
 
     /**
-     * Decodes a compact IP-address/port info".
-     * The 4-byte IP address is in network byte order with
-     * the 2 byte port in network byte order concatenated onto the end.
-     * @param bytes  compact IP-address/port info
-     * @return String <ipadress>:<port>
+     * Converts "Compact IP-address/port info" into an InetAddress.
+     * @param bytes  bytes
+     * @return InetAddress
+     * @throws UnknownHostException  UnknownHostException
      */
-    public static String decodeCompactAddressToString(final byte[] bytes) {
-
-        String ip = decodeCompactAddress(bytes);
-
-        int port = decodeCompactAddressPort(bytes);
-
-        return ip + ":" + port;
-    }
-
-    /**
-     * Decodes a compact IP-address/port info".
-     * @param bytes  compact IP-address/port info
-     * @return String <ipaddress>
-     */
-    public static String decodeCompactAddress(final byte[] bytes) {
-
-        int i = 0;
-        int len = bytes.length;
-
-        StringBuilder ip = new StringBuilder();
-        while (i < len - 2) {
-            if (i > 0) {
-                ip.append(".");
-            }
-            ip.append(bytes[i] & BYTE_TO_INT);
-            i++;
-        }
-        return ip.toString();
+    public static InetAddress compactAddress(final byte[] bytes)
+            throws UnknownHostException {
+        byte[] bb = new byte[bytes.length - 2];
+        System.arraycopy(bytes, 0, bb, 0, bb.length);
+        return InetAddress.getByAddress(bb);
     }
 
     /**
@@ -330,7 +306,7 @@ public final class DHTConversion {
      * @param bytes  compact IP-address/port info
      * @return int
      */
-    public static int decodeCompactAddressPort(final byte[] bytes) {
+    public static int compactAddressPort(final byte[] bytes) {
         int len = bytes.length;
         int port = (bytes[len - 2] & BYTE_TO_INT) << BITS_PER_BYTE
                 | (bytes[len - 1] & BYTE_TO_INT);
@@ -375,7 +351,7 @@ public final class DHTConversion {
                         COMPACT_ADDR_LENGTH);
                 pos += COMPACT_NODE_LENGTH;
 
-                int port = decodeCompactAddressPort(addr);
+                int port = compactAddressPort(addr);
 
                 DHTNode node = DHTNodeFactory.create(nodeId,
                         java.util.Arrays.copyOfRange(addr, 0, addr.length - 2),

@@ -159,15 +159,19 @@ public final class DHTConversionUnitTest {
 
         assertEquals("1461501637330902918203684832716283019655932542975",
                 DHTConversion.toBigInteger(id).toString());
-        assertEquals("73.54.93.12:123",
-                DHTConversion.decodeCompactAddressToString(addr));
+        assertEquals("73.54.93.12",
+                DHTConversion.compactAddress(addr).getHostAddress());
+        assertEquals(123,
+                DHTConversion.compactAddressPort(addr));
 
         System.arraycopy(result, 26, id, 0, 20);
         System.arraycopy(result, 46, addr, 0, 6);
 
         assertEquals("13242", new BigInteger(id).toString());
-        assertEquals("34.64.43.51:8080",
-                DHTConversion.decodeCompactAddressToString(addr));
+        assertEquals("34.64.43.51",
+                DHTConversion.compactAddress(addr).getHostAddress());
+        assertEquals(8080,
+                DHTConversion.compactAddressPort(addr));
     }
 
     /**
@@ -193,13 +197,17 @@ public final class DHTConversionUnitTest {
         assertEquals(2, result.size());
         byte[] addr = result.get(0);
 
-        assertEquals("73.54.93.12:123",
-                DHTConversion.decodeCompactAddressToString(addr));
+        assertEquals("73.54.93.12",
+                DHTConversion.compactAddress(addr).getHostAddress());
+        assertEquals(123,
+                DHTConversion.compactAddressPort(addr));
 
         addr = result.get(1);
 
-        assertEquals("34.64.43.51:8080",
-                DHTConversion.decodeCompactAddressToString(addr));
+        assertEquals("34.64.43.51",
+                DHTConversion.compactAddress(addr).getHostAddress());
+        assertEquals(8080,
+                DHTConversion.compactAddressPort(addr));
     }
 
     /**
@@ -309,10 +317,12 @@ public final class DHTConversionUnitTest {
         byte[] bytes = new byte[]{37, 76, -96, 28, -110, -114};
 
         // when
-        String result = DHTConversion.decodeCompactAddressToString(bytes);
+        String result = DHTConversion.compactAddress(bytes).getHostAddress();
+        int port = DHTConversion.compactAddressPort(bytes);
 
         // then
-        assertEquals("37.76.160.28:37518", result);
+        assertEquals("37.76.160.28", result);
+        assertEquals(37518, port);
     }
 
     /**
@@ -322,12 +332,57 @@ public final class DHTConversionUnitTest {
     @Test
     public void testDecodeCompactIP02() throws Exception {
         // given
-        byte[] bytes = new byte[] {37, 76, -96, -96, 28, 28, -110, -114 };
+        InetAddress addr = InetAddress
+                .getByName("805b:2d9d:dc28:0000:0000:fc57:d4c8:1fff");
+        byte[] bytes = DHTConversion.compactAddress(addr.getAddress(), 37518);
 
         // when
-        String result = DHTConversion.decodeCompactAddressToString(bytes);
+        String result = DHTConversion.compactAddress(bytes).getHostAddress();
+        int port = DHTConversion.compactAddressPort(bytes);
 
         // then
-        assertEquals("37.76.160.160.28.28:37518", result);
+        assertEquals("805b:2d9d:dc28:0:0:fc57:d4c8:1fff", result);
+        assertEquals(37518, port);
+    }
+
+    /**
+     * testCompactAddress01() convert IPv4 to compact mode and
+     * back again.
+     * @throws Exception   Exception
+     */
+    @Test
+    public void testCompactAddress01() throws Exception {
+        // given
+        int port = 4832;
+        InetAddress addr = InetAddress.getByName("54.242.12.2");
+
+        // when
+        byte[] compact = DHTConversion.compactAddress(addr.getAddress(), port);
+        InetAddress result = DHTConversion.compactAddress(compact);
+
+        // then
+        assertEquals(addr.getHostAddress(), result.getHostAddress());
+        assertEquals(port, DHTConversion.compactAddressPort(compact));
+    }
+
+    /**
+     * testCompactAddress02() convert IPv6 to compact mode and
+     * back again.
+     * @throws Exception   Exception
+     */
+    @Test
+    public void testCompactAddress02() throws Exception {
+        // given
+        int port = 4832;
+        InetAddress addr = InetAddress
+                .getByName("805b:2d9d:dc28:0000:0000:fc57:d4c8:1fff");
+
+        // when
+        byte[] compact = DHTConversion.compactAddress(addr.getAddress(), port);
+        InetAddress result = DHTConversion.compactAddress(compact);
+
+        // then
+        assertEquals(addr.getHostAddress(), result.getHostAddress());
+        assertEquals(port, DHTConversion.compactAddressPort(compact));
     }
 }

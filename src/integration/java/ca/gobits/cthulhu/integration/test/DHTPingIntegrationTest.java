@@ -94,8 +94,8 @@ public final class DHTPingIntegrationTest {
                 new String((byte[]) response.get("t")));
         assertEquals(new String((byte[]) realResponse.get("y")),
                 new String((byte[]) response.get("y")));
-        assertTrue(DHTConversion.decodeCompactAddressToString(
-                (byte[]) response.get("ip")).startsWith("127.0.0.1"));
+        assertTrue(DHTConversion.compactAddress((byte[]) response.get("ip"))
+                .getHostAddress().startsWith("127.0.0.1"));
 
         Map<String, Object> r = (Map<String, Object>) response.get("r");
         assertEquals(1, r.size());

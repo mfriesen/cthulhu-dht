@@ -16,6 +16,9 @@
 
 package ca.gobits.cthulhu.discovery;
 
+import static ca.gobits.dht.DHTConversion.compactAddress;
+import static ca.gobits.dht.DHTConversion.compactAddressPort;
+
 import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
@@ -96,18 +99,19 @@ public class DHTNodeDiscoveryImpl implements DHTNodeDiscovery {
 
         for (DelayObject<byte[]> obj : objs) {
 
-            String host = DHTConversion.decodeCompactAddress(obj.getPayload());
-            int port = DHTConversion.decodeCompactAddressPort(obj.getPayload());
-
-            LOGGER.info("sending 'find_nodes' for " + Arrays.toString(nodeId)
-                    + " to " + host + ":" + port);
-
-            byte[] msg = this.queryProtocol.findNodeQuery(transactionId,
-                    nodeId, nodeId);
-
             try {
+                InetAddress addr = compactAddress(obj.getPayload());
+                int port = compactAddressPort(obj.getPayload());
+
+                LOGGER.info("sending 'find_nodes' for "
+                        + Arrays.toString(nodeId) + " to " + addr.getHostName()
+                        + ":" + port);
+
+                byte[] msg = this.queryProtocol.findNodeQuery(transactionId,
+                        nodeId, nodeId);
+
                 DatagramPacket packet = new DatagramPacket(msg, msg.length,
-                        InetAddress.getByName(host), port);
+                        addr, port);
                 this.socket.send(packet);
             } catch (IOException e) {
                 LOGGER.trace(e, e);

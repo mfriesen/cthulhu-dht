@@ -21,6 +21,8 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 import java.math.BigInteger;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -44,8 +46,10 @@ public final class DHTTestHelper {
      * Assert two "nodes" results are equal.
      * @param a  byte[]
      * @param b  byte[]
+     * @throws UnknownHostException  UnknownHostException
      */
-    public static void assertNodesEquals(final byte[] a, final byte[] b) {
+    public static void assertNodesEquals(final byte[] a, final byte[] b)
+            throws UnknownHostException {
         assertEquals(a.length, b.length);
 
         Map<BigInteger, String> mapA = buildNodeMap(a);
@@ -61,8 +65,10 @@ public final class DHTTestHelper {
      * Build a Map from a node list.
      * @param a  byte[]
      * @return Map<BigInteger, String>
+     * @throws UnknownHostException  UnknownHostException
      */
-    private static Map<BigInteger, String> buildNodeMap(final byte[] a) {
+    private static Map<BigInteger, String> buildNodeMap(final byte[] a)
+            throws UnknownHostException {
         Map<BigInteger, String> map = new HashMap<BigInteger, String>();
 
         int i = 0;
@@ -71,10 +77,10 @@ public final class DHTTestHelper {
             i += NODE_ID_LENGTH;
             byte[] ipBytes = java.util.Arrays.copyOfRange(a, i, i
                     + COMPACT_ADDR_LENGTH);
-            String addr = DHTConversion.decodeCompactAddressToString(ipBytes);
+            InetAddress addr = DHTConversion.compactAddress(ipBytes);
             i += COMPACT_ADDR_LENGTH;
 
-            map.put(DHTConversion.toBigInteger(key), addr);
+            map.put(DHTConversion.toBigInteger(key), addr.getHostAddress());
         }
 
         return map;
