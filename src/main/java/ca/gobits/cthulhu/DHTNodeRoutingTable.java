@@ -43,29 +43,33 @@ public interface DHTNodeRoutingTable {
     /**
      * Find the node with matching ID or NULL.
      * @param nodeId to find closest nodes to.
+     * @param ipv6  whether search ipv6 node list
      * @return DHTNode
      */
-    DHTNode findExactNode(byte[] nodeId);
+    DHTNode findExactNode(byte[] nodeId, boolean ipv6);
 
     /**
      * Find the closest X nodes to the nodeId.
      * @param nodeId to find closest nodes to.
+     * @param ipv6  whether search ipv6 node list
      * @return List<DHTNode>
      */
-    List<DHTNode> findClosestNodes(byte[] nodeId);
+    List<DHTNode> findClosestNodes(byte[] nodeId, boolean ipv6);
 
     /**
      * Find the closest X nodes to the nodeId.
      * @param nodeId to find closest nodes to.
-     * @param returnCount  max number of nodes to return.
+     * @param max  max number of nodes to return.
+     * @param ipv6  whether search ipv6 node list
      * @return List<DHTNode>
      */
-    List<DHTNode> findClosestNodes(byte[] nodeId, int returnCount);
+    List<DHTNode> findClosestNodes(byte[] nodeId, int max, boolean ipv6);
 
     /**
-     * @return int
+     * @param ipv6  whether search ipv6 node list
+     * @return int  number of nodes in IPv6 list.
      */
-    int getTotalNodeCount();
+    int getTotalNodeCount(boolean ipv6);
 
     /**
      * @return int

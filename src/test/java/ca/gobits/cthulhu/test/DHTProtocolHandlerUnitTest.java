@@ -127,6 +127,7 @@ public final class DHTProtocolHandlerUnitTest extends EasyMockSupport {
     @Test
     public void testHandle01() throws Exception {
         // given
+        boolean isIPv6 = false;
         String dat = "d1:ad2:id20:abcdefghij0123456789e1:q4:ping1:t2:aa1:y1:qe";
         byte[] bb = dat.getBytes();
         byte[] id = "abcdefghij0123456789".getBytes();
@@ -138,7 +139,8 @@ public final class DHTProtocolHandlerUnitTest extends EasyMockSupport {
         this.discovery.addNode(this.iaddr, this.port);
         expect(this.config.getNodeId()).andReturn(
                 "ABCDEFGHIJKLMNOPQRST".getBytes());
-        expect(this.routingTable.findExactNode(aryEq(id))).andReturn(null);
+        expect(this.routingTable.findExactNode(aryEq(id), eq(isIPv6)))
+                .andReturn(null);
 
         replayAll();
         byte[] resultBytes = this.handler.handle(packet);
@@ -160,6 +162,7 @@ public final class DHTProtocolHandlerUnitTest extends EasyMockSupport {
     @Test
     public void testHandle02() throws Exception {
         // given
+        boolean isIPv6 = false;
         String dat = "d1:ad2:id20:abcdefghij0123456789e1:q4:ping1:t2:aa1:y1:qe";
         byte[] id = "abcdefghij0123456789".getBytes();
         byte[] bb = dat.getBytes();
@@ -172,7 +175,8 @@ public final class DHTProtocolHandlerUnitTest extends EasyMockSupport {
         // when
         expect(this.config.getNodeId()).andReturn(
                 "ABCDEFGHIJKLMNOPQRST".getBytes());
-        expect(this.routingTable.findExactNode(aryEq(id))).andReturn(node);
+        expect(this.routingTable.findExactNode(aryEq(id), eq(isIPv6)))
+                .andReturn(node);
 
         replayAll();
         byte[] resultBytes = this.handler.handle(packet);
@@ -196,6 +200,7 @@ public final class DHTProtocolHandlerUnitTest extends EasyMockSupport {
     @Test
     public void testHandle03() throws Exception {
         // given
+        boolean isIPv6 = false;
         // 1019541382561204384426858321430530264477101611793")
         byte[] nodeId = new byte[] {-78, -107, -47, 23, 19, 90, -105, 99, -38,
                 40, 46, 125, -82, 115, -91, -54, 125, 62, 91, 17 };
@@ -209,11 +214,11 @@ public final class DHTProtocolHandlerUnitTest extends EasyMockSupport {
         DatagramPacket packet = createFindNodeRequest();
 
         // when
-        expect(this.routingTable.findExactNode(aryEq(nodeId))).andReturn(
-                new DHTNodeBasic());
+        expect(this.routingTable.findExactNode(aryEq(nodeId), eq(isIPv6)))
+            .andReturn(new DHTNodeBasic());
 
-        expect(this.routingTable.findClosestNodes(aryEq(target))).andReturn(
-                getFindNodes());
+        expect(this.routingTable.findClosestNodes(aryEq(target), eq(isIPv6)))
+            .andReturn(getFindNodes());
 
         replayAll();
         byte[] bytes = this.handler.handle(packet);
@@ -394,6 +399,7 @@ public final class DHTProtocolHandlerUnitTest extends EasyMockSupport {
     @Test
     public void testHandle08() throws Exception {
         // given
+        boolean isIPv6 = false;
         String dat = "d1:ad2:id20:abcdefghij01234567899:info_hash20:"
                 + "mnopqrstuvwxyz123456e1:q9:get_peers1:t2:aa1:y1:qe";
         byte[] bb = dat.getBytes();
@@ -405,8 +411,9 @@ public final class DHTProtocolHandlerUnitTest extends EasyMockSupport {
         expectUpdateNodeStatus();
         expect(this.peerRoutingTable.findPeers(aryEq(this.nodeId12345)))
                 .andReturn(null);
-        expect(this.routingTable.findClosestNodes(aryEq(this.nodeId12345)))
-                .andReturn(getFindNodes());
+        expect(
+                this.routingTable.findClosestNodes(aryEq(this.nodeId12345),
+                        eq(isIPv6))).andReturn(getFindNodes());
 
         replayAll();
         byte[] bytes = this.handler.handle(packet);
@@ -631,6 +638,7 @@ public final class DHTProtocolHandlerUnitTest extends EasyMockSupport {
     @Test
     public void testHandle15() throws Exception {
         // given
+        boolean isIPv6 = false;
         byte[] id = new byte[] {109, 110, 111, 112, 113, 114, 115, 116, 117,
                 118, 119, 120, 121, 122, 49, 50, 51, 52, 53, 54 };
         String s = "d1:rd2:id20:mnopqrstuvwxyz123456e1:t2:aa1:y1:re";
@@ -643,7 +651,8 @@ public final class DHTProtocolHandlerUnitTest extends EasyMockSupport {
 
         // when
         expect(this.tokenTable.isValidTransactionId("aa")).andReturn(true);
-        expect(this.routingTable.findExactNode(aryEq(id))).andReturn(node);
+        expect(this.routingTable.findExactNode(aryEq(id), eq(isIPv6)))
+                .andReturn(node);
         replayAll();
 
         byte[] bytes = this.handler.handle(packet);
@@ -665,6 +674,7 @@ public final class DHTProtocolHandlerUnitTest extends EasyMockSupport {
 
         // given
         DHTNode node = null;
+        boolean isIPv6 = false;
         byte[] id = new byte[] {109, 110, 111, 112, 113, 114, 115, 116, 117,
                 118, 119, 120, 121, 122, 49, 50, 51, 52, 53, 54 };
 
@@ -674,7 +684,8 @@ public final class DHTProtocolHandlerUnitTest extends EasyMockSupport {
                 this.port);
 
         // when
-        expect(this.routingTable.findExactNode(aryEq(id))).andReturn(node);
+        expect(this.routingTable.findExactNode(aryEq(id), eq(isIPv6)))
+                .andReturn(node);
         expect(this.tokenTable.isValidTransactionId("aa")).andReturn(true);
         this.routingTable.addNode(aryEq(id), eq(this.iaddr), eq(this.port),
                 eq(State.GOOD));
@@ -953,10 +964,11 @@ public final class DHTProtocolHandlerUnitTest extends EasyMockSupport {
      * expect Update Node Status to Good.
      */
     private void expectUpdateNodeStatus() {
+        boolean isIPv6 = false;
         byte[] bytes = new BigInteger(
                 "555966236078696110491139251576793858856027895865")
                 .toByteArray();
-        expect(this.routingTable.findExactNode(aryEq(bytes))).andReturn(
-                new DHTNodeBasic());
+        expect(this.routingTable.findExactNode(aryEq(bytes), eq(isIPv6)))
+                .andReturn(new DHTNodeBasic());
     }
 }

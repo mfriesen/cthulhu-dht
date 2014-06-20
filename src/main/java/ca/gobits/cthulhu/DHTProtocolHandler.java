@@ -23,6 +23,7 @@ import static ca.gobits.dht.DHTConversion.toDHTNode;
 
 import java.io.IOException;
 import java.net.DatagramPacket;
+import java.net.Inet6Address;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.Collection;
@@ -146,7 +147,8 @@ public class DHTProtocolHandler {
                 String transId = new String((byte[]) request.get("t"));
                 if (this.tokenTable.isValidTransactionId(transId)) {
 
-                    DHTNode node = this.routingTable.findExactNode(id);
+                    DHTNode node = this.routingTable.findExactNode(id,
+                            packet.getAddress() instanceof Inet6Address);
 
                     if (node != null) {
                         node.setState(State.GOOD);
@@ -184,14 +186,15 @@ public class DHTProtocolHandler {
     /**
      * Updates DHTNode's state to Good if exists in RoutingTable
      * or Sends Ping Request.
-     * @param infohash  infohash
+     * @param argument  infohash
      * @param addr  InetAddress
      * @param port  port
      */
-    private void updateNodeStatusOrPing(final byte[] infohash,
+    private void updateNodeStatusOrPing(final DHTArgumentRequest argument,
             final InetAddress addr, final int port) {
 
-        DHTNode node = this.routingTable.findExactNode(infohash);
+        DHTNode node = this.routingTable.findExactNode(argument.getId(),
+                argument.isIpv6());
 
         if (node != null) {
             node.setState(State.GOOD);
@@ -223,10 +226,10 @@ public class DHTProtocolHandler {
             response.put("ip", compactAddress(addr.getAddress(), port));
 
             @SuppressWarnings("unchecked")
-            DHTArgumentRequest arguments = new DHTArgumentRequest(
+            DHTArgumentRequest arguments = new DHTArgumentRequest(addr,
                     (Map<String, Object>) request.get("a"));
 
-            updateNodeStatusOrPing(arguments.getId(), addr, port);
+            updateNodeStatusOrPing(arguments, addr, port);
 
             if (action.equals("ping")) {
 
@@ -341,8 +344,10 @@ public class DHTProtocolHandler {
 
         } else {
 
-            List<DHTNode> nodes = this.routingTable.findClosestNodes(infoHash);
+            List<DHTNode> nodes = this.routingTable.findClosestNodes(infoHash,
+                    arguments.isIpv6());
 
+            // TODO isIPv6
             byte[] transformNodes = toByteArrayFromDHTNode(nodes);
             responseParameter.put("nodes", transformNodes);
         }
@@ -377,8 +382,10 @@ public class DHTProtocolHandler {
         response.put("r", responseParameter);
         responseParameter.put("id", arguments.getId());
 
-        List<DHTNode> nodes = findClosestNodes(arguments.getTarget());
+        List<DHTNode> nodes = findClosestNodes(arguments.getTarget(),
+                arguments.isIpv6());
 
+        // TODO isIPv6
         byte[] transformNodes = toByteArrayFromDHTNode(nodes);
         responseParameter.put("nodes", transformNodes);
     }
@@ -399,10 +406,12 @@ public class DHTProtocolHandler {
     /**
      * Find the closest X nodes to the target.
      * @param targetBytes  ID of the target node to find
+     * @param isIPv6  Is request an IPv6
      * @return List<DHTNode>
      */
-    private List<DHTNode> findClosestNodes(final byte[] targetBytes) {
-        return this.routingTable.findClosestNodes(targetBytes);
+    private List<DHTNode> findClosestNodes(final byte[] targetBytes,
+            final boolean isIPv6) {
+        return this.routingTable.findClosestNodes(targetBytes, isIPv6);
     }
 
     /**

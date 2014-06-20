@@ -361,6 +361,7 @@ public final class DHTConversionUnitTest {
         InetAddress result = DHTConversion.compactAddress(compact);
 
         // then
+        assertEquals(6, compact.length);
         assertEquals(addr.getHostAddress(), result.getHostAddress());
         assertEquals(port, DHTConversion.compactAddressPort(compact));
     }
@@ -382,6 +383,7 @@ public final class DHTConversionUnitTest {
         InetAddress result = DHTConversion.compactAddress(compact);
 
         // then
+        assertEquals(18, compact.length);
         assertEquals(addr.getHostAddress(), result.getHostAddress());
         assertEquals(port, DHTConversion.compactAddressPort(compact));
     }

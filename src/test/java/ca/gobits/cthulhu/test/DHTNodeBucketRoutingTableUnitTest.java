@@ -41,21 +41,23 @@ import ca.gobits.cthulhu.domain.DHTNode.State;
  */
 public final class DHTNodeBucketRoutingTableUnitTest {
 
-    /** address. */
-    private static byte[] addr = new byte[] {50, 71, 50, 12 };
-
     /** port. */
-    private static int port = 64568;
+    private final int port = 64568;
 
     /** inet socket address. */
-    private static InetAddress iaddr;
+    private final InetAddress iaddr;
+
+    /** inet v6 address. */
+    private final InetAddress iaddr6;
 
     /**
      * constuctor.
      * @throws Exception  Exception
      */
     public DHTNodeBucketRoutingTableUnitTest() throws Exception {
-        iaddr = InetAddress.getByAddress(addr);
+        this.iaddr = InetAddress.getByName("50.71.50.12");
+        this.iaddr6 = InetAddress
+                .getByName("805b:2d9d:dc28:0000:0000:fc57:d4c8:1fff");
     }
 
     /**
@@ -80,16 +82,18 @@ public final class DHTNodeBucketRoutingTableUnitTest {
     @Test
     public void testAddNode01() throws Exception {
         // given
+        boolean ipv6 = false;
         Logger.getLogger(DHTNodeBucketRoutingTable.class).setLevel(Level.DEBUG);
         DHTNodeBucketRoutingTable rt = new DHTNodeBucketRoutingTable();
-        DHTNode node = create(new BigInteger("1").toByteArray(), addr, port,
-                State.GOOD);
+        DHTNode node = create(new BigInteger("1").toByteArray(),
+                this.iaddr, this.port, State.GOOD);
 
         // when
-        rt.addNode(new BigInteger("1").toByteArray(), iaddr, port, State.GOOD);
+        rt.addNode(new BigInteger("1").toByteArray(), this.iaddr, this.port,
+                State.GOOD);
 
         // then
-        assertEquals(1, rt.getTotalNodeCount());
+        assertEquals(1, rt.getTotalNodeCount(ipv6));
         SortedCollection<DHTNode> root = rt.getNodes();
         assertEquals(1, root.size());
         assertEquals(node, root.get(0));
@@ -103,17 +107,18 @@ public final class DHTNodeBucketRoutingTableUnitTest {
     @Test
     public void testAddNode02() {
         // given
+        boolean ipv6 = false;
         DHTNodeBucketRoutingTable rt = new DHTNodeBucketRoutingTable();
         int nodeCount = rt.getMaxNodeCount() + 1;
 
         // when
         for (int i = 0; i < nodeCount; i++) {
-            rt.addNode(new BigInteger("" + i).toByteArray(), iaddr, port,
-                    State.GOOD);
+            rt.addNode(new BigInteger("" + i).toByteArray(), this.iaddr,
+                this.port, State.GOOD);
         }
 
         // then
-        assertEquals(rt.getMaxNodeCount(), rt.getTotalNodeCount());
+        assertEquals(rt.getMaxNodeCount(), rt.getTotalNodeCount(ipv6));
     }
 
     /**
@@ -122,17 +127,18 @@ public final class DHTNodeBucketRoutingTableUnitTest {
     @Test
     public void testAddNode03() {
         // given
+        boolean ipv6 = false;
         DHTNodeBucketRoutingTable rt = new DHTNodeBucketRoutingTable();
         byte[] id = new BigInteger("1").toByteArray();
         DHTNode node = create(new BigInteger("1").toByteArray(),
-            addr, port, State.GOOD);
+            this.iaddr, this.port, State.GOOD);
 
         // when
-        rt.addNode(id, iaddr, port, State.GOOD);
-        rt.addNode(id, iaddr, port, State.GOOD);
+        rt.addNode(id, this.iaddr, this.port, State.GOOD);
+        rt.addNode(id, this.iaddr, this.port, State.GOOD);
 
         // then
-        assertEquals(1, rt.getTotalNodeCount());
+        assertEquals(1, rt.getTotalNodeCount(ipv6));
         SortedCollection<DHTNode> root = rt.getNodes();
         assertEquals(1, root.size());
         assertEquals(node, root.get(0));
@@ -144,6 +150,7 @@ public final class DHTNodeBucketRoutingTableUnitTest {
     @Test
     public void testAddNode04() {
         // given
+        boolean ipv6 = false;
         DHTNodeBucketRoutingTable rt = new DHTNodeBucketRoutingTable();
         byte[] bytes0 = new byte[] {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
                 0, 0, 0, 0, 0, 1 };
@@ -154,19 +161,19 @@ public final class DHTNodeBucketRoutingTableUnitTest {
         byte[] bytes3 = new byte[] {-97, 74, -60, 105, 35, -102, 80, -77, 40,
                 -2, -19, 64, 127, 15, -105, -44, -84, 125, 67, 10 };
 
-        DHTNode node0 = create(bytes0, addr, port, State.GOOD);
-        DHTNode node1 = create(bytes1, addr, port, State.GOOD);
-        DHTNode node2 = create(bytes2, addr, port, State.GOOD);
-        DHTNode node3 = create(bytes3, addr, port, DHTNode.State.GOOD);
+        DHTNode node0 = create(bytes0, this.iaddr, this.port, State.GOOD);
+        DHTNode node1 = create(bytes1, this.iaddr, this.port, State.GOOD);
+        DHTNode node2 = create(bytes2, this.iaddr, this.port, State.GOOD);
+        DHTNode node3 = create(bytes3, this.iaddr, this.port, State.GOOD);
 
         // when
-        rt.addNode(node0.getInfoHash(), iaddr, port, State.GOOD);
-        rt.addNode(node3.getInfoHash(), iaddr, port, State.GOOD);
-        rt.addNode(node2.getInfoHash(), iaddr, port, State.GOOD);
-        rt.addNode(node1.getInfoHash(), iaddr, port, State.GOOD);
+        rt.addNode(node0.getInfoHash(), this.iaddr, this.port, State.GOOD);
+        rt.addNode(node3.getInfoHash(), this.iaddr, this.port, State.GOOD);
+        rt.addNode(node2.getInfoHash(), this.iaddr, this.port, State.GOOD);
+        rt.addNode(node1.getInfoHash(), this.iaddr, this.port, State.GOOD);
 
         // then
-        assertEquals(4, rt.getTotalNodeCount());
+        assertEquals(4, rt.getTotalNodeCount(ipv6));
         SortedCollection<DHTNode> nodes = rt.getNodes();
 
         assertEquals(node0, nodes.get(0));
@@ -181,19 +188,44 @@ public final class DHTNodeBucketRoutingTableUnitTest {
     @Test
     public void testAddNode05() {
         // given
+        boolean ipv6 = false;
         Logger.getLogger(DHTNodeBucketRoutingTable.class).setLevel(Level.DEBUG);
         DHTNodeBucketRoutingTable rt = new DHTNodeBucketRoutingTable();
         DHTNode node = create(new BigInteger("1").toByteArray(), State.GOOD);
 
         // when
-        rt.addNode(node.getInfoHash(), iaddr, port, State.GOOD);
+        rt.addNode(node.getInfoHash(), this.iaddr, this.port, State.GOOD);
 
         // then
-        assertEquals(1, rt.getTotalNodeCount());
+        assertEquals(1, rt.getTotalNodeCount(ipv6));
         SortedCollection<DHTNode> root = rt.getNodes();
         assertEquals(1, root.size());
         assertEquals(node, root.get(0));
 
+        Logger.getLogger(DHTNodeBucketRoutingTable.class).setLevel(Level.INFO);
+    }
+
+    /**
+     * testAddNode06() - test add nodes IPv6 node.
+     */
+    @Test
+    public void testAddNode06() {
+        // given
+        Logger.getLogger(DHTNodeBucketRoutingTable.class).setLevel(Level.DEBUG);
+        DHTNodeBucketRoutingTable rt = new DHTNodeBucketRoutingTable();
+        DHTNode node = create(new BigInteger("1").toByteArray(), State.GOOD);
+
+        // when
+        rt.addNode(node.getInfoHash(), this.iaddr6, this.port, State.GOOD);
+
+        // then
+        assertEquals(1, rt.getTotalNodeCount(true));
+        SortedCollection<DHTNode> root = rt.getNodes6();
+        assertEquals(1, root.size());
+        assertEquals(node, root.get(0));
+
+        assertEquals(1, rt.getTotalNodeCount(true));
+        assertEquals(0, rt.getTotalNodeCount(false));
         Logger.getLogger(DHTNodeBucketRoutingTable.class).setLevel(Level.INFO);
     }
 
@@ -203,14 +235,15 @@ public final class DHTNodeBucketRoutingTableUnitTest {
     @Test
     public void testFindClosestNodes01() {
         // given
-        DHTNode n = create(new BigInteger("11").toByteArray(), addr, port,
-                State.UNKNOWN);
+        boolean ipv6 = false;
+        DHTNode n = create(new BigInteger("11").toByteArray(), this.iaddr,
+                this.port, State.UNKNOWN);
         DHTNodeBucketRoutingTable rt = new DHTNodeBucketRoutingTable();
 
         addNodes(rt);
 
         // when
-        List<DHTNode> results = rt.findClosestNodes(n.getInfoHash(), 8);
+        List<DHTNode> results = rt.findClosestNodes(n.getInfoHash(), 8, ipv6);
 
         // then
         assertEquals(8, results.size());
@@ -231,14 +264,15 @@ public final class DHTNodeBucketRoutingTableUnitTest {
     @Test
     public void testFindClosestNodes02() {
         // given
-        DHTNode n = create(new BigInteger("1").toByteArray(), addr, port,
-                DHTNode.State.UNKNOWN);
+        boolean ipv6 = false;
+        DHTNode n = create(new BigInteger("1").toByteArray(), this.iaddr,
+                this.port, State.UNKNOWN);
         DHTNodeBucketRoutingTable rt = new DHTNodeBucketRoutingTable();
 
         addNodes(rt);
 
         // when
-        List<DHTNode> results = rt.findClosestNodes(n.getInfoHash(), 8);
+        List<DHTNode> results = rt.findClosestNodes(n.getInfoHash(), 8, ipv6);
 
         // then
         assertEquals(8, results.size());
@@ -259,14 +293,15 @@ public final class DHTNodeBucketRoutingTableUnitTest {
     @Test
     public void testFindClosestNodes03() {
         // given
-        DHTNode n = create(new BigInteger("41").toByteArray(), addr, port,
-                DHTNode.State.UNKNOWN);
+        boolean ipv6 = false;
+        DHTNode n = create(new BigInteger("41").toByteArray(), this.iaddr,
+            this.port, State.UNKNOWN);
         DHTNodeBucketRoutingTable rt = new DHTNodeBucketRoutingTable();
 
         addNodes(rt);
 
         // when
-        List<DHTNode> results = rt.findClosestNodes(n.getInfoHash(), 8);
+        List<DHTNode> results = rt.findClosestNodes(n.getInfoHash(), 8, ipv6);
 
         // then
         assertEquals(8, results.size());
@@ -286,14 +321,15 @@ public final class DHTNodeBucketRoutingTableUnitTest {
     @Test
     public void testFindClosestNodes04() {
         // given
-        DHTNode n = create(new BigInteger("22").toByteArray(), addr, port,
-                DHTNode.State.UNKNOWN);
+        boolean ipv6 = false;
+        DHTNode n = create(new BigInteger("22").toByteArray(), this.iaddr,
+                this.port, State.UNKNOWN);
         DHTNodeBucketRoutingTable rt = new DHTNodeBucketRoutingTable();
 
         addNodes(rt);
 
         // when
-        List<DHTNode> results = rt.findClosestNodes(n.getInfoHash(), 8);
+        List<DHTNode> results = rt.findClosestNodes(n.getInfoHash(), 8, ipv6);
 
         // then
         assertEquals(8, results.size());
@@ -313,14 +349,15 @@ public final class DHTNodeBucketRoutingTableUnitTest {
     @Test
     public void testFindClosestNodes05() {
         // given
-        DHTNode n = create(new BigInteger("0").toByteArray(), addr, port,
-                DHTNode.State.UNKNOWN);
+        boolean ipv6 = false;
+        DHTNode n = create(new BigInteger("0").toByteArray(), this.iaddr,
+                this.port, State.UNKNOWN);
         DHTNodeBucketRoutingTable rt = new DHTNodeBucketRoutingTable();
 
         addNodes(rt);
 
         // when
-        List<DHTNode> results = rt.findClosestNodes(n.getInfoHash());
+        List<DHTNode> results = rt.findClosestNodes(n.getInfoHash(), ipv6);
 
         // then
         assertEquals(16, results.size());
@@ -332,11 +369,12 @@ public final class DHTNodeBucketRoutingTableUnitTest {
     @Test
     public void testFindExactNode01() {
         // given
+        boolean ipv6 = false;
         DHTNodeBucketRoutingTable rt = new DHTNodeBucketRoutingTable();
         BigInteger nodeId = new BigInteger("5");
 
         // when
-        DHTNode result = rt.findExactNode(nodeId.toByteArray());
+        DHTNode result = rt.findExactNode(nodeId.toByteArray(), ipv6);
 
         // then
         assertNull(result);
@@ -348,12 +386,13 @@ public final class DHTNodeBucketRoutingTableUnitTest {
     @Test
     public void testFindExactNode02() {
         // given
+        boolean ipv6 = false;
         DHTNodeBucketRoutingTable rt = new DHTNodeBucketRoutingTable();
         BigInteger nodeId = new BigInteger("5");
         addNodes(rt);
 
         // when
-        DHTNode result = rt.findExactNode(nodeId.toByteArray());
+        DHTNode result = rt.findExactNode(nodeId.toByteArray(), ipv6);
 
         // then
         assertNull(result);
@@ -365,16 +404,41 @@ public final class DHTNodeBucketRoutingTableUnitTest {
     @Test
     public void testFindExactNode03() {
         // given
+        boolean ipv6 = false;
         DHTNodeBucketRoutingTable rt = new DHTNodeBucketRoutingTable();
         byte[] bytes0 = new byte[] {4};
         addNodes(rt);
 
         // when
-        DHTNode result = rt.findExactNode(bytes0);
+        DHTNode result = rt.findExactNode(bytes0, ipv6);
 
         // then
         assertNotNull(result);
         assertTrue(Arrays.equals(bytes0, result.getInfoHash()));
+    }
+
+    /**
+     * testClear01().
+     */
+    @Test
+    public void testClear01() {
+        // given
+        DHTNodeBucketRoutingTable rt = new DHTNodeBucketRoutingTable();
+
+        rt.addNode(new BigInteger("1").toByteArray(),
+                this.iaddr, this.port, State.GOOD);
+        rt.addNode(new BigInteger("1").toByteArray(),
+                this.iaddr6, this.port, State.GOOD);
+
+        assertEquals(1, rt.getTotalNodeCount(true));
+        assertEquals(1, rt.getTotalNodeCount(false));
+
+        // when
+        rt.clear();
+
+        // then
+        assertEquals(0, rt.getTotalNodeCount(true));
+        assertEquals(0, rt.getTotalNodeCount(false));
     }
 
     /**
@@ -384,7 +448,7 @@ public final class DHTNodeBucketRoutingTableUnitTest {
     private void addNodes(final DHTNodeBucketRoutingTable rt) {
         for (int i = 0; i < 40; i = i + 2) {
             byte[] id = new BigInteger("" + i).toByteArray();
-            rt.addNode(id, iaddr, port, State.GOOD);
+            rt.addNode(id, this.iaddr, this.port, State.GOOD);
         }
     }
 }

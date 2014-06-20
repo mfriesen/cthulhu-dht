@@ -16,6 +16,7 @@
 
 package ca.gobits.cthulhu;
 
+import java.net.Inet6Address;
 import java.net.InetAddress;
 import java.util.Arrays;
 import java.util.List;
@@ -42,14 +43,19 @@ public final class DHTNodeBucketRoutingTable implements DHTNodeRoutingTable {
     /** Maximum number of nodes Routing Table holds. */
     private static final int MAX_NUMBER_OF_NODES = 1000000;
 
-    /** root node of the routing table. */
+    /** IPv4 nodes. */
     private final ConcurrentSortedList<DHTNode> nodes;
+
+    /** IPv6 nodes. */
+    private final ConcurrentSortedList<DHTNode> nodes6;
 
     /**
      * constructor.
      */
     public DHTNodeBucketRoutingTable() {
         this.nodes = new ConcurrentSortedList<DHTNode>(
+                DHTNodeComparator.getInstance(), false);
+        this.nodes6 = new ConcurrentSortedList<DHTNode>(
                 DHTNodeComparator.getInstance(), false);
     }
 
@@ -76,7 +82,12 @@ public final class DHTNodeBucketRoutingTable implements DHTNodeRoutingTable {
         if (this.nodes.size() < MAX_NUMBER_OF_NODES) {
 
             addNodeLoggerDebug(node);
-            this.nodes.add(node);
+
+            if (addr instanceof Inet6Address) {
+                this.nodes6.add(node);
+            } else {
+                this.nodes.add(node);
+            }
 
         } else {
             LOGGER.warn("MAXIMUM number of noded reached "
@@ -132,12 +143,13 @@ public final class DHTNodeBucketRoutingTable implements DHTNodeRoutingTable {
     }
 
     @Override
-    public List<DHTNode> findClosestNodes(final byte[] nodeId) {
-        return findClosestNodes(nodeId, DEFAULT_SEARCH_COUNT);
+    public List<DHTNode> findClosestNodes(final byte[] nodeId,
+            final boolean ipv6) {
+        return findClosestNodes(nodeId, DEFAULT_SEARCH_COUNT, ipv6);
     }
 
     @Override
-    public DHTNode findExactNode(final byte[] nodeId) {
+    public DHTNode findExactNode(final byte[] nodeId, final boolean ipv6) {
 
         DHTNode nodeMatch = null;
         DHTNode node = DHTNodeFactory.create(nodeId, DHTNode.State.UNKNOWN);
@@ -155,9 +167,9 @@ public final class DHTNodeBucketRoutingTable implements DHTNodeRoutingTable {
 
     @Override
     public List<DHTNode> findClosestNodes(final byte[] nodeId,
-            final int returnCount) {
+            final int max, final boolean ipv6) {
 
-        DHTNode node = findExactNode(nodeId);
+        DHTNode node = findExactNode(nodeId, ipv6);
 
         if (node != null) {
             node.setState(State.GOOD);
@@ -165,34 +177,35 @@ public final class DHTNodeBucketRoutingTable implements DHTNodeRoutingTable {
             node = DHTNodeFactory.create(nodeId, State.UNKNOWN);
         }
 
-        return findClosestNodes(node, returnCount);
+        return findClosestNodes(node, max, ipv6);
     }
 
     /**
      * Finds the closest nodes list.
      * @param node  node to find
-     * @param returnCount  number of nodes to return
+     * @param max  number of nodes to return
+     * @param ipv6  whether ipv6 request
      * @return List<DHTNode>
      */
     private List<DHTNode> findClosestNodes(final DHTNode node,
-            final int returnCount) {
+            final int max, final boolean ipv6) {
 
         int index = this.nodes.indexOf(node);
 
         int fromIndex = index > 0 ? index - 1 : 0;
-        int toIndex = index < getTotalNodeCount() ? index + 1
-                : getTotalNodeCount();
+        int toIndex = index < getTotalNodeCount(ipv6) ? index + 1
+                : getTotalNodeCount(ipv6);
         int count = toIndex - fromIndex;
 
-        while (count < returnCount && count < this.nodes.size()) {
+        while (count < max && count < this.nodes.size()) {
 
             if (fromIndex > 0) {
                 fromIndex--;
                 count++;
             }
 
-            if (count < returnCount
-                    && toIndex < getTotalNodeCount()) {
+            if (count < max
+                    && toIndex < getTotalNodeCount(ipv6)) {
                 toIndex++;
                 count++;
             }
@@ -208,9 +221,16 @@ public final class DHTNodeBucketRoutingTable implements DHTNodeRoutingTable {
         return this.nodes;
     }
 
+    /**
+     * @return DHTBucket
+     */
+    public SortedCollection<DHTNode> getNodes6() {
+        return this.nodes6;
+    }
+
     @Override
-    public int getTotalNodeCount() {
-        return this.nodes.size();
+    public int getTotalNodeCount(final boolean ipv6) {
+        return ipv6 ? this.nodes6.size() : this.nodes.size();
     }
 
     @Override
@@ -221,5 +241,6 @@ public final class DHTNodeBucketRoutingTable implements DHTNodeRoutingTable {
     @Override
     public void clear() {
         this.nodes.clear();
+        this.nodes6.clear();
     }
 }
