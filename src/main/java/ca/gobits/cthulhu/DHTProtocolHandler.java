@@ -32,7 +32,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Random;
 
-import org.apache.commons.lang3.ArrayUtils;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.util.CollectionUtils;
@@ -158,27 +157,42 @@ public class DHTProtocolHandler {
                     }
                 }
             }
+// TODO run tests
+            // find_nodes ipv4
+            if (request1.containsKey("nodes")) {
+                Collection<DHTNode> nodes = toDHTNode((byte[]) request1
+                        .get("nodes"), false);
+                addToDiscovery(nodes);
+            }
 
-            // find_nodes
-            byte[] nodesBytes = (byte[]) request1.get("nodes");
-            if (!ArrayUtils.isEmpty(nodesBytes)) {
-                Collection<DHTNode> nodes = toDHTNode(nodesBytes);
+            // find_nodes ipv6
+            if (request1.containsKey("nodes6")) {
+                Collection<DHTNode> nodes = toDHTNode((byte[]) request1
+                        .get("nodes6"), true);
+                addToDiscovery(nodes);
+            }
+        }
+    }
 
-                for (DHTNode node : nodes) {
+    /**
+     * Adds nodes to be discovery list.
+     * @param nodes  Collection of DHTNodes
+     */
+    private void addToDiscovery(final Collection<DHTNode> nodes) {
 
-                    int port = node.getPort();
+        for (DHTNode node : nodes) {
 
-                    try {
+            int port = node.getPort();
 
-                        InetAddress address = node.getAddress();
-                        this.discovery.addNode(address, port);
+            try {
 
-                    } catch (UnknownHostException e) {
+                InetAddress address = node.getAddress();
+                this.discovery.addNode(address, port);
 
-                        LOGGER.info("Cannot add " + node.toString()
-                                + " to discovery, unknown host");
-                    }
-                }
+            } catch (UnknownHostException e) {
+
+                LOGGER.info("Cannot add " + node.toString()
+                        + " to discovery, unknown host");
             }
         }
     }
@@ -348,7 +362,8 @@ public class DHTProtocolHandler {
                     arguments.isIpv6());
 
             // TODO isIPv6
-            byte[] transformNodes = toByteArrayFromDHTNode(nodes);
+            byte[] transformNodes = toByteArrayFromDHTNode(nodes,
+                    arguments.isIpv6());
             responseParameter.put("nodes", transformNodes);
         }
 
@@ -386,7 +401,8 @@ public class DHTProtocolHandler {
                 arguments.isIpv6());
 
         // TODO isIPv6
-        byte[] transformNodes = toByteArrayFromDHTNode(nodes);
+        byte[] transformNodes = toByteArrayFromDHTNode(nodes,
+                arguments.isIpv6());
         responseParameter.put("nodes", transformNodes);
     }
 

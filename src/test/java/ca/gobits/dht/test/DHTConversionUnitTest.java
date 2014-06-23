@@ -16,15 +16,18 @@
 
 package ca.gobits.dht.test;
 
-import static ca.gobits.dht.DHTConversion.COMPACT_ADDR_LENGTH;
+import static ca.gobits.cthulhu.domain.DHTNodeFactory.NODE_ID_LENGTH;
+import static ca.gobits.dht.DHTConversion.toByteArrayFromDHTNode;
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Modifier;
 import java.math.BigInteger;
 import java.net.InetAddress;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
@@ -32,10 +35,12 @@ import java.util.List;
 import org.junit.Test;
 
 import ca.gobits.cthulhu.domain.DHTNode;
+import ca.gobits.cthulhu.domain.DHTNode.State;
 import ca.gobits.cthulhu.domain.DHTNodeFactory;
 import ca.gobits.cthulhu.domain.DHTPeer;
 import ca.gobits.cthulhu.domain.DHTPeerBasic;
 import ca.gobits.dht.DHTConversion;
+import ca.gobits.dht.DHTIdentifier;
 
 import com.google.common.primitives.UnsignedLong;
 
@@ -44,9 +49,6 @@ import com.google.common.primitives.UnsignedLong;
  *
  */
 public final class DHTConversionUnitTest {
-
-    /** Length Node ID. */
-    private static final int NODE_ID_LENGTH = 20;
 
     /**
      * testConstructorIsPrivate().
@@ -134,13 +136,18 @@ public final class DHTConversionUnitTest {
     @Test
     public void testToByteArrayFromDHTNode01() throws Exception {
         // given
-        byte[] addr0 = new byte[] {73, 54, 93, 12 };
+        boolean isIPv6 = false;
+        InetAddress addr0 = InetAddress.getByAddress(new byte[] {73, 54, 93,
+                12 });
+
         BigInteger bi0 = new BigInteger(
                 "FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF", 16);
         DHTNode n0 = DHTNodeFactory.create(bi0.toByteArray(), addr0, 123,
                 DHTNode.State.UNKNOWN);
 
-        byte[] addr1 = new byte[] {34, 64, 43, 51 };
+        InetAddress addr1 = InetAddress.getByAddress(new byte[] {34, 64, 43,
+                51 });
+
         DHTNode n1 = DHTNodeFactory.create(
                 new BigInteger("13242").toByteArray(), addr1, 8080,
                 DHTNode.State.UNKNOWN);
@@ -148,12 +155,18 @@ public final class DHTConversionUnitTest {
         List<DHTNode> nodes = java.util.Arrays.asList(n0, n1);
 
         // when
-        byte[] result = DHTConversion.toByteArrayFromDHTNode(nodes);
+        byte[] result = DHTConversion.toByteArrayFromDHTNode(nodes, isIPv6);
 
         // then
         assertEquals(52, result.length);
+
+        assertArrayEquals(new byte[] {-1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+                -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 73, 54, 93, 12, 0, 123,
+                0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 51, -70,
+                34, 64, 43, 51, 31, -112}, result);
+
         byte[] id = new byte[NODE_ID_LENGTH];
-        byte[] addr = new byte[COMPACT_ADDR_LENGTH];
+        byte[] addr = new byte[6];
         System.arraycopy(result, 0, id, 0, 20);
         System.arraycopy(result, 20, addr, 0, 6);
 
@@ -172,6 +185,38 @@ public final class DHTConversionUnitTest {
                 DHTConversion.compactAddress(addr).getHostAddress());
         assertEquals(8080,
                 DHTConversion.compactAddressPort(addr));
+    }
+
+    /**
+     * testToByteArrayFromDHTNode02() - IPV6.
+     *
+     * @throws Exception  Exception
+     */
+    @Test
+    public void testToByteArrayFromDHTNode02() throws Exception {
+        // given
+        boolean isIPv6 = true;
+
+        byte[] id0 = DHTIdentifier.sha1("node0".getBytes());
+        int port0 = 123;
+        State state0 = State.UNKNOWN;
+        InetAddress addr0 = InetAddress
+                .getByName("ffff:ffff:ffff:ffff:ffff:ffff:ffff:ffff");
+
+        byte[] id1 = DHTIdentifier.sha1("node1".getBytes());
+        int port1 = 124;
+        State state1 = State.UNKNOWN;
+        InetAddress addr1 = InetAddress
+                .getByName("805b:2d9d:dc28:0000:0000:fc57:d4c8:1fff");
+
+        DHTNode n0 = DHTNodeFactory.create(id0, addr0, port0, state0);
+        DHTNode n1 = DHTNodeFactory.create(id1, addr1, port1, state1);
+
+        // when
+        byte[] result = toByteArrayFromDHTNode(Arrays.asList(n0, n1), isIPv6);
+
+        // then
+        assertEquals(76, result.length);
     }
 
     /**
@@ -265,13 +310,14 @@ public final class DHTConversionUnitTest {
     @Test
     public void testToDHTNode01() throws Exception {
         // given
+        boolean isIPV6 = false;
         byte[] bytes = new byte[] {-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
                 -1, -1, -1, -1, -1, -1, -1, -1, -1, 73, 54, 93, 12, 0, 123, 0,
                 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 51, -70, 34,
                 64, 43, 51, 31, -112 };
 
         // when
-        Collection<DHTNode> results = DHTConversion.toDHTNode(bytes);
+        Collection<DHTNode> results = DHTConversion.toDHTNode(bytes, isIPV6);
 
         // then
         assertEquals(2, results.size());
@@ -294,15 +340,57 @@ public final class DHTConversionUnitTest {
     }
 
     /**
-     * testToDHTNode02() - incorrect length of byte array.
+     * testToDHTNode02() - IPv6 transform bytes to DHTNode.
+     * @throws Exception   Exception
+     */
+    @Test
+    public void testToDHTNode02() throws Exception {
+        // given
+        boolean isIPV6 = true;
+
+        byte[] bytes = new byte[] {-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+                -1, -1, -1, -1, -1, -1, -1, -1, -1, -128, 91, 45, -99, -36, 40,
+                0, 0, 0, 0, -4, 87, -44, -56, 31, -1, 0, 123, 0, 0, 0, 0, 0, 0,
+                0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 51, -70, -1, -1, -1, -1,
+                -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 31, -112 };
+
+        // when
+        Collection<DHTNode> results = DHTConversion.toDHTNode(bytes, isIPV6);
+
+        // then
+        assertEquals(2, results.size());
+
+        Iterator<DHTNode> itr = results.iterator();
+
+        DHTNode node0 = itr.next();
+        BigInteger b0 = DHTConversion.toBigInteger(node0.getInfoHash());
+        assertEquals("1461501637330902918203684832716283019655932542975",
+                b0.toString());
+
+        assertEquals("805b:2d9d:dc28:0:0:fc57:d4c8:1fff",
+                node0.getAddress().getHostAddress());
+        assertEquals(123, node0.getPort());
+
+        DHTNode node1 = itr.next();
+        BigInteger b1 = DHTConversion.toBigInteger(node1.getInfoHash());
+        assertEquals("13242", b1.toString());
+
+        assertEquals("ffff:ffff:ffff:ffff:ffff:ffff:ffff:ffff",
+                node1.getAddress().getHostAddress());
+        assertEquals(8080, node1.getPort());
+
+    }
+
+    /**
+     * testToDHTNode03() - incorrect length of byte array.
      */
     @Test(expected = IllegalArgumentException.class)
-    public void testToDHTNode02() {
+    public void testToDHTNode03() {
         // given
         byte[] bytes = new byte[] {12, 3, 2, 1 };
 
         // when
-        DHTConversion.toDHTNode(bytes);
+        DHTConversion.toDHTNode(bytes, false);
 
         // then
     }
@@ -386,5 +474,88 @@ public final class DHTConversionUnitTest {
         assertEquals(18, compact.length);
         assertEquals(addr.getHostAddress(), result.getHostAddress());
         assertEquals(port, DHTConversion.compactAddressPort(compact));
+    }
+
+    /**
+     * testCompactAddress03()  UnknownHost
+     * back again.
+     * @throws Exception   Exception
+     */
+    @Test
+    public void testCompactAddress03() throws Exception {
+        // given
+        byte[] bytes = new byte[] {12, 3, 4};
+
+        // when
+        InetAddress result = DHTConversion.compactAddress(bytes);
+
+        // then
+        assertNull(result);
+    }
+
+    /**
+     * testFitToSize01() - bytes.length == length.
+     */
+    @Test
+    public void testFitToSize01() {
+        // given
+        byte[] bytes = new byte[] {34, 54, 24, 12, 43, 65};
+        int len = bytes.length;
+
+        // when
+        byte[] results = DHTConversion.fitToSize(bytes, len);
+
+        // then
+        assertEquals(bytes, results);
+    }
+
+    /**
+     * testFitToSize02() - bytes.length > length.
+     */
+    @Test
+    public void testFitToSize02() {
+        // given
+        byte[] bytes = new byte[] {34, 54, 24, 12, 43, 65};
+        int len = 3;
+
+        // when
+        byte[] results = DHTConversion.fitToSize(bytes, len);
+
+        // then
+        assertArrayEquals(new byte[] {12, 43, 65}, results);
+    }
+
+    /**
+     * testFitToSize03() - bytes.length < length.
+     */
+    @Test
+    public void testFitToSize03() {
+        // given
+        byte[] bytes = new byte[] {34, 54, 24, 12, 43, 65};
+        int len = 10;
+
+        // when
+        byte[] results = DHTConversion.fitToSize(bytes, len);
+
+        // then
+        assertArrayEquals(new byte[] {0, 0, 0, 0, 34, 54, 24, 12, 43, 65},
+                results);
+    }
+
+    /**
+     * testToInetAddressAsString01().
+     * @throws Exception   Exception
+     */
+    @Test
+    public void testToInetAddressAsString01() throws Exception {
+        // given
+        InetAddress addr = InetAddress.getByName("23.54.14.2");
+        UnsignedLong[] uls = DHTConversion.toUnsignedLong(addr.getAddress());
+
+        // when
+        String result = DHTConversion.toInetAddressAsString(uls[0], null);
+
+        // then
+        assertEquals("23.54.14.2", result);
     }
 }

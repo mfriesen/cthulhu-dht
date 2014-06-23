@@ -16,19 +16,21 @@
 
 package ca.gobits.cthulhu.domain;
 
+import static ca.gobits.dht.DHTConversion.fitToSize;
+
 import java.net.InetAddress;
 import java.util.Date;
 
 import ca.gobits.cthulhu.domain.DHTNode.State;
-import ca.gobits.dht.DHTConversion;
-
-import com.google.common.primitives.UnsignedLong;
 
 /**
  * DHTNode Factory class.
  *
  */
 public final class DHTNodeFactory {
+
+    /** Length Node ID. */
+    public static final int NODE_ID_LENGTH = 20;
 
     /**
      * private constructor.
@@ -43,9 +45,10 @@ public final class DHTNodeFactory {
      * @return DHTNode
      */
     public static DHTNode create(final byte[] infoHash, final State state) {
+
         DHTNodeBasic node = new DHTNodeBasic();
         node.setLastUpdated(new Date());
-        node.setInfoHash(infoHash);
+        updateInfoHash(node, infoHash);
         node.setState(state);
         return node;
     }
@@ -63,7 +66,7 @@ public final class DHTNodeFactory {
 
         DHTNodeBasic node = new DHTNodeBasic();
         node.setLastUpdated(new Date());
-        node.setInfoHash(infoHash);
+        updateInfoHash(node, infoHash);
         node.setState(state);
 
         node.setAddress(addr);
@@ -73,27 +76,12 @@ public final class DHTNodeFactory {
     }
 
     /**
-     * Creates DHTNode.
-     * @param infoHash  InfoHash
-     * @param addr address
-     * @param port port
-     * @param state  State
-     * @return DHTNode
+     * Updates Infohash to ensure correct length.
+     * @param node  DHTNode
+     * @param infoHash  infohash
      */
-    public static DHTNode create(final byte[] infoHash,
-            final byte[] addr, final int port, final State state) {
-
-        DHTNodeBasic node = new DHTNodeBasic();
-        node.setLastUpdated(new Date());
-        node.setInfoHash(infoHash);
-        node.setState(state);
-
-        UnsignedLong[] address = DHTConversion.toUnsignedLong(addr);
-        UnsignedLong low = address.length > 1 ? address[1] : null;
-
-        node.setAddress(address[0], low);
-        node.setPort(port);
-
-        return node;
+    private static void updateInfoHash(final DHTNodeBasic node,
+            final byte[] infoHash) {
+        node.setInfoHash(fitToSize(infoHash, NODE_ID_LENGTH));
     }
 }

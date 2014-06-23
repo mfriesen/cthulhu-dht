@@ -247,14 +247,30 @@ public final class DHTNodeBucketRoutingTableUnitTest {
 
         // then
         assertEquals(8, results.size());
-        assertEquals("[4]", Arrays.toString(results.get(0).getInfoHash()));
-        assertEquals("[6]", Arrays.toString(results.get(1).getInfoHash()));
-        assertEquals("[8]", Arrays.toString(results.get(2).getInfoHash()));
-        assertEquals("[10]", Arrays.toString(results.get(3).getInfoHash()));
-        assertEquals("[12]", Arrays.toString(results.get(4).getInfoHash()));
-        assertEquals("[14]", Arrays.toString(results.get(5).getInfoHash()));
-        assertEquals("[16]", Arrays.toString(results.get(6).getInfoHash()));
-        assertEquals("[18]", Arrays.toString(results.get(7).getInfoHash()));
+        assertEquals(
+                "[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4]",
+                Arrays.toString(results.get(0).getInfoHash()));
+        assertEquals(
+                "[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 6]",
+                Arrays.toString(results.get(1).getInfoHash()));
+        assertEquals(
+                "[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 8]",
+                Arrays.toString(results.get(2).getInfoHash()));
+        assertEquals(
+                "[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 10]",
+                Arrays.toString(results.get(3).getInfoHash()));
+        assertEquals(
+                "[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 12]",
+                Arrays.toString(results.get(4).getInfoHash()));
+        assertEquals(
+                "[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 14]",
+                Arrays.toString(results.get(5).getInfoHash()));
+        assertEquals(
+                "[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 16]",
+                Arrays.toString(results.get(6).getInfoHash()));
+        assertEquals(
+                "[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 18]",
+                Arrays.toString(results.get(7).getInfoHash()));
     }
 
     /**
@@ -276,14 +292,30 @@ public final class DHTNodeBucketRoutingTableUnitTest {
 
         // then
         assertEquals(8, results.size());
-        assertEquals("[0]", Arrays.toString(results.get(0).getInfoHash()));
-        assertEquals("[2]", Arrays.toString(results.get(1).getInfoHash()));
-        assertEquals("[4]", Arrays.toString(results.get(2).getInfoHash()));
-        assertEquals("[6]", Arrays.toString(results.get(3).getInfoHash()));
-        assertEquals("[8]", Arrays.toString(results.get(4).getInfoHash()));
-        assertEquals("[10]", Arrays.toString(results.get(5).getInfoHash()));
-        assertEquals("[12]", Arrays.toString(results.get(6).getInfoHash()));
-        assertEquals("[14]", Arrays.toString(results.get(7).getInfoHash()));
+        assertEquals(
+                "[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]",
+                Arrays.toString(results.get(0).getInfoHash()));
+        assertEquals(
+                "[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2]",
+                Arrays.toString(results.get(1).getInfoHash()));
+        assertEquals(
+                "[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4]",
+                Arrays.toString(results.get(2).getInfoHash()));
+        assertEquals(
+                "[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 6]",
+                Arrays.toString(results.get(3).getInfoHash()));
+        assertEquals(
+                "[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 8]",
+                Arrays.toString(results.get(4).getInfoHash()));
+        assertEquals(
+                "[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 10]",
+                Arrays.toString(results.get(5).getInfoHash()));
+        assertEquals(
+                "[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 12]",
+                Arrays.toString(results.get(6).getInfoHash()));
+        assertEquals(
+                "[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 14]",
+                Arrays.toString(results.get(7).getInfoHash()));
     }
 
     /**
@@ -305,14 +337,30 @@ public final class DHTNodeBucketRoutingTableUnitTest {
 
         // then
         assertEquals(8, results.size());
-        assertEquals("[24]", Arrays.toString(results.get(0).getInfoHash()));
-        assertEquals("[26]", Arrays.toString(results.get(1).getInfoHash()));
-        assertEquals("[28]", Arrays.toString(results.get(2).getInfoHash()));
-        assertEquals("[30]", Arrays.toString(results.get(3).getInfoHash()));
-        assertEquals("[32]", Arrays.toString(results.get(4).getInfoHash()));
-        assertEquals("[34]", Arrays.toString(results.get(5).getInfoHash()));
-        assertEquals("[36]", Arrays.toString(results.get(6).getInfoHash()));
-        assertEquals("[38]", Arrays.toString(results.get(7).getInfoHash()));
+        assertEquals(
+                "[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 24]",
+                Arrays.toString(results.get(0).getInfoHash()));
+        assertEquals(
+                "[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 26]",
+                Arrays.toString(results.get(1).getInfoHash()));
+        assertEquals(
+                "[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 28]",
+                Arrays.toString(results.get(2).getInfoHash()));
+        assertEquals(
+                "[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 30]",
+                Arrays.toString(results.get(3).getInfoHash()));
+        assertEquals(
+                "[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 32]",
+                Arrays.toString(results.get(4).getInfoHash()));
+        assertEquals(
+                "[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 34]",
+                Arrays.toString(results.get(5).getInfoHash()));
+        assertEquals(
+                "[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 36]",
+                Arrays.toString(results.get(6).getInfoHash()));
+        assertEquals(
+                "[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 38]",
+                Arrays.toString(results.get(7).getInfoHash()));
     }
 
     /**
@@ -333,14 +381,30 @@ public final class DHTNodeBucketRoutingTableUnitTest {
 
         // then
         assertEquals(8, results.size());
-        assertEquals("[14]", Arrays.toString(results.get(0).getInfoHash()));
-        assertEquals("[16]", Arrays.toString(results.get(1).getInfoHash()));
-        assertEquals("[18]", Arrays.toString(results.get(2).getInfoHash()));
-        assertEquals("[20]", Arrays.toString(results.get(3).getInfoHash()));
-        assertEquals("[22]", Arrays.toString(results.get(4).getInfoHash()));
-        assertEquals("[24]", Arrays.toString(results.get(5).getInfoHash()));
-        assertEquals("[26]", Arrays.toString(results.get(6).getInfoHash()));
-        assertEquals("[28]", Arrays.toString(results.get(7).getInfoHash()));
+        assertEquals(
+                "[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 14]",
+                Arrays.toString(results.get(0).getInfoHash()));
+        assertEquals(
+                "[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 16]",
+                Arrays.toString(results.get(1).getInfoHash()));
+        assertEquals(
+                "[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 18]",
+                Arrays.toString(results.get(2).getInfoHash()));
+        assertEquals(
+                "[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 20]",
+                Arrays.toString(results.get(3).getInfoHash()));
+        assertEquals(
+                "[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 22]",
+                Arrays.toString(results.get(4).getInfoHash()));
+        assertEquals(
+                "[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 24]",
+                Arrays.toString(results.get(5).getInfoHash()));
+        assertEquals(
+                "[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 26]",
+                Arrays.toString(results.get(6).getInfoHash()));
+        assertEquals(
+                "[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 28]",
+                Arrays.toString(results.get(7).getInfoHash()));
     }
 
     /**
@@ -406,7 +470,8 @@ public final class DHTNodeBucketRoutingTableUnitTest {
         // given
         boolean ipv6 = false;
         DHTNodeBucketRoutingTable rt = new DHTNodeBucketRoutingTable();
-        byte[] bytes0 = new byte[] {4};
+        byte[] bytes0 = new byte[] {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+                0, 0, 0, 0, 0, 4 };
         addNodes(rt);
 
         // when

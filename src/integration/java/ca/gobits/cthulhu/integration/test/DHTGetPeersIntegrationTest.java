@@ -132,7 +132,7 @@ public final class DHTGetPeersIntegrationTest {
      * @throws IOException  IOException
      */
     private void addNodesToRoutingTable(final byte[] bytes) throws IOException {
-        Collection<DHTNode> nodes = DHTConversion.toDHTNode(bytes);
+        Collection<DHTNode> nodes = DHTConversion.toDHTNode(bytes, false);
         LOGGER.debug("add " + nodes.size() + " nodes to DHTNode Routing Table");
         assertFalse(nodes.isEmpty());
         for (DHTNode node : nodes) {

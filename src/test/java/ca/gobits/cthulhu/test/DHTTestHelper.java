@@ -16,7 +16,7 @@
 
 package ca.gobits.cthulhu.test;
 
-import static ca.gobits.dht.DHTConversion.COMPACT_ADDR_LENGTH;
+import static ca.gobits.cthulhu.domain.DHTNodeFactory.NODE_ID_LENGTH;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
@@ -33,8 +33,8 @@ import ca.gobits.dht.DHTConversion;
  */
 public final class DHTTestHelper {
 
-    /** Length Node ID. */
-    private static final int NODE_ID_LENGTH = 20;
+    /** Length of Compact IPV4 Bytes. */
+    private static final int COMPACT_IPV4_LENGTH = 6;
 
     /**
      * private constructor.
@@ -76,9 +76,9 @@ public final class DHTTestHelper {
             byte[] key = java.util.Arrays.copyOfRange(a, i, i + NODE_ID_LENGTH);
             i += NODE_ID_LENGTH;
             byte[] ipBytes = java.util.Arrays.copyOfRange(a, i, i
-                    + COMPACT_ADDR_LENGTH);
+                    + COMPACT_IPV4_LENGTH);
             InetAddress addr = DHTConversion.compactAddress(ipBytes);
-            i += COMPACT_ADDR_LENGTH;
+            i += COMPACT_IPV4_LENGTH;
 
             map.put(DHTConversion.toBigInteger(key), addr.getHostAddress());
         }

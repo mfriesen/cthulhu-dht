@@ -16,6 +16,9 @@
 
 package ca.gobits.dht;
 
+import static ca.gobits.cthulhu.domain.DHTNodeFactory.NODE_ID_LENGTH;
+import static ca.gobits.cthulhu.domain.DHTNodeFactory.create;
+
 import java.io.IOException;
 import java.math.BigInteger;
 import java.net.InetAddress;
@@ -29,7 +32,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
 
 import ca.gobits.cthulhu.domain.DHTNode;
-import ca.gobits.cthulhu.domain.DHTNodeFactory;
+import ca.gobits.cthulhu.domain.DHTNode.State;
 import ca.gobits.cthulhu.domain.DHTPeer;
 
 import com.google.common.primitives.UnsignedLong;
@@ -41,7 +44,7 @@ import com.google.common.primitives.UnsignedLong;
 public final class DHTConversion {
 
     /** Length of IPV6 Bytes. */
-    private static final int BYTES_IPV6_LENGTH = 8;
+    private static final int BYTES_IPV6_LENGTH = 16;
 
     /** Length of IPV4 Bytes. */
     private static final int BYTES_IPV4_LENGTH = 4;
@@ -55,16 +58,6 @@ public final class DHTConversion {
     /** Maxmimum number of bytes in an unsigned long. */
     private static final int MAX_LONG_BYTES_LENGTH = 64;
 
-    /** Length Node ID. */
-    private static final int NODE_ID_LENGTH = 20;
-
-    /** Contact information for nodes is encoded as a 26-byte string. */
-    private static final int COMPACT_NODE_LENGTH = 26;
-
-    /** Compact Node Info length. */
-    public static final int COMPACT_ADDR_LENGTH = COMPACT_NODE_LENGTH
-            - NODE_ID_LENGTH;
-
     /** Logger. */
     private static final Logger LOGGER = Logger
             .getLogger(DHTConversion.class);
@@ -73,6 +66,30 @@ public final class DHTConversion {
      * private constructor.
      */
     private DHTConversion() {
+    }
+
+    /**
+     * Make sure bytes array fits a certain length,
+     * if bytes.length > len then end bytes are returned.
+     * IE: bytes.substring(bytes.length - len, len)
+     * @param bytes  bytes
+     * @param len  length
+     * @return byte[]
+     */
+    public static byte[] fitToSize(final byte[] bytes, final int len) {
+
+        byte[] ret = bytes;
+
+        if (bytes.length != len) {
+            ret = new byte[len];
+            System.arraycopy(bytes,
+                    Math.max(0, bytes.length - len),
+                    ret,
+                    len - Math.min(bytes.length, len),
+                    Math.min(bytes.length, len));
+        }
+
+        return ret;
     }
 
     /**
@@ -119,7 +136,6 @@ public final class DHTConversion {
             final UnsignedLong low) throws UnknownHostException {
 
         byte[] bytes = toByteArray(high, low);
-
         return InetAddress.getByAddress(bytes);
     }
 
@@ -154,27 +170,35 @@ public final class DHTConversion {
      */
     private static byte[] toByteArray(final UnsignedLong high,
             final UnsignedLong low) {
-        boolean isIPV6 = low != null;
-        int bcount = isIPV6 ? BYTES_IPV6_LENGTH : BYTES_IPV4_LENGTH;
-        byte[] bytes = isIPV6 ? new byte[bcount * 2] : new byte[bcount];
-        int destPos = 0;
 
-        byte[] bi = new BigInteger(high.toString()).toByteArray();
-        int srcpos = Math.max(bi.length - bcount, 0);
-        int len = Math.min(bi.length, bcount);
-
-        System.arraycopy(bi, srcpos, bytes, destPos + (bcount - len), len);
-        destPos += bcount;
+        byte[] bytes = null;
 
         if (low != null) {
 
-            bi = new BigInteger(low.toString()).toByteArray();
-            srcpos = Math.max(bi.length - bcount, 0);
-            len = Math.min(bi.length, bcount);
+            bytes = new byte[BYTES_IPV6_LENGTH];
 
-            System.arraycopy(bi, srcpos, bytes, destPos + (bcount - len), len);
-            destPos += bcount;
+            byte[] msb = fitToSize(
+                    new BigInteger(high.toString()).toByteArray(),
+                    BYTES_IPV6_LENGTH / 2);
+
+            byte[] lsb = fitToSize(
+                    new BigInteger(low.toString()).toByteArray(),
+                    BYTES_IPV6_LENGTH / 2);
+
+            System.arraycopy(msb, 0, bytes, 0, msb.length);
+            System.arraycopy(lsb, 0, bytes, msb.length, lsb.length);
+
+        } else {
+
+            bytes = new byte[BYTES_IPV4_LENGTH];
+
+            byte[] msb = fitToSize(
+                    new BigInteger(high.toString()).toByteArray(),
+                    BYTES_IPV4_LENGTH);
+
+            System.arraycopy(msb, 0, bytes, 0, msb.length);
         }
+
         return bytes;
     }
 
@@ -204,20 +228,26 @@ public final class DHTConversion {
     /**
      * Transforms Nodes to "compact node info" mode.
      *
-     * @param nodes
-     *            Collection of DHTNode objects
+     * @param nodes  Collection of DHTNode objects
+     * @param ipv6  is IPv6
      * @return byte[]
      * @throws IOException
      *             IOException
      */
-    public static byte[] toByteArrayFromDHTNode(final Collection<DHTNode> nodes)
+    public static byte[] toByteArrayFromDHTNode(
+            final Collection<DHTNode> nodes, final boolean ipv6)
             throws IOException {
 
-        byte[] bytes = new byte[nodes.size() * COMPACT_NODE_LENGTH];
-
         int pos = 0;
+        byte[] bytes = null;
+
         for (DHTNode node : nodes) {
-            byte[] nodeints = transform(node);
+            byte[] nodeints = transform(node, ipv6);
+
+            if (bytes == null) {
+                bytes = new byte[nodes.size() * nodeints.length];
+            }
+
             System.arraycopy(nodeints, 0, bytes, pos, nodeints.length);
             pos += nodeints.length;
         }
@@ -231,27 +261,21 @@ public final class DHTConversion {
      * If IPv4 a 6 byte compact IP address /port is added at the end.
      *
      * @param node  DHTNode
+     * @param isIPv6  whether IPv6 transform
      * @return int[]
      * @throws IOException
      *             IOException
      */
-    private static byte[] transform(final DHTNode node) throws IOException {
+    private static byte[] transform(final DHTNode node, final boolean isIPv6)
+            throws IOException {
 
-        byte[] dest = new byte[COMPACT_NODE_LENGTH];
-
-        byte[] ids = node.getInfoHash();
-        int len = ids.length;
-        int length = Math.min(len, NODE_ID_LENGTH);
-        int srcpos = len > NODE_ID_LENGTH ? len - NODE_ID_LENGTH : 0;
-        int destpos = NODE_ID_LENGTH > len ? NODE_ID_LENGTH - len : 0;
-        System.arraycopy(ids, srcpos, dest, destpos, length);
-
+        byte[] infohash = node.getInfoHash();
         byte[] addr = node.getAddress().getAddress();
-        byte[] addrBytes = compactAddress(addr, node.getPort());
+        byte[] compact = compactAddress(addr, node.getPort());
 
-        System.arraycopy(addrBytes, addrBytes.length - COMPACT_ADDR_LENGTH,
-                dest, COMPACT_NODE_LENGTH - COMPACT_ADDR_LENGTH,
-                COMPACT_ADDR_LENGTH);
+        byte[] dest = new byte[infohash.length + compact.length];
+        System.arraycopy(infohash, 0, dest, 0, infohash.length);
+        System.arraycopy(compact, 0, dest, infohash.length, compact.length);
 
         return dest;
     }
@@ -292,13 +316,20 @@ public final class DHTConversion {
      * Converts "Compact IP-address/port info" into an InetAddress.
      * @param bytes  bytes
      * @return InetAddress
-     * @throws UnknownHostException  UnknownHostException
      */
-    public static InetAddress compactAddress(final byte[] bytes)
-            throws UnknownHostException {
-        byte[] bb = new byte[bytes.length - 2];
-        System.arraycopy(bytes, 0, bb, 0, bb.length);
-        return InetAddress.getByAddress(bb);
+    public static InetAddress compactAddress(final byte[] bytes) {
+
+        InetAddress addr;
+
+        try {
+            byte[] bb = new byte[bytes.length - 2];
+            System.arraycopy(bytes, 0, bb, 0, bb.length);
+            addr = InetAddress.getByAddress(bb);
+        } catch (Exception e) {
+            addr = null;
+        }
+
+        return addr;
     }
 
     /**
@@ -330,34 +361,37 @@ public final class DHTConversion {
     /**
      * Transforms byte array to DHTNode.
      *
-     * @param bytes
-     *            bytes array
+     * @param bytes  bytes array
+     * @param isIPv6  is IPv6 request
      * @return Collection<DHTNode>
      */
-    public static Collection<DHTNode> toDHTNode(final byte[] bytes) {
+    public static Collection<DHTNode> toDHTNode(final byte[] bytes,
+            final boolean isIPv6) {
 
-        if (bytes.length % COMPACT_NODE_LENGTH == 0) {
+        int addrLen = isIPv6 ? BYTES_IPV6_LENGTH + 2 : BYTES_IPV4_LENGTH + 2;
+        int len = NODE_ID_LENGTH + addrLen;
 
-            int pos = 0;
-            int count = bytes.length / COMPACT_NODE_LENGTH;
-            Collection<DHTNode> nodes = new ArrayList<DHTNode>(count);
+        if (bytes.length % len == 0) {
 
-            while (pos < bytes.length) {
+            Collection<DHTNode> nodes = new ArrayList<DHTNode>();
 
-                byte[] nodeId = new byte[NODE_ID_LENGTH];
-                byte[] addr = new byte[COMPACT_ADDR_LENGTH];
-                System.arraycopy(bytes, pos, nodeId, 0, NODE_ID_LENGTH);
-                System.arraycopy(bytes, pos + NODE_ID_LENGTH, addr, 0,
-                        COMPACT_ADDR_LENGTH);
-                pos += COMPACT_NODE_LENGTH;
+            for (int i = 0; i < bytes.length / len; i++) {
 
+                byte[] infoHash = new byte[NODE_ID_LENGTH];
+                System.arraycopy(bytes, len * i, infoHash, 0, NODE_ID_LENGTH);
+
+                byte[] addr = new byte[addrLen];
+                System.arraycopy(bytes, len * i + NODE_ID_LENGTH, addr, 0,
+                        addrLen);
+
+                InetAddress iaddr = compactAddress(addr);
                 int port = compactAddressPort(addr);
 
-                DHTNode node = DHTNodeFactory.create(nodeId,
-                        java.util.Arrays.copyOfRange(addr, 0, addr.length - 2),
-                        port, DHTNode.State.UNKNOWN);
+                if (iaddr != null) {
 
-                nodes.add(node);
+                    DHTNode node = create(infoHash, iaddr, port, State.UNKNOWN);
+                    nodes.add(node);
+                }
             }
 
             return nodes;

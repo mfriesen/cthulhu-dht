@@ -902,7 +902,7 @@ public final class DHTProtocolHandlerUnitTest extends EasyMockSupport {
      */
     private DHTNode createDHTNode(final String id, final String address,
             final int portNo) throws UnknownHostException {
-        byte[] addr = InetAddress.getByName(address).getAddress();
+        InetAddress addr = InetAddress.getByName(address);
         return DHTNodeFactory.create(new BigInteger(id).toByteArray(), addr,
                 portNo, DHTNode.State.UNKNOWN);
     }

@@ -16,6 +16,7 @@
 
 package ca.gobits.cthulhu.domain.test;
 
+import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
@@ -23,7 +24,6 @@ import static org.junit.Assert.assertTrue;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Modifier;
 import java.net.InetAddress;
-import java.util.Arrays;
 
 import org.junit.Test;
 
@@ -69,7 +69,8 @@ public final class DHTNodeFactoryUnitTest {
         DHTNode result = DHTNodeFactory.create(infoHash, state);
 
         // then
-        assertTrue(Arrays.equals(infoHash, result.getInfoHash()));
+        assertArrayEquals(new byte[] {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+                0, 0, 0, 0, 0, 0, 1 }, result.getInfoHash());
         assertEquals(state, result.getState());
         assertNotNull(result.getLastUpdated());
     }
@@ -90,7 +91,8 @@ public final class DHTNodeFactoryUnitTest {
         DHTNode result = DHTNodeFactory.create(infoHash, addr, port, state);
 
         // then
-        assertTrue(Arrays.equals(infoHash, result.getInfoHash()));
+        assertArrayEquals(new byte[] {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+                0, 0, 0, 0, 0, 0, 1 }, result.getInfoHash());
         assertEquals(state, result.getState());
         assertEquals(64568, result.getPort());
         assertEquals(addr, result.getAddress());
