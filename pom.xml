@@ -173,6 +173,9 @@ Maven build itself.
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-checkstyle-plugin</artifactId>
           <version>2.12.1</version>
+          <configuration>
+            <configLocation>checkstyle.xml</configLocation>
+          </configuration>
           <reportSets>
             <reportSet>
               <reports>
