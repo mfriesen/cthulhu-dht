@@ -133,7 +133,6 @@
           <version>2.12.1</version>
           <configuration>
             <configLocation>checkstyle.xml</configLocation>
-            <configLocation>checkstyle-tests.xml</configLocation>
           </configuration>
         </plugin>
       
