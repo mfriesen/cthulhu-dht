@@ -129,6 +129,16 @@
       <plugins>
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-checkstyle-plugin</artifactId>
+          <version>2.12.1</version>
+          <configuration>
+            <configLocation>checkstyle.xml</configLocation>
+            <configLocation>checkstyle-tests.xml</configLocation>
+          </configuration>
+        </plugin>
+      
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-compiler-plugin</artifactId>
           <configuration>
             <source>1.7</source>
@@ -167,23 +177,4 @@ Maven build itself.
         </plugins>
       </pluginManagement>
     </build>
-    <reporting>
-      <plugins>
-        <plugin>
-          <groupId>org.apache.maven.plugins</groupId>
-          <artifactId>maven-checkstyle-plugin</artifactId>
-          <version>2.12.1</version>
-          <configuration>
-            <configLocation>checkstyle.xml</configLocation>
-          </configuration>
-          <reportSets>
-            <reportSet>
-              <reports>
-                <report>checkstyle</report>
-              </reports>
-            </reportSet>
-          </reportSets>
-        </plugin>
-      </plugins>
-    </reporting>
 </project>
