@@ -30,6 +30,7 @@ import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 
 import ca.gobits.cthulhu.discovery.DelayObject;
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 
 /**
  * DelayObject Unit Tests.
@@ -136,6 +137,7 @@ public final class DelayObjectTest {
      * testEquals03() non DHTNode object.
      */
     @Test
+    @SuppressFBWarnings(value = "EC_UNRELATED_TYPES")
     public void testEquals03() {
         // given
         DelayObject<String> obj = new DelayObject<String>("test", 5000);

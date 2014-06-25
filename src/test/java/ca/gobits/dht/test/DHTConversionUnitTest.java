@@ -506,7 +506,7 @@ public final class DHTConversionUnitTest {
         byte[] results = DHTConversion.fitToSize(bytes, len);
 
         // then
-        assertEquals(bytes, results);
+        assertArrayEquals(bytes, results);
     }
 
     /**

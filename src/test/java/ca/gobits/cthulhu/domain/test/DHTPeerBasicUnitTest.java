@@ -26,6 +26,7 @@ import org.junit.Test;
 
 import ca.gobits.cthulhu.domain.DHTPeer;
 import ca.gobits.cthulhu.domain.DHTPeerBasic;
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 
 /**
  * DHTPeer Unit Test.
@@ -104,6 +105,7 @@ public final class DHTPeerBasicUnitTest {
      * testEquals03()  non DHTPeer object.
      */
     @Test
+    @SuppressFBWarnings(value = "EC_UNRELATED_TYPES")
     public void testEquals03() {
         // given
         DHTPeer node = new DHTPeerBasic();

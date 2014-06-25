@@ -33,6 +33,7 @@ import org.junit.Test;
 import ca.gobits.cthulhu.domain.DHTNode;
 import ca.gobits.cthulhu.domain.DHTNode.State;
 import ca.gobits.cthulhu.domain.DHTNodeBasic;
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 
 /**
  * Unit Test for DHTNode.
@@ -80,7 +81,7 @@ public final class DHTNodeBasicUnitTest {
         result.setPort(nodePort);
 
         // then
-        assertEquals(nodeId, result.getInfoHash());
+        assertArrayEquals(nodeId, result.getInfoHash());
         assertEquals(address, result.getAddress());
         assertEquals(nodePort, result.getPort());
     }
@@ -104,7 +105,7 @@ public final class DHTNodeBasicUnitTest {
         result.setPort(nodePort);
 
         // then
-        assertEquals(nodeId, result.getInfoHash());
+        assertArrayEquals(nodeId, result.getInfoHash());
         assertEquals(address, result.getAddress());
         assertEquals(nodePort, result.getPort());
     }
@@ -175,6 +176,7 @@ public final class DHTNodeBasicUnitTest {
      * @throws Exception   Exception
      */
     @Test
+    @SuppressFBWarnings(value = "EC_UNRELATED_CLASS_AND_INTERFACE")
     public void testEquals03() throws Exception {
         // given
         byte[] nodeId = new BigInteger("123").toByteArray();

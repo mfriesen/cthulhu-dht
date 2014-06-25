@@ -33,6 +33,7 @@ import ca.gobits.cthulhu.domain.DHTInfoHash;
 import ca.gobits.cthulhu.domain.DHTInfoHashBasic;
 import ca.gobits.cthulhu.domain.DHTPeer;
 import ca.gobits.cthulhu.domain.DHTPeerBasic;
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 
 /**
  * Unit Test for DHTInfoHashBasic.
@@ -106,6 +107,7 @@ public final class DHTInfoHashBasicUnitTest {
      * testEquals03()  non DHTInfoHash object.
      */
     @Test
+    @SuppressFBWarnings(value = "EC_UNRELATED_TYPES")
     public void testEquals03() {
         // given
         BigInteger nodeId = new BigInteger("123");

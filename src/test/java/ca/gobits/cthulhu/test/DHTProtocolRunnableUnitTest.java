@@ -18,7 +18,7 @@ package ca.gobits.cthulhu.test;
 
 import static org.easymock.EasyMock.capture;
 import static org.easymock.EasyMock.expect;
-import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertArrayEquals;
 
 import java.io.IOException;
 import java.net.DatagramPacket;
@@ -86,7 +86,7 @@ public final class DHTProtocolRunnableUnitTest {
         PowerMock.verifyAll();
 
         DatagramPacket result = this.capture.getValue();
-        assertEquals(bb, result.getData());
+        assertArrayEquals(bb, result.getData());
     }
 
     /**

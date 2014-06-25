@@ -68,7 +68,7 @@ public final class DHTServerIntegrationTest {
         // then
         assertEquals(DATA_PACKET_LENGTH, result.length);
         String r = new String(result);
-        r.contains(":rd3:20414:Method Unknowne1:t2:aa1:y1:ee");
+        assertTrue(r.contains(":rd3:20414:Method Unknowne1:t2:aa1:y1:ee"));
     }
 
     /**

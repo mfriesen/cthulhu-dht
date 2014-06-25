@@ -150,8 +150,9 @@ public final class DHTTokenTableBasic implements DHTTokenTable {
 
             DHTToken token = (DHTToken) objs[i];
             if (!isValid(token, now)) {
-                LOGGER.debug("removing expired token " + token.getInfoHash()
-                    + " added " + token.getAddedDate() + " now " + now);
+                LOGGER.debug("removing expired token "
+                        + Arrays.toString(token.getInfoHash()) + " added "
+                        + token.getAddedDate() + " now " + now);
 
                 removeTokens.add(token);
             }

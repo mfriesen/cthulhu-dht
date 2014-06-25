@@ -16,6 +16,7 @@
 
 package ca.gobits.cthulhu;
 
+import java.util.Arrays;
 import java.util.Collection;
 
 import org.apache.log4j.Logger;
@@ -52,7 +53,8 @@ public final class DHTInfoHashRoutingTableBasic implements
 
         Collection<DHTPeer> peers = null;
 
-        LOGGER.debug("findPeers: looking for peers for " + infoHash);
+        LOGGER.debug("findPeers: looking for peers for "
+                + Arrays.toString(infoHash));
 
         DHTInfoHash peer = this.infoHashes.get(new DHTInfoHashBasic(infoHash));
 
@@ -72,7 +74,7 @@ public final class DHTInfoHashRoutingTableBasic implements
     public void addPeer(final byte[] infoHashId, final byte[] address,
             final int port) {
 
-        LOGGER.debug("addPeer: " + infoHashId + " "
+        LOGGER.debug("addPeer: " + Arrays.toString(infoHashId) + " "
                 + java.util.Arrays.toString(address) + " port " + port);
 
         DHTInfoHash infoHash = new DHTInfoHashBasic(infoHashId);
@@ -80,14 +82,15 @@ public final class DHTInfoHashRoutingTableBasic implements
                 new DHTInfoHashBasic(infoHashId));
 
         if (result == null) {
-            LOGGER.debug("InfoHash " + infoHashId
+            LOGGER.debug("InfoHash " + Arrays.toString(infoHashId)
                     + " not found..... adding to list");
             result = infoHash;
             this.infoHashes.add(result);
         }
 
         LOGGER.debug("adding peer " + java.util.Arrays.toString(address)
-                + " port " + port + " to info hash " + infoHashId);
+                + " port " + port + " to info hash "
+                + Arrays.toString(infoHashId));
 
         result.addPeer(address, port);
     }

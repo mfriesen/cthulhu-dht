@@ -16,6 +16,7 @@
 
 package ca.gobits.cthulhu.domain.test;
 
+import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
@@ -28,6 +29,7 @@ import org.junit.Test;
 
 import ca.gobits.cthulhu.domain.DHTToken;
 import ca.gobits.cthulhu.domain.DHTTokenBasic;
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 
 /**
  * DHTTokenBasic Unit Test.
@@ -50,7 +52,7 @@ public final class DHTTokenBasicUnitTest {
         DHTToken result = new DHTTokenBasic(nodeId, addr, port);
 
         // then
-        assertEquals(nodeId, result.getInfoHash());
+        assertArrayEquals(nodeId, result.getInfoHash());
         assertEquals("12.12.12.12", result.getAddress().getHostAddress());
         assertEquals(630, result.hashCode());
         assertNotNull(result.getAddedDate());
@@ -73,7 +75,7 @@ public final class DHTTokenBasicUnitTest {
         DHTToken result = new DHTTokenBasic(nodeId, addr.getAddress(), port);
 
         // then
-        assertEquals(nodeId, result.getInfoHash());
+        assertArrayEquals(nodeId, result.getInfoHash());
         assertEquals("54.23.54.12", result.getAddress().getHostAddress());
         assertEquals(630, result.hashCode());
         assertEquals(port, result.getPort());
@@ -122,6 +124,7 @@ public final class DHTTokenBasicUnitTest {
      * testEquals03()  non DHTInfoHash object.
      */
     @Test
+    @SuppressFBWarnings(value = "EC_UNRELATED_TYPES")
     public void testEquals03() {
         // given
         byte[] id = new BigInteger("1").toByteArray();
