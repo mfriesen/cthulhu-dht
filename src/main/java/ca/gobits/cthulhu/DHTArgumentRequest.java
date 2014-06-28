@@ -18,8 +18,8 @@ package ca.gobits.cthulhu;
 
 import java.net.Inet6Address;
 import java.net.InetAddress;
-import java.util.Arrays;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -42,13 +42,14 @@ public final class DHTArgumentRequest {
     /** Argument "target" value. */
     private final byte[] target;
     /** Is IPv6 request. */
-    private Set<String> want;
+    private final Set<String> want;
 
     /**
      * constructor.
      * @param addr  InetAddress
      * @param map hashmap
      */
+    @SuppressWarnings("unchecked")
     public DHTArgumentRequest(final InetAddress addr,
             final Map<String, Object> map) {
         this.id = (byte[]) map.get("id");
@@ -57,11 +58,14 @@ public final class DHTArgumentRequest {
         this.port = (Long) map.get("port");
         this.token = (byte[]) map.get("token");
         this.target = (byte[]) map.get("target");
+        this.want = new HashSet<String>();
 
-        this.want = new HashSet<String>(2);
         if (map.containsKey("want")) {
-            String w = new String((byte[]) map.get("want"));
-            this.want = new HashSet<String>(Arrays.asList(w.split(",")));
+
+            List<byte[]> wantList = (List<byte[]>) map.get("want");
+            for (byte[] bs : wantList) {
+                this.want.add(new String(bs));
+            }
         }
 
         if (addr instanceof Inet6Address) {
@@ -69,7 +73,6 @@ public final class DHTArgumentRequest {
         } else {
             this.want.add("n4");
         }
-
     }
 
     /**

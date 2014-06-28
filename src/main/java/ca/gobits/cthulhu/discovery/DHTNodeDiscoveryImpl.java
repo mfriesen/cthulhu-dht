@@ -26,6 +26,7 @@ import java.net.InetAddress;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.List;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.DelayQueue;
 
@@ -57,9 +58,6 @@ public class DHTNodeDiscoveryImpl implements DHTNodeDiscovery {
     /** Queue of DHTNode to contact. */
     private final BlockingQueue<DelayObject<byte[]>> delayed =
             new DelayQueue<DelayObject<byte[]>>();
-
-    /** DHTQueryProtocol instance. */
-    private final DHTQueryProtocol queryProtocol = new DHTQueryProtocol();
 
     /** Reference to DHTServerConfig. */
     @Autowired
@@ -106,9 +104,11 @@ public class DHTNodeDiscoveryImpl implements DHTNodeDiscovery {
                 LOGGER.info("sending 'find_nodes' for "
                         + Arrays.toString(nodeId) + " to " + addr.getHostName()
                         + ":" + port);
-
-                byte[] msg = this.queryProtocol.findNodeQuery(transactionId,
-                        nodeId, nodeId);
+                // TODO get Want from DHTServerConfig (is server want IPv4 or
+                // IPv6 responses)
+                List<byte[]> want = null;
+                byte[] msg = DHTQueryProtocol.findNodeQuery(transactionId,
+                        nodeId, nodeId, want);
 
                 DatagramPacket packet = new DatagramPacket(msg, msg.length,
                         addr, port);

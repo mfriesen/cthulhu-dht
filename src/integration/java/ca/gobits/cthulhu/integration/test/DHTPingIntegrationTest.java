@@ -50,10 +50,6 @@ public final class DHTPingIntegrationTest {
     @Autowired
     private DHTServerAsync async;
 
-    /** DHTQueryProtocol instance. */
-    @Autowired
-    private DHTQueryProtocol queryProtocol;
-
     /** DHTServerConfig. */
     @Autowired
     private DHTServerConfig config;
@@ -79,7 +75,7 @@ public final class DHTPingIntegrationTest {
         Map<String, Object> realResponse = (Map<String, Object>) new BDecoder()
             .decode(getRealPingResponse());
 
-        byte[] request = this.queryProtocol.pingQuery("aa", id.getBytes());
+        byte[] request = DHTQueryProtocol.pingQuery("aa", id.getBytes());
 
         // when
         byte[] results = sendUDPPacket(request);

@@ -22,6 +22,8 @@ import static org.easymock.EasyMock.eq;
 import static org.easymock.EasyMock.expect;
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
@@ -61,6 +63,7 @@ import ca.gobits.cthulhu.domain.DHTPeer;
 import ca.gobits.cthulhu.domain.DHTPeerBasic;
 import ca.gobits.dht.BDecoder;
 import ca.gobits.dht.BEncoder;
+import ca.gobits.dht.DHTConversion;
 import ca.gobits.dht.DHTIdentifier;
 
 /**
@@ -86,10 +89,6 @@ public final class DHTProtocolHandlerUnitTest extends EasyMockSupport {
     @Mock
     private DHTTokenTable tokenTable;
 
-    /** Mock DHTQueryProtocol. */
-    @Mock
-    private DHTQueryProtocol queryProtocol;
-
     /** Mock DHTServerConfig. */
     @Mock
     private DHTServerConfig config;
@@ -100,6 +99,9 @@ public final class DHTProtocolHandlerUnitTest extends EasyMockSupport {
 
     /** InetSocketAddress. */
     private InetAddress iaddr;
+
+    /** InetSocketAddress. */
+    private InetAddress iaddr6;
 
     /** Port. */
     private final int port = 64568;
@@ -118,6 +120,9 @@ public final class DHTProtocolHandlerUnitTest extends EasyMockSupport {
                 this.routingTable);
 
         this.iaddr = InetAddress.getByName("50.71.214.139");
+        this.iaddr6 = InetAddress
+                .getByName("805b:2d9d:dc28:0000:0000:fc57:d4c8:1fff");
+
     }
 
     /**
@@ -193,7 +198,7 @@ public final class DHTProtocolHandlerUnitTest extends EasyMockSupport {
     }
 
     /**
-     * testHandle03() - "find_node" compare our result from
+     * testHandle03() - "find_node" ipv4 compare our result from
      * router.bittorrent.com response.
      * @throws Exception  Exception
      */
@@ -208,10 +213,14 @@ public final class DHTProtocolHandlerUnitTest extends EasyMockSupport {
         byte[] target = new byte[] {-1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
                 -1, -1, -1, -1, -1, -1, -1, -1, -1, -1 };
 
+        byte[] id = DHTIdentifier.sha1("salt".getBytes());
+        byte[] bb = DHTQueryProtocol.findNodeQuery("aa", id , target, null);
+
+        DatagramPacket packet = new DatagramPacket(bb, bb.length, this.iaddr,
+                this.port);
+
         assertEquals(20, nodeId.length);
         assertEquals(20, target.length);
-
-        DatagramPacket packet = createFindNodeRequest();
 
         // when
         expect(this.routingTable.findExactNode(aryEq(nodeId), eq(isIPv6)))
@@ -262,18 +271,82 @@ public final class DHTProtocolHandlerUnitTest extends EasyMockSupport {
     }
 
     /**
-     * testHandle04() - test "unknown method" request.
+     * testHandle04() - "find_node" ipv6.
      * @throws Exception  Exception
      */
     @Test
     public void testHandle04() throws Exception {
+        // given
+        boolean isIPv6 = true;
+        // 1019541382561204384426858321430530264477101611793")
+        byte[] nodeId = new byte[] {-78, -107, -47, 23, 19, 90, -105, 99, -38,
+                40, 46, 125, -82, 115, -91, -54, 125, 62, 91, 17 };
+        // 1461501637330902918203684832716283019655932542975
+        byte[] target = new byte[] {-1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+                -1, -1, -1, -1, -1, -1, -1, -1, -1, -1 };
+
+        assertEquals(20, nodeId.length);
+        assertEquals(20, target.length);
+
+        byte[] id = DHTIdentifier.sha1("salt".getBytes());
+        byte[] bb = DHTQueryProtocol.findNodeQuery("aa", id, target,
+                Arrays.asList("n6".getBytes()));
+
+        DatagramPacket packet = new DatagramPacket(bb, bb.length, this.iaddr6,
+                this.port);
+
+        // when
+        expect(this.routingTable.findExactNode(aryEq(nodeId), eq(isIPv6)))
+            .andReturn(new DHTNodeBasic());
+
+        expect(this.routingTable.findClosestNodes(aryEq(target), eq(isIPv6)))
+            .andReturn(getFindNodes6());
+
+        replayAll();
+        byte[] bytes = this.handler.handle(packet);
+
+        // then
+        verifyAll();
+
+        Map<Object, Object> map = (Map<Object, Object>)
+                new BDecoder().decode(bytes);
+
+        assertTrue(map.containsKey("ip"));
+        assertEquals("aa", new String((byte[]) map.get("t")));
+        assertEquals("r", new String((byte[]) map.get("y")));
+
+        Map<Object, Object> r = (Map<Object, Object>) map.get("r");
+        assertNotNull(r.get("id"));
+
+        byte[] nodes6 = (byte[]) r.get("nodes6");
+        assertEquals(76, nodes6.length);
+
+        byte[] ip0 = new byte[18];
+        System.arraycopy(nodes6, 20, ip0, 0, 18);
+        assertEquals("805b:2d9d:dc28:0:0:fc57:d4c8:1fff", DHTConversion
+                .compactAddress(ip0).getHostAddress());
+        assertEquals(37518, DHTConversion.compactAddressPort(ip0));
+
+        byte[] ip1 = new byte[18];
+        System.arraycopy(nodes6, 58, ip1, 0, 18);
+        assertEquals("ffff:ffff:ffff:ffff:ffff:ffff:ffff:ffff", DHTConversion
+                .compactAddress(ip1).getHostAddress());
+        assertEquals(11503, DHTConversion.compactAddressPort(ip1));
+    }
+
+    /**
+     * testHandle05() - test "unknown method" request.
+     * @throws Exception  Exception
+     */
+    @Test
+    public void testHandle05() throws Exception {
         // given
         String dat = "d1:ad2:id20:abcdefghij0123456789e1:q4:pinA1:t2:aa1:y1:qe";
         byte[] bb = dat.getBytes();
 
         DatagramPacket packet = new DatagramPacket(bb, bb.length, this.iaddr,
                 this.port);
-        expectUpdateNodeStatus();
+        expectUpdateNodeStatus(false);
 
         // when
         replayAll();
@@ -291,11 +364,11 @@ public final class DHTProtocolHandlerUnitTest extends EasyMockSupport {
     }
 
     /**
-     * testHandle05() - test exception thrown in queryRequestHandler.
+     * testHandle06() - test exception thrown in queryRequestHandler.
      * @throws Exception  Exception
      */
     @Test
-    public void testHandle05() throws Exception {
+    public void testHandle06() throws Exception {
         // given
         String dat = "d1:ad2:id20:abcdefghij0123456789e1:q4:ping1:t2:aa1:y1:qe";
         byte[] bb = dat.getBytes();
@@ -315,11 +388,11 @@ public final class DHTProtocolHandlerUnitTest extends EasyMockSupport {
     }
 
     /**
-     * testHandle06() - test "garbage" request.
+     * testHandle07() - test "garbage" request.
      * @throws Exception  Exception
      */
     @Test
-    public void testHandle06() throws Exception {
+    public void testHandle07() throws Exception {
         // given
         String dat = "adsadadsa";
         byte[] bb = dat.getBytes();
@@ -339,11 +412,11 @@ public final class DHTProtocolHandlerUnitTest extends EasyMockSupport {
     }
 
     /**
-     * testHandle07() - test "get_peers" request and peers exists.
+     * testHandle08() - test "get_peers" request and peers exists.
      * @throws Exception  Exception
      */
     @Test
-    public void testHandle07() throws Exception {
+    public void testHandle08() throws Exception {
         // given
         String dat = "d1:ad2:id20:abcdefghij01234567899:info_hash20:"
                 + "mnopqrstuvwxyz123456e1:q9:get_peers1:t2:aa1:y1:qe";
@@ -359,7 +432,7 @@ public final class DHTProtocolHandlerUnitTest extends EasyMockSupport {
         // when
         expect(this.peerRoutingTable.findPeers(aryEq(this.nodeId12345)))
                 .andReturn(peers);
-        expectUpdateNodeStatus();
+        expectUpdateNodeStatus(false);
 
         replayAll();
         byte[] bytes = this.handler.handle(packet);
@@ -391,13 +464,13 @@ public final class DHTProtocolHandlerUnitTest extends EasyMockSupport {
     }
 
     /**
-     * testHandle08() - test "get_peers" request and InfoHash node is
+     * testHandle09() - test IPv4 "get_peers" request and InfoHash node is
      * null.
      *
      * @throws Exception Exception
      */
     @Test
-    public void testHandle08() throws Exception {
+    public void testHandle09() throws Exception {
         // given
         boolean isIPv6 = false;
         String dat = "d1:ad2:id20:abcdefghij01234567899:info_hash20:"
@@ -408,7 +481,7 @@ public final class DHTProtocolHandlerUnitTest extends EasyMockSupport {
                 this.port);
 
         // when
-        expectUpdateNodeStatus();
+        expectUpdateNodeStatus(false);
         expect(this.peerRoutingTable.findPeers(aryEq(this.nodeId12345)))
                 .andReturn(null);
         expect(
@@ -432,6 +505,7 @@ public final class DHTProtocolHandlerUnitTest extends EasyMockSupport {
         assertEquals(20, ((byte[]) rmap.get("id")).length);
         assertEquals(10, ((byte[]) rmap.get("token")).length);
 
+        assertFalse(rmap.containsKey("nodes6"));
         assertEquals(416, ((byte[]) rmap.get("nodes")).length);
         assertEquals(
                 "s6s1sj0aMsjo0fAFMAYObQwHAZUlTKAcko6fSsRpI5pQsyj+7UB/D5"
@@ -449,12 +523,64 @@ public final class DHTProtocolHandlerUnitTest extends EasyMockSupport {
     }
 
     /**
-     * testHandle09() - "announce_peer" request and InfoHash is found.
+     * testHandle10() - test IPv6 "get_peers" request and InfoHash node is
+     * null.
      *
      * @throws Exception Exception
      */
     @Test
-    public void testHandle09() throws Exception {
+    public void testHandle10() throws Exception {
+        // given
+        boolean isIPv6 = true;
+
+        byte[] bb = DHTQueryProtocol.getPeers("aa",
+                "abcdefghij0123456789".getBytes(),
+                "mnopqrstuvwxyz123456".getBytes(),
+                Arrays.asList("n6".getBytes()));
+
+        DatagramPacket packet = new DatagramPacket(bb, bb.length, this.iaddr6,
+                this.port);
+
+        // when
+        expectUpdateNodeStatus(true);
+        expect(this.peerRoutingTable.findPeers(aryEq(this.nodeId12345)))
+                .andReturn(null);
+        expect(
+                this.routingTable.findClosestNodes(aryEq(this.nodeId12345),
+                        eq(isIPv6))).andReturn(getFindNodes6());
+
+        replayAll();
+        byte[] bytes = this.handler.handle(packet);
+
+        // then
+        verifyAll();
+
+        Map<String, Object> map = (Map<String, Object>) new BDecoder()
+            .decode(bytes);
+
+        assertEquals("aa", new String((byte[]) map.get("t")));
+        assertEquals("r", new String((byte[]) map.get("y")));
+
+        Map<String, Object> rmap = (Map<String, Object>) map.get("r");
+
+        assertEquals(20, ((byte[]) rmap.get("id")).length);
+        assertEquals(10, ((byte[]) rmap.get("token")).length);
+
+        assertFalse(rmap.containsKey("nodes"));
+        assertEquals(76, ((byte[]) rmap.get("nodes6")).length);
+        assertEquals(
+                "s6s1sj0aMsjo0fAFMAYObQwHAZWAWy2d3CgAAAAA/FfUyB//ko6fSsRpI5pQsy"
+                + "j+7UB/D5fUrH1DCv////////////////////8s7w==",
+                Base64.encodeBase64String((byte[]) rmap.get("nodes6")));
+    }
+
+    /**
+     * testHandle11() - "announce_peer" request and InfoHash is found.
+     *
+     * @throws Exception Exception
+     */
+    @Test
+    public void testHandle11() throws Exception {
         // given
         int p = 6881;
         byte[] secret = "aoeusnth".getBytes();
@@ -467,7 +593,7 @@ public final class DHTProtocolHandlerUnitTest extends EasyMockSupport {
                 this.port);
 
         // when
-        expectUpdateNodeStatus();
+        expectUpdateNodeStatus(false);
         expect(this.tokenTable.valid(eq(this.iaddr), eq(p), aryEq(secret)))
                 .andReturn(true);
         this.peerRoutingTable.addPeer(aryEq(this.nodeId12345),
@@ -483,12 +609,12 @@ public final class DHTProtocolHandlerUnitTest extends EasyMockSupport {
     }
 
     /**
-     * testHandle010() - "announce_peer" request, with implied_port of 0.
+     * testHandle12() - "announce_peer" request, with implied_port of 0.
      *
      * @throws Exception Exception
      */
     @Test
-    public void testHandle10() throws Exception {
+    public void testHandle12() throws Exception {
         // given
         int p = 6881;
         byte[] secret = "aoeusnth".getBytes();
@@ -501,7 +627,7 @@ public final class DHTProtocolHandlerUnitTest extends EasyMockSupport {
                 this.port);
 
         // when
-        expectUpdateNodeStatus();
+        expectUpdateNodeStatus(false);
         expect(this.tokenTable.valid(eq(this.iaddr), eq(6881), aryEq(secret)))
                 .andReturn(true);
         this.peerRoutingTable.addPeer(aryEq(this.nodeId12345),
@@ -517,12 +643,12 @@ public final class DHTProtocolHandlerUnitTest extends EasyMockSupport {
     }
 
     /**
-     * testHandle11() - "announce_peer" request, with implied_port of 1.
+     * testHandle13() - "announce_peer" request, with implied_port of 1.
      *
      * @throws Exception Exception
      */
     @Test
-    public void testHandle11() throws Exception {
+    public void testHandle13() throws Exception {
         // given
         byte[] secret = "aoeusnth".getBytes();
         String dat = "d1:ad2:id20:abcdefghij01234567899:info_hash20:"
@@ -534,7 +660,7 @@ public final class DHTProtocolHandlerUnitTest extends EasyMockSupport {
                 this.port);
 
         // when
-        expectUpdateNodeStatus();
+        expectUpdateNodeStatus(false);
         expect(
                 this.tokenTable.valid(eq(this.iaddr), eq(this.port),
                         aryEq(secret))).andReturn(true);
@@ -552,12 +678,12 @@ public final class DHTProtocolHandlerUnitTest extends EasyMockSupport {
     }
 
     /**
-     * testHandle12() - "announce_peer" request, with invalid token.
+     * testHandle14() - "announce_peer" request, with invalid token.
      *
      * @throws Exception Exception
      */
     @Test
-    public void testHandle12() throws Exception {
+    public void testHandle14() throws Exception {
         // given
         byte[] secret = "aoeusnth".getBytes();
 
@@ -570,7 +696,7 @@ public final class DHTProtocolHandlerUnitTest extends EasyMockSupport {
                 this.port);
 
         // when
-        expectUpdateNodeStatus();
+        expectUpdateNodeStatus(false);
         expect(
                 this.tokenTable.valid(eq(this.iaddr), eq(this.port),
                         aryEq(secret))).andReturn(false);
@@ -586,11 +712,11 @@ public final class DHTProtocolHandlerUnitTest extends EasyMockSupport {
     }
 
     /**
-     * testHandle13() - test request is NOT "r".
+     * testHandle15() - test request is NOT "r".
      * @throws Exception  Exception
      */
     @Test
-    public void testHandle13() throws Exception {
+    public void testHandle15() throws Exception {
         // given
         String s = "d1:t2:aa1:y1:re";
         byte[] bb = s.getBytes();
@@ -609,11 +735,11 @@ public final class DHTProtocolHandlerUnitTest extends EasyMockSupport {
     }
 
     /**
-     * testHandle14() - test request is HAS "r", not does not have "id".
+     * testHandle16() - test request is HAS "r", not does not have "id".
      * @throws Exception  Exception
      */
     @Test
-    public void testHandle14() throws Exception {
+    public void testHandle16() throws Exception {
         // given
         String s = "d1:rd2:ia20:mnopqrstuvwxyz123456e1:t2:aa1:y1:re";
         byte[] bb = s.getBytes();
@@ -632,11 +758,11 @@ public final class DHTProtocolHandlerUnitTest extends EasyMockSupport {
     }
 
     /**
-     * testHandle15() - test request HAS "id" and NODE IS found.
+     * testHandle17() - test request HAS "id" and NODE IS found.
      * @throws Exception  Exception
      */
     @Test
-    public void testHandle15() throws Exception {
+    public void testHandle17() throws Exception {
         // given
         boolean isIPv6 = false;
         byte[] id = new byte[] {109, 110, 111, 112, 113, 114, 115, 116, 117,
@@ -665,12 +791,12 @@ public final class DHTProtocolHandlerUnitTest extends EasyMockSupport {
     }
 
     /**
-     * testHandle16() - test request HAS "id" and NODE IS NOT found.
+     * testHandle18() - test request HAS "id" and NODE IS NOT found.
      * Transaction ID is valid.
      * @throws Exception  Exception
      */
     @Test
-    public void testHandle16() throws Exception {
+    public void testHandle18() throws Exception {
 
         // given
         DHTNode node = null;
@@ -701,12 +827,12 @@ public final class DHTProtocolHandlerUnitTest extends EasyMockSupport {
     }
 
     /**
-     * testHandle17() - test request HAS "id" and NODE IS NOT found.
+     * testHandle19() - test request HAS "id" and NODE IS NOT found.
      * Transaction ID is NOT valid.
      * @throws Exception  Exception
      */
     @Test
-    public void testHandle17() throws Exception {
+    public void testHandle19() throws Exception {
 
         // given
         String s = "d1:rd2:id20:mnopqrstuvwxyz123456e1:t2:aa1:y1:re";
@@ -728,11 +854,11 @@ public final class DHTProtocolHandlerUnitTest extends EasyMockSupport {
     }
 
     /**
-     * testHandle18() - test invalid packet missing "T" param.
+     * testHandle20() - test invalid packet missing "T" param.
      * @throws Exception  Exception
      */
     @Test
-    public void testHandle18() throws Exception {
+    public void testHandle20() throws Exception {
         // given
         String dat = "d1:ad2:id20:abcdefghij0123456789e1:q4:ping1:z2:aa1:y1:qe";
         byte[] bb = dat.getBytes();
@@ -751,11 +877,11 @@ public final class DHTProtocolHandlerUnitTest extends EasyMockSupport {
     }
 
     /**
-     * testHandle19() - test invalid packet missing "Y" param.
+     * testHandle21() - test invalid packet missing "Y" param.
      * @throws Exception  Exception
      */
     @Test
-    public void testHandle19() throws Exception {
+    public void testHandle21() throws Exception {
         // given
         String dat = "d1:ad2:id20:abcdefghij0123456789e1:q4:ping1:t2:aa1:z1:qe";
         byte[] bb = dat.getBytes();
@@ -774,11 +900,11 @@ public final class DHTProtocolHandlerUnitTest extends EasyMockSupport {
     }
 
     /**
-     * Handles DHT Query "find_nodes" Response.
+     * Handles DHT Query "find_nodes" ipv4 Response.
      * @throws Exception  Exception
      */
     @Test
-    public void testHandle20() throws Exception {
+    public void testHandle22() throws Exception {
         // given
         byte[] bb = Base64.decodeBase64(getBase64FindNodeResponse());
         DatagramPacket packet = new DatagramPacket(bb, bb.length, this.iaddr,
@@ -804,6 +930,48 @@ public final class DHTProtocolHandlerUnitTest extends EasyMockSupport {
         this.discovery.addNode(InetAddress.getByName("79.22.67.76"), 38518);
         this.discovery.addNode(InetAddress.getByName("92.99.87.123"), 26120);
         this.discovery.addNode(InetAddress.getByName("176.12.59.50"), 61553);
+
+        replayAll();
+        byte[] result = this.handler.handle(packet);
+
+        // then
+        verifyAll();
+
+        assertNull(result);
+    }
+
+    /**
+     * Handles DHT Query "find_nodes" ipv6 Response.
+     * @throws Exception  Exception
+     */
+    @Test
+    public void testHandle23() throws Exception {
+        // given
+        Map<Object, Object> map = new HashMap<Object, Object>();
+        map.put("t", "aa");
+        map.put("y", "r");
+        Map<Object, Object> r = new HashMap<Object, Object>();
+        r.put("id", DHTIdentifier.sha1("salt".getBytes()));
+        r.put("nodes6", new byte[] {80, 13, -127, -86, -2, 99, 119, 23, -91,
+                47, -122, 80, -27, 66, 6, -26, 77, -93, 61, 39, -1, -1, -1, -1,
+                -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 0, 123, -7, 55,
+                -61, 126, -108, -99, -98, -6, 32, -46, -107, -118, -13, 9, 35,
+                92, 115, -20, 3, -102, -128, 91, 45, -99, -36, 40, 0, 0, 0, 0,
+                -4, 87, -44, -56, 31, -1, 0, 124 });
+        map.put("r", r);
+
+        byte[] bb = BEncoder.bencoding(map);
+        DatagramPacket packet = new DatagramPacket(bb, bb.length, this.iaddr,
+                this.port);
+
+        expect(this.tokenTable.isValidTransactionId("aa")).andReturn(
+                Boolean.FALSE);
+
+        // when
+        this.discovery.addNode(InetAddress
+                .getByName("ffff:ffff:ffff:ffff:ffff:ffff:ffff:ffff"), 123);
+        this.discovery.addNode(InetAddress
+                .getByName("805b:2d9d:dc28:0000:0000:fc57:d4c8:1fff"), 124);
 
         replayAll();
         byte[] result = this.handler.handle(packet);
@@ -893,6 +1061,22 @@ public final class DHTProtocolHandlerUnitTest extends EasyMockSupport {
     }
 
     /**
+     * Adds expected nodes to the routing table.
+     * @throws UnknownHostException  UnknownHostException
+     * @return List<DHTNode>
+     */
+    private List<DHTNode> getFindNodes6() throws UnknownHostException {
+
+        return Arrays.asList(
+                createDHTNode(
+                "1025727453009050644114422909938179475956677673365",
+                "805b:2d9d:dc28:0000:0000:fc57:d4c8:1fff", 37518),
+        createDHTNode(
+                "909396897490697132528408310795708133687135388426",
+                "ffff:ffff:ffff:ffff:ffff:ffff:ffff:ffff", 11503));
+    }
+
+    /**
      * Create DHTNode.
      * @param id  identifier
      * @param address  hostname
@@ -906,40 +1090,6 @@ public final class DHTProtocolHandlerUnitTest extends EasyMockSupport {
         return DHTNodeFactory.create(new BigInteger(id).toByteArray(), addr,
                 portNo, DHTNode.State.UNKNOWN);
     }
-
-    /**
-     * Creates a find request.
-     * @return Map<String, Object>
-     */
-    private Map<String, Object> createFindNodeRequestMap() {
-        Map<String, Object> map = new HashMap<String, Object>();
-        map.put("t", "aa");
-        map.put("y", "q");
-        map.put("q", "find_node");
-
-        Map<String, Object> map2 = new HashMap<String, Object>();
-        map2.put("id", DHTIdentifier.sha1("salt".getBytes()));
-        map2.put("target", new int[] {255, 255, 255, 255, 255, 255, 255, 255,
-                255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255 });
-        map.put("a", map2);
-
-        return map;
-    }
-
-    /**
-     * Create Find Node Request packet.
-     * @return DatagramPacket
-     * @throws IOException IOException
-     */
-    private DatagramPacket createFindNodeRequest() throws IOException {
-        Map<String, Object> map = createFindNodeRequestMap();
-        byte[] bb = BEncoder.bencoding(map);
-
-        DatagramPacket packet = new DatagramPacket(bb, bb.length, this.iaddr,
-                this.port);
-        return packet;
-    }
-
 
     /**
      * real find_node response from router.bittorrent.com.
@@ -962,9 +1112,9 @@ public final class DHTProtocolHandlerUnitTest extends EasyMockSupport {
 
     /**
      * expect Update Node Status to Good.
+     * @param isIPv6  Is IPv6
      */
-    private void expectUpdateNodeStatus() {
-        boolean isIPv6 = false;
+    private void expectUpdateNodeStatus(final boolean isIPv6) {
         byte[] bytes = new BigInteger(
                 "555966236078696110491139251576793858856027895865")
                 .toByteArray();

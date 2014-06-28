@@ -157,7 +157,7 @@ public class DHTProtocolHandler {
                     }
                 }
             }
-// TODO run tests
+
             // find_nodes ipv4
             if (request1.containsKey("nodes")) {
                 Collection<DHTNode> nodes = toDHTNode((byte[]) request1
@@ -266,7 +266,7 @@ public class DHTProtocolHandler {
             }
 
         } catch (Exception e) {
-            LOGGER.debug(e, e);
+            LOGGER.warn(e, e);
             addServerError(response);
         }
 
@@ -345,6 +345,7 @@ public class DHTProtocolHandler {
         final Map<String, Object> response, final DatagramPacket packet)
             throws IOException {
 
+        boolean isIPv6 = arguments.isIpv6();
         Map<String, Object> responseParameter = new HashMap<String, Object>();
 
         byte[] infoHash = arguments.getInfoHash();
@@ -353,18 +354,19 @@ public class DHTProtocolHandler {
 
         if (!CollectionUtils.isEmpty(peers)) {
 
+            // TODO IPv6
             List<byte[]> bytes = toByteArrayFromDHTPeer(peers);
             responseParameter.put("values", bytes);
 
         } else {
-
             List<DHTNode> nodes = this.routingTable.findClosestNodes(infoHash,
-                    arguments.isIpv6());
+                    isIPv6);
 
-            // TODO isIPv6
             byte[] transformNodes = toByteArrayFromDHTNode(nodes,
-                    arguments.isIpv6());
-            responseParameter.put("nodes", transformNodes);
+                    isIPv6);
+
+            responseParameter.put(arguments.isIpv6() ? "nodes6" : "nodes",
+                    transformNodes);
         }
 
         responseParameter.put("token", generateToken());
@@ -393,17 +395,17 @@ public class DHTProtocolHandler {
             final Map<String, Object> response,
             final DatagramPacket packet) throws IOException {
 
+        boolean isIPv6 = arguments.isIpv6();
         Map<String, Object> responseParameter = new HashMap<String, Object>();
         response.put("r", responseParameter);
         responseParameter.put("id", arguments.getId());
 
         List<DHTNode> nodes = findClosestNodes(arguments.getTarget(),
-                arguments.isIpv6());
+                isIPv6);
 
-        // TODO isIPv6
         byte[] transformNodes = toByteArrayFromDHTNode(nodes,
-                arguments.isIpv6());
-        responseParameter.put("nodes", transformNodes);
+                isIPv6);
+        responseParameter.put(isIPv6 ? "nodes6" : "nodes", transformNodes);
     }
 
     /**

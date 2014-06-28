@@ -103,14 +103,6 @@ public class DHTConfiguration {
     }
 
     /**
-     * @return DHTQueryProtocol
-     */
-    @Bean
-    public DHTQueryProtocol dhtQueryProtocol() {
-        return new DHTQueryProtocol();
-    }
-
-    /**
      * @return DatagramSocket
      * @throws SocketException  SocketException
      */
