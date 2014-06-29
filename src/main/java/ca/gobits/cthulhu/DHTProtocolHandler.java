@@ -68,10 +68,6 @@ public class DHTProtocolHandler {
     @Autowired
     private DHTTokenTable tokenTable;
 
-    /** DHTQuery Protocol instance. */
-    @Autowired
-    private DHTQueryProtocol queryProtocol;
-
     /** DHTServerConfig. */
     @Autowired
     private DHTServerConfig config;
@@ -146,12 +142,11 @@ public class DHTProtocolHandler {
                 String transId = new String((byte[]) request.get("t"));
                 if (this.tokenTable.isValidTransactionId(transId)) {
 
-                    DHTNode node = this.routingTable.findExactNode(id,
-                            packet.getAddress() instanceof Inet6Address);
+                    boolean ipv6 = packet.getAddress() instanceof Inet6Address;
+                    boolean success = this.routingTable.updateNodeState(id,
+                            State.GOOD, ipv6);
 
-                    if (node != null) {
-                        node.setState(State.GOOD);
-                    } else {
+                    if (!success) {
                         this.routingTable.addNode(id, packet.getAddress(),
                             packet.getPort(), State.GOOD);
                     }

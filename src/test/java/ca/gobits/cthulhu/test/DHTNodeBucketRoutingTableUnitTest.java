@@ -18,6 +18,7 @@ package ca.gobits.cthulhu.test;
 
 import static ca.gobits.cthulhu.domain.DHTNodeFactory.create;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
@@ -35,6 +36,8 @@ import ca.gobits.cthulhu.DHTNodeBucketRoutingTable;
 import ca.gobits.cthulhu.SortedCollection;
 import ca.gobits.cthulhu.domain.DHTNode;
 import ca.gobits.cthulhu.domain.DHTNode.State;
+import ca.gobits.cthulhu.domain.DHTNodeFactory;
+import ca.gobits.dht.DHTConversion;
 
 /**
  * DHTBucketRoutingTableTest.
@@ -515,5 +518,48 @@ public final class DHTNodeBucketRoutingTableUnitTest {
             byte[] id = new BigInteger("" + i).toByteArray();
             rt.addNode(id, this.iaddr, this.port, State.GOOD);
         }
+    }
+
+    /**
+     * testUpdateNodeState01() - update node status of existing node.
+     */
+    @Test
+    public void testUpdateNodeState01() {
+        // given
+        boolean ipv6 = false;
+        State state = State.UNKNOWN;
+        byte[] nodeId = new BigInteger("" + 2).toByteArray();
+        nodeId = DHTConversion.fitToSize(nodeId, DHTNodeFactory.NODE_ID_LENGTH);
+
+        DHTNodeBucketRoutingTable rt = new DHTNodeBucketRoutingTable();
+        addNodes(rt);
+        assertEquals(State.GOOD, rt.findExactNode(nodeId, ipv6).getState());
+
+        // when
+        boolean result = rt.updateNodeState(nodeId, state, ipv6);
+
+        // then
+        assertTrue(result);
+        assertEquals(state, rt.findExactNode(nodeId, ipv6).getState());
+    }
+
+    /**
+     * testUpdateNodeState02() - update node status of NON-existing node.
+     */
+    @Test
+    public void testUpdateNodeState02() {
+        // given
+        boolean ipv6 = false;
+        State state = State.UNKNOWN;
+        byte[] nodeId = new BigInteger("" + 2).toByteArray();
+        nodeId = DHTConversion.fitToSize(nodeId, DHTNodeFactory.NODE_ID_LENGTH);
+
+        DHTNodeBucketRoutingTable rt = new DHTNodeBucketRoutingTable();
+
+        // when
+        boolean result = rt.updateNodeState(nodeId, state, ipv6);
+
+        // then
+        assertFalse(result);
     }
 }

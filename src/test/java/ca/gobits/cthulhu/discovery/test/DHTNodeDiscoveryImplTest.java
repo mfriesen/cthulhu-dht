@@ -115,6 +115,8 @@ public final class DHTNodeDiscoveryImplTest extends EasyMockSupport {
         // when
         expect(this.config.getNodeId()).andReturn(nodeId);
         expect(this.tokens.getTransactionId()).andReturn("aa");
+        expect(this.socket.getLocalAddress()).andReturn(
+                InetAddress.getByName("127.0.0.1"));
 
         this.socket.send(capture(this.cap));
 
@@ -131,7 +133,8 @@ public final class DHTNodeDiscoveryImplTest extends EasyMockSupport {
         assertEquals(2345, packet.getPort());
         assertEquals(
                 "ZDE6YWQyOmlkMjA6spXRFxNal2PaKC59rnOlyn0+WxE2OnRhcmdldDIwOrKV0R"
-                + "cTWpdj2igufa5zpcp9PlsRZTE6cTk6ZmluZF9ub2RlMTp0MjphYTE6eTE6c"
-                + "WU=", Base64.encodeBase64String(packet.getData()));
+                + "cTWpdj2igufa5zpcp9PlsRNDp3YW50bDI6bjRlZTE6cTk6ZmluZF9ub2RlMT"
+                + "p0MjphYTE6eTE6cWU=",
+                Base64.encodeBase64String(packet.getData()));
     }
 }

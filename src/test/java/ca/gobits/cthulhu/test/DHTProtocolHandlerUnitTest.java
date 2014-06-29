@@ -772,13 +772,11 @@ public final class DHTProtocolHandlerUnitTest extends EasyMockSupport {
         DatagramPacket packet = new DatagramPacket(bb, bb.length, this.iaddr,
                 this.port);
 
-        DHTNode node = new DHTNodeBasic();
-        assertNull(node.getState());
-
         // when
         expect(this.tokenTable.isValidTransactionId("aa")).andReturn(true);
-        expect(this.routingTable.findExactNode(aryEq(id), eq(isIPv6)))
-                .andReturn(node);
+        expect(this.routingTable.updateNodeState(aryEq(id), eq(State.GOOD),
+            eq(isIPv6))).andReturn(Boolean.TRUE);
+
         replayAll();
 
         byte[] bytes = this.handler.handle(packet);
@@ -787,7 +785,6 @@ public final class DHTProtocolHandlerUnitTest extends EasyMockSupport {
         verifyAll();
 
         assertNull(bytes);
-        assertEquals(State.GOOD, node.getState());
     }
 
     /**
@@ -799,7 +796,6 @@ public final class DHTProtocolHandlerUnitTest extends EasyMockSupport {
     public void testHandle18() throws Exception {
 
         // given
-        DHTNode node = null;
         boolean isIPv6 = false;
         byte[] id = new byte[] {109, 110, 111, 112, 113, 114, 115, 116, 117,
                 118, 119, 120, 121, 122, 49, 50, 51, 52, 53, 54 };
@@ -810,8 +806,8 @@ public final class DHTProtocolHandlerUnitTest extends EasyMockSupport {
                 this.port);
 
         // when
-        expect(this.routingTable.findExactNode(aryEq(id), eq(isIPv6)))
-                .andReturn(node);
+        expect(this.routingTable.updateNodeState(aryEq(id), eq(State.GOOD),
+                eq(isIPv6))).andReturn(Boolean.FALSE);
         expect(this.tokenTable.isValidTransactionId("aa")).andReturn(true);
         this.routingTable.addNode(aryEq(id), eq(this.iaddr), eq(this.port),
                 eq(State.GOOD));
