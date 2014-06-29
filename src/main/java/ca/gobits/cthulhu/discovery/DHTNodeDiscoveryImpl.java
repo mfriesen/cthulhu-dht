@@ -22,6 +22,7 @@ import static ca.gobits.dht.DHTConversion.compactAddressPort;
 import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
+import java.net.Inet6Address;
 import java.net.InetAddress;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -104,9 +105,8 @@ public class DHTNodeDiscoveryImpl implements DHTNodeDiscovery {
                 LOGGER.info("sending 'find_nodes' for "
                         + Arrays.toString(nodeId) + " to " + addr.getHostName()
                         + ":" + port);
-                // TODO get Want from DHTServerConfig (is server want IPv4 or
-                // IPv6 responses)
-                List<byte[]> want = null;
+
+                List<byte[]> want = getWant();
                 byte[] msg = DHTQueryProtocol.findNodeQuery(transactionId,
                         nodeId, nodeId, want);
 
@@ -117,6 +117,22 @@ public class DHTNodeDiscoveryImpl implements DHTNodeDiscovery {
                 LOGGER.trace(e, e);
             }
         }
+    }
+
+    /**
+     * @return List<byte[]>  wants the local server supports.
+     */
+    private List<byte[]> getWant() {
+
+        List<byte[]> want = new ArrayList<byte[]>();
+        InetAddress addr = this.socket.getLocalAddress();
+        if (addr instanceof Inet6Address) {
+            want.add("n6".getBytes());
+        } else {
+            want.add("n4".getBytes());
+        }
+
+        return want;
     }
 
     @Override
