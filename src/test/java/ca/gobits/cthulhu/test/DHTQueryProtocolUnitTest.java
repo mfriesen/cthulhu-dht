@@ -17,7 +17,13 @@
 package ca.gobits.cthulhu.test;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
+import java.lang.reflect.Constructor;
+import java.lang.reflect.Modifier;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.codec.binary.Base64;
@@ -36,6 +42,26 @@ public final class DHTQueryProtocolUnitTest {
     /** Dummy NodeId. */
     private final byte[] nodeId = DHTIdentifier.sha1("test".getBytes());
 
+    /** Transaction Id. */
+    private final String transId = "aa";
+
+    /** Target. */
+    private final byte[] target = new byte[] {-1, -1, -1, -1, -1, -1, -1, -1,
+            -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1 };
+
+    /**
+     * testConstructorIsPrivate().
+     * @throws Exception  Exception
+     */
+    @Test
+    public void testConstructorIsPrivate() throws Exception {
+        Constructor<DHTQueryProtocol> constructor = DHTQueryProtocol.class
+                .getDeclaredConstructor();
+        assertTrue(Modifier.isPrivate(constructor.getModifiers()));
+        constructor.setAccessible(true);
+        constructor.newInstance();
+    }
+
     /**
      * testPingQuery01() - generate ping request.
      */
@@ -44,10 +70,9 @@ public final class DHTQueryProtocolUnitTest {
     public void testPingQuery01() {
 
         // given
-        String transactionId = "aa";
 
         // when
-        byte[] result = DHTQueryProtocol.pingQuery(transactionId, this.nodeId);
+        byte[] result = DHTQueryProtocol.pingQuery(this.transId, this.nodeId);
 
         // then
         assertEquals(56, result.length);
@@ -72,26 +97,120 @@ public final class DHTQueryProtocolUnitTest {
     public void testFindNodeQuery01() {
 
         // given
-        String transactionId = "aa";
-        byte[] target = new byte[] {-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
-                -1, -1, -1, -1, -1, -1, -1, -1, -1 };
 
         // when
-        byte[] result = DHTQueryProtocol.findNodeQuery(transactionId,
-                this.nodeId, target, null);
+        byte[] result = DHTQueryProtocol.findNodeQuery(this.transId,
+                this.nodeId, this.target, null);
 
         // then
         assertEquals(92, result.length);
 
         Map<Object, Object> map = (Map<Object, Object>) new BDecoder()
                 .decode(result);
-        assertEquals(transactionId, new String((byte[]) map.get("t")));
+        assertEquals(this.transId, new String((byte[]) map.get("t")));
         assertEquals("q", new String((byte[]) map.get("y")));
         assertEquals("find_node", new String((byte[]) map.get("q")));
 
         Map<Object, Object> a = (Map<Object, Object>) map.get("a");
         assertEquals(20, ((byte[]) a.get("id")).length);
         assertEquals(20, ((byte[]) a.get("target")).length);
+        assertEquals(Base64.encodeBase64String(this.nodeId),
+                Base64.encodeBase64String((byte[]) a.get("id")));
+    }
+
+    /**
+     * testFindNodeQuery02() - generate find_node request with want.
+     */
+    @SuppressWarnings("unchecked")
+    @Test
+    public void testFindNodeQuery02() {
+
+        // given
+
+        // when
+        byte[] result = DHTQueryProtocol.findNodeQuery(this.transId,
+                this.nodeId, this.target, Arrays.asList("n6".getBytes()));
+
+        // then
+        assertEquals(104, result.length);
+
+        Map<Object, Object> map = (Map<Object, Object>) new BDecoder()
+                .decode(result);
+        assertEquals(this.transId, new String((byte[]) map.get("t")));
+        assertEquals("q", new String((byte[]) map.get("y")));
+        assertEquals("find_node", new String((byte[]) map.get("q")));
+
+        Map<Object, Object> a = (Map<Object, Object>) map.get("a");
+        assertEquals(20, ((byte[]) a.get("id")).length);
+        assertEquals(20, ((byte[]) a.get("target")).length);
+
+        List<byte[]> want = (ArrayList<byte[]>) a.get("want");
+        assertEquals(1, want.size());
+        assertEquals("n6", new String(want.get(0)));
+
+        assertEquals(Base64.encodeBase64String(this.nodeId),
+                Base64.encodeBase64String((byte[]) a.get("id")));
+    }
+
+    /**
+     * testGetPeersQuery01() - generate get_peers request.
+     */
+    @SuppressWarnings("unchecked")
+    @Test
+    public void testGetPeersQuery01() {
+
+        // given
+
+        // when
+        byte[] result = DHTQueryProtocol.getPeersQuery(this.transId,
+                this.nodeId, this.target, null);
+
+        // then
+        assertEquals(95, result.length);
+
+        Map<Object, Object> map = (Map<Object, Object>) new BDecoder()
+                .decode(result);
+        assertEquals(this.transId, new String((byte[]) map.get("t")));
+        assertEquals("q", new String((byte[]) map.get("y")));
+        assertEquals("get_peers", new String((byte[]) map.get("q")));
+
+        Map<Object, Object> a = (Map<Object, Object>) map.get("a");
+        assertEquals(20, ((byte[]) a.get("id")).length);
+        assertEquals(20, ((byte[]) a.get("info_hash")).length);
+        assertEquals(Base64.encodeBase64String(this.nodeId),
+                Base64.encodeBase64String((byte[]) a.get("id")));
+    }
+
+    /**
+     * testGetPeersQuery02() - generate get_peers with want request.
+     */
+    @SuppressWarnings("unchecked")
+    @Test
+    public void testGetPeersQuery02() {
+
+        // given
+
+        // when
+        byte[] result = DHTQueryProtocol.getPeersQuery(this.transId,
+                this.nodeId, this.target, Arrays.asList("n6".getBytes()));
+
+        // then
+        assertEquals(107, result.length);
+
+        Map<Object, Object> map = (Map<Object, Object>) new BDecoder()
+                .decode(result);
+        assertEquals(this.transId, new String((byte[]) map.get("t")));
+        assertEquals("q", new String((byte[]) map.get("y")));
+        assertEquals("get_peers", new String((byte[]) map.get("q")));
+
+        Map<Object, Object> a = (Map<Object, Object>) map.get("a");
+        assertEquals(20, ((byte[]) a.get("id")).length);
+        assertEquals(20, ((byte[]) a.get("info_hash")).length);
+
+        List<byte[]> want = (ArrayList<byte[]>) a.get("want");
+        assertEquals(1, want.size());
+        assertEquals("n6", new String(want.get(0)));
+
         assertEquals(Base64.encodeBase64String(this.nodeId),
                 Base64.encodeBase64String((byte[]) a.get("id")));
     }

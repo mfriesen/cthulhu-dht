@@ -80,7 +80,6 @@ public final class DHTQueryProtocol {
         return bytes;
     }
 
-    // TODO add test case
     /**
      * Creates a "get_peers" request.
      * @param transactionId   TransactionId
@@ -90,7 +89,7 @@ public final class DHTQueryProtocol {
      *  "n4" for IPv4 or "n6" for IPv6.
      * @return Map<String, Object>
      */
-    public static byte[] getPeers(final String transactionId,
+    public static byte[] getPeersQuery(final String transactionId,
             final byte[] id, final byte[] infohash,
             final List<byte[]> want) {
 

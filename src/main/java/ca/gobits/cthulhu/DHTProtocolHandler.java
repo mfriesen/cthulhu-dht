@@ -354,19 +354,28 @@ public class DHTProtocolHandler {
 
         if (!CollectionUtils.isEmpty(peers)) {
 
-            // TODO IPv6
             List<byte[]> bytes = toByteArrayFromDHTPeer(peers);
             responseParameter.put("values", bytes);
 
         } else {
-            List<DHTNode> nodes = this.routingTable.findClosestNodes(infoHash,
-                    isIPv6);
 
-            byte[] transformNodes = toByteArrayFromDHTNode(nodes,
-                    isIPv6);
+            if (isIPv6) {
+                List<DHTNode> nodes = this.routingTable.findClosestNodes(
+                        infoHash, true);
 
-            responseParameter.put(arguments.isIpv6() ? "nodes6" : "nodes",
-                    transformNodes);
+                byte[] transformNodes = toByteArrayFromDHTNode(nodes, true);
+
+                responseParameter.put("nodes6", transformNodes);
+            }
+
+            if (arguments.isIpv4()) {
+                List<DHTNode> nodes = this.routingTable.findClosestNodes(
+                        infoHash, false);
+
+                byte[] transformNodes = toByteArrayFromDHTNode(nodes, false);
+
+                responseParameter.put("nodes", transformNodes);
+            }
         }
 
         responseParameter.put("token", generateToken());

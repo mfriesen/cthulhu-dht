@@ -118,9 +118,16 @@ public final class DHTArgumentRequest {
     }
 
     /**
-     * @return IPv6
+     * @return boolean
      */
     public boolean isIpv6() {
-        return this.want != null && this.want.contains("n6");
+        return this.want.contains("n6");
+    }
+
+    /**
+     * @return boolean
+     */
+    public boolean isIpv4() {
+        return this.want.contains("n4");
     }
 }

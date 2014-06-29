@@ -533,7 +533,7 @@ public final class DHTProtocolHandlerUnitTest extends EasyMockSupport {
         // given
         boolean isIPv6 = true;
 
-        byte[] bb = DHTQueryProtocol.getPeers("aa",
+        byte[] bb = DHTQueryProtocol.getPeersQuery("aa",
                 "abcdefghij0123456789".getBytes(),
                 "mnopqrstuvwxyz123456".getBytes(),
                 Arrays.asList("n6".getBytes()));
