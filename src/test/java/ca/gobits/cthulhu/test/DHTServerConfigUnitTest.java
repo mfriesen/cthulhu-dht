@@ -22,6 +22,7 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 import org.apache.commons.codec.binary.Base64;
+import org.apache.log4j.Level;
 import org.junit.Test;
 
 import ca.gobits.cthulhu.DHTServerConfig;
@@ -155,7 +156,6 @@ public final class DHTServerConfigUnitTest {
         assertEquals(20, result.getNodeId().length);
     }
 
-
     /**
      * testContructor09() - bootstrap nodes.
      */
@@ -170,5 +170,53 @@ public final class DHTServerConfigUnitTest {
 
         // then
         assertArrayEquals(new String[]{"23.43.12.4", "23.2.2.1"}, result);
+    }
+
+    /**
+     * testContructor10() - set -debug flag.
+     */
+    @Test
+    public void testContructor10() {
+        // given
+        String[] args = new String[] {"-debug"};
+
+        // when
+        DHTServerConfig config = new DHTServerConfig(args);
+        Level result = config.getLogLevel();
+
+        // then
+        assertEquals(Level.DEBUG, result);
+    }
+
+    /**
+     * testContructor11() - set -verbose flag.
+     */
+    @Test
+    public void testContructor11() {
+        // given
+        String[] args = new String[] {"-verbose"};
+
+        // when
+        DHTServerConfig config = new DHTServerConfig(args);
+        Level result = config.getLogLevel();
+
+        // then
+        assertEquals(Level.ALL, result);
+    }
+
+    /**
+     * testContructor12() - set -debug and -verbose flag.
+     */
+    @Test
+    public void testContructor12() {
+        // given
+        String[] args = new String[] {"-verbose", "-debug"};
+
+        // when
+        DHTServerConfig config = new DHTServerConfig(args);
+        Level result = config.getLogLevel();
+
+        // then
+        assertEquals(Level.ALL, result);
     }
 }

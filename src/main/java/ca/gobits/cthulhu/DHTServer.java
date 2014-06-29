@@ -19,6 +19,7 @@ import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
 
+import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
@@ -72,6 +73,8 @@ public class DHTServer /*implements Lifecycle*/ {
      */
     public void run() throws Exception {
 
+        setLoggingLevels();
+
         LOGGER.info("starting cthulhu on " + this.serverSocket.getLocalPort());
         bootstrap();
 
@@ -100,6 +103,16 @@ public class DHTServer /*implements Lifecycle*/ {
     }
 
     /**
+     * Sets the DHTServer logging levels.
+     */
+    private void setLoggingLevels() {
+        Level level = this.config.getLogLevel();
+        Logger.getRootLogger().setLevel(level);
+        Logger.getLogger("ca.gobits").setLevel(level);
+        LOGGER.debug("setting logging level to " + level);
+    }
+
+    /**
      * Bootstrap Server with nodes.
      */
     private void bootstrap() {
@@ -111,6 +124,7 @@ public class DHTServer /*implements Lifecycle*/ {
             for (String node : nodes) {
 
                 LOGGER.info("bootstrapping server with " + node);
+
                 try {
 
                     String[] addrPort = node.split(":");

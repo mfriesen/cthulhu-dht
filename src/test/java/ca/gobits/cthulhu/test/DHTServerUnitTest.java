@@ -22,6 +22,7 @@ import static org.easymock.EasyMock.isA;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 
+import org.apache.log4j.Level;
 import org.easymock.EasyMockRunner;
 import org.easymock.EasyMockSupport;
 import org.easymock.Mock;
@@ -76,6 +77,7 @@ public final class DHTServerUnitTest extends EasyMockSupport {
         // when
         expect(this.serverSocket.getLocalPort()).andReturn(port);
         expect(this.config.getBootstrapNodes()).andReturn(null);
+        expect(this.config.getLogLevel()).andReturn(Level.INFO);
         this.serverSocket.receive(isA(DatagramPacket.class));
         this.socketThreadPool.execute(isA(Runnable.class));
         this.socketThreadPool.shutdown();
