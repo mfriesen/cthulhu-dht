@@ -16,6 +16,7 @@
 
 package ca.gobits.cthulhu.test;
 
+import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
@@ -152,5 +153,22 @@ public final class DHTServerConfigUnitTest {
         // then
         assertEquals(6881, result.getPort());
         assertEquals(20, result.getNodeId().length);
+    }
+
+
+    /**
+     * testContructor09() - bootstrap nodes.
+     */
+    @Test
+    public void testContructor09() {
+        // given
+        String[] args = new String[] {"-nodes", " 23.43.12.4, 23.2.2.1 "};
+
+        // when
+        DHTServerConfig config = new DHTServerConfig(args);
+        String[] result = config.getBootstrapNodes();
+
+        // then
+        assertArrayEquals(new String[]{"23.43.12.4", "23.2.2.1"}, result);
     }
 }

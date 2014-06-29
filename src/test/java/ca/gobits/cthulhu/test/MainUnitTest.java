@@ -118,14 +118,17 @@ public final class MainUnitTest {
 
         String expected1 = "usage: java -jar dht.jar";
         String expected2 = "Parameters";
-        String expected3 = "-?            help";
-        String expected4 = "-p <arg>      bind to port";
-        String expected5 = "-salt <arg>   DHT Node Identifier salt";
+        String expected3 = "-?             help";
+        String expected4 = "-p <arg>       bind to port";
+        String expected5 = "-salt <arg>    DHT Node Identifier salt";
+        String expected6 = "-nodes <arg>   "
+               + "comma-separated list of bootstrap nodes format \"host:port\"";
 
         assertTrue(s.contains(expected1));
         assertTrue(s.contains(expected2));
         assertTrue(s.contains(expected3));
         assertTrue(s.contains(expected4));
         assertTrue(s.contains(expected5));
+        assertTrue(s.contains(expected6));
     }
 }

@@ -40,6 +40,8 @@ public class DHTServerConfig {
     static final Options DHTSERVER_OPTIONS = new Options()
         .addOption("p", true, "bind to port")
         .addOption("salt", true, "DHT Node Identifier salt")
+        .addOption("nodes", true,
+                "comma-separated list of bootstrap nodes format \"host:port\"")
         .addOption("?", false, "help");
 
     /** Default Port. */
@@ -53,6 +55,9 @@ public class DHTServerConfig {
 
     /** Is Display Help. */
     private boolean showHelp;
+
+    /** List of nodes to bootstrap server with. */
+    private String[] bootstrapNodes;
 
     /**
      * default constructor needed for registering with Spring Application
@@ -86,6 +91,12 @@ public class DHTServerConfig {
                     String salt = cmd.getOptionValue("salt");
                     this.nodeId = DHTIdentifier.sha1(salt.getBytes());
                 }
+
+                if (cmd.hasOption("nodes")) {
+                    String value = cmd.getOptionValue("nodes");
+                    this.bootstrapNodes = value.split(",");
+                    trim(this.bootstrapNodes);
+                }
             }
 
         } catch (UnrecognizedOptionException e) {
@@ -95,6 +106,16 @@ public class DHTServerConfig {
         } catch (Exception e) {
             LOGGER.fatal(e, e);
             this.showHelp = true;
+        }
+    }
+
+    /**
+     * Trim all strings.
+     * @param list list of strings
+     */
+    private void trim(final String[] list) {
+        for (int i = 0; i < list.length; i++) {
+            list[i] = list[i].trim();
         }
     }
 
@@ -117,5 +138,12 @@ public class DHTServerConfig {
      */
     public byte[] getNodeId() {
         return this.nodeId;
+    }
+
+    /**
+     * @return String[]
+     */
+    public String[] getBootstrapNodes() {
+        return this.bootstrapNodes;
     }
 }

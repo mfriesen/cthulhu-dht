@@ -33,6 +33,7 @@ import org.springframework.test.util.ReflectionTestUtils;
 
 import ca.gobits.cthulhu.DHTProtocolHandler;
 import ca.gobits.cthulhu.DHTServer;
+import ca.gobits.cthulhu.DHTServerConfig;
 
 /**
  * DHTServer UnitTests.
@@ -58,6 +59,10 @@ public final class DHTServerUnitTest extends EasyMockSupport {
     @Mock
     private DatagramSocket serverSocket;
 
+    /** Mock DHTServerConfig. */
+    @Mock
+    private DHTServerConfig config;
+
     /**
      * testRun01().
      * @throws Exception  Exception
@@ -70,6 +75,7 @@ public final class DHTServerUnitTest extends EasyMockSupport {
 
         // when
         expect(this.serverSocket.getLocalPort()).andReturn(port);
+        expect(this.config.getBootstrapNodes()).andReturn(null);
         this.serverSocket.receive(isA(DatagramPacket.class));
         this.socketThreadPool.execute(isA(Runnable.class));
         this.socketThreadPool.shutdown();

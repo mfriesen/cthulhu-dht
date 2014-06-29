@@ -85,11 +85,34 @@ public class DHTNodeDiscoveryImpl implements DHTNodeDiscovery {
     }
 
     @Override
+    public void sendFindNodeQuery(final InetAddress addr, final int port) {
+
+        try {
+            byte[] nodeId = this.config.getNodeId();
+            String transactionId = this.tokens.getTransactionId();
+
+            LOGGER.info("sending 'find_nodes' for "
+                    + Arrays.toString(nodeId) + " to " + addr.getHostName()
+                    + ":" + port);
+
+            List<byte[]> want = getWant();
+            byte[] msg = DHTQueryProtocol.findNodeQuery(transactionId,
+                    nodeId, nodeId, want);
+
+            DatagramPacket packet = new DatagramPacket(msg, msg.length,
+                    addr, port);
+            this.socket.send(packet);
+
+        } catch (IOException e) {
+            LOGGER.trace(e, e);
+        }
+    }
+
+    // TODO remove old nodes
+
+    @Override
     @Scheduled(fixedDelay = SCHEDULED_FIXED_DELAY)
     public void process() {
-
-        byte[] nodeId = this.config.getNodeId();
-        String transactionId = this.tokens.getTransactionId();
 
         Collection<DelayObject<byte[]>> objs =
                 new ArrayList<DelayObject<byte[]>>();
@@ -98,24 +121,9 @@ public class DHTNodeDiscoveryImpl implements DHTNodeDiscovery {
 
         for (DelayObject<byte[]> obj : objs) {
 
-            try {
-                InetAddress addr = compactAddress(obj.getPayload());
-                int port = compactAddressPort(obj.getPayload());
-
-                LOGGER.info("sending 'find_nodes' for "
-                        + Arrays.toString(nodeId) + " to " + addr.getHostName()
-                        + ":" + port);
-
-                List<byte[]> want = getWant();
-                byte[] msg = DHTQueryProtocol.findNodeQuery(transactionId,
-                        nodeId, nodeId, want);
-
-                DatagramPacket packet = new DatagramPacket(msg, msg.length,
-                        addr, port);
-                this.socket.send(packet);
-            } catch (IOException e) {
-                LOGGER.trace(e, e);
-            }
+            InetAddress addr = compactAddress(obj.getPayload());
+            int port = compactAddressPort(obj.getPayload());
+            sendFindNodeQuery(addr, port);
         }
     }
 

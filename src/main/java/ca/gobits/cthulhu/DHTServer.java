@@ -17,10 +17,13 @@
 package ca.gobits.cthulhu;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
+import java.net.InetAddress;
 
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
+
+import ca.gobits.cthulhu.discovery.DHTNodeDiscovery;
 
 
 /**
@@ -49,6 +52,14 @@ public class DHTServer /*implements Lifecycle*/ {
     @Autowired
     private DatagramSocket serverSocket;
 
+    /** DHTNode Discovery Handler. */
+    @Autowired
+    private DHTNodeDiscovery discovery;
+
+    /** DHTServer Config. */
+    @Autowired
+    private DHTServerConfig config;
+
     /**
      * Constructor.
      */
@@ -62,6 +73,7 @@ public class DHTServer /*implements Lifecycle*/ {
     public void run() throws Exception {
 
         LOGGER.info("starting cthulhu on " + this.serverSocket.getLocalPort());
+        bootstrap();
 
         try {
 
@@ -84,6 +96,33 @@ public class DHTServer /*implements Lifecycle*/ {
 
         } finally {
             shutdownGracefully();
+        }
+    }
+
+    /**
+     * Bootstrap Server with nodes.
+     */
+    private void bootstrap() {
+
+        String[] nodes = this.config.getBootstrapNodes();
+
+        if (nodes != null) {
+
+            for (String node : nodes) {
+
+                LOGGER.info("bootstrapping server with " + node);
+                try {
+
+                    String[] addrPort = node.split(":");
+                    InetAddress addr = InetAddress.getByName(addrPort[0]);
+                    int port = Integer.valueOf(addrPort[1]).intValue();
+
+                    this.discovery.sendFindNodeQuery(addr, port);
+
+                } catch (Exception e) {
+                    LOGGER.warn("unable to bootstrap " + node + ".", e);
+                }
+            }
         }
     }
 
