@@ -19,6 +19,7 @@
     <spring.version>4.0.3.RELEASE</spring.version>
     <log4j.version>1.2.17</log4j.version>
     <java.main.class>ca.gobits.cthulhu.DHTServer</java.main.class>
+    <jdk.version>1.7</jdk.version>
   </properties>  
   <scm>
     <url>git@github.com:mfriesen/cthulhu-dht.git</url>
@@ -146,8 +147,8 @@
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-compiler-plugin</artifactId>
           <configuration>
-            <source>1.7</source>
-            <target>1.7</target>
+            <source>${jdk.version}</source>
+            <target>${jdk.version}</target>
           </configuration>
         </plugin>
 
