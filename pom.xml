@@ -135,6 +135,20 @@
         <pluginManagement>
             <plugins>
       
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-jar-plugin</artifactId>
+                    <configuration>
+                        <archive>
+                            <manifest>
+                                <mainClass>ca.gobits.cthulhu.Main</mainClass>
+                                <addClasspath>true</addClasspath>
+                                <classpathPrefix>lib/</classpathPrefix>                                
+                            </manifest>
+                        </archive>
+                    </configuration>
+                </plugin>
+                
                 <!-- Package project -->
 			    <plugin>
 			        <groupId>org.apache.maven.plugins</groupId>
