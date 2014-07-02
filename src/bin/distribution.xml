@@ -14,7 +14,7 @@
         </fileSet>
         <fileSet>
             <directory>src/bin</directory>
-            <outputDirectory>bin</outputDirectory>
+            <outputDirectory>/</outputDirectory>
             <includes>
                 <include>*.bat</include>
             </includes>
@@ -22,9 +22,9 @@
         </fileSet>
         <fileSet>
             <directory>src/bin</directory>
-            <outputDirectory>bin</outputDirectory>
+            <outputDirectory>/</outputDirectory>
             <includes>
-                <include>hello</include>
+                <include>*.sh</include>
             </includes>
             <lineEnding>unix</lineEnding>
             <fileMode>0755</fileMode>

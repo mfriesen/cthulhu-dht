@@ -156,7 +156,7 @@
 			        <version>2.4</version>
 			        <configuration>
 			            <descriptors>
-			                <descriptor>src/assembly/distribution.xml</descriptor>
+			                <descriptor>src/bin/distribution.xml</descriptor>
 			            </descriptors>
 			        </configuration>
 			        <executions>
