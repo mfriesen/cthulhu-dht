@@ -45,6 +45,8 @@ public final class Main {
             = new AnnotationConfigApplicationContext();
 
         ac.register(DHTConfiguration.class);
+        ac.register(DHTServerConfig.class);
+        ac.refresh();
 
         try {
             main(args, ac);
@@ -64,8 +66,8 @@ public final class Main {
     public static void main(final String[] args,
             final AnnotationConfigApplicationContext ac) {
 
-        DHTServerConfig config = new DHTServerConfig(args);
-        ac.register(DHTServerConfig.class);
+        DHTServerConfig config = ac.getBean(DHTServerConfig.class);
+        config.parse(args);
 
         if (config.isShowHelp()) {
 
@@ -74,7 +76,6 @@ public final class Main {
         } else {
 
             try {
-                ac.refresh();
 
                 DHTServer server = ac.getBean(DHTServer.class);
                 server.run();

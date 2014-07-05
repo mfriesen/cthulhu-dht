@@ -25,7 +25,6 @@ import java.net.DatagramSocket;
 import java.net.Inet6Address;
 import java.net.InetAddress;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.BlockingQueue;
@@ -91,9 +90,8 @@ public class DHTNodeDiscoveryImpl implements DHTNodeDiscovery {
             byte[] nodeId = this.config.getNodeId();
             String transactionId = this.tokens.getTransactionId();
 
-            LOGGER.info("sending 'find_nodes' for "
-                    + Arrays.toString(nodeId) + " to " + addr.getHostName()
-                    + ":" + port);
+            LOGGER.info("sending 'find_nodes' to " + addr.getHostName()
+                    + ":" + port + " for node: SELF");
 
             List<byte[]> want = getWant();
             byte[] msg = DHTQueryProtocol.findNodeQuery(transactionId,
@@ -108,7 +106,7 @@ public class DHTNodeDiscoveryImpl implements DHTNodeDiscovery {
         }
     }
 
-    // TODO remove old nodes
+    // TODO remove old nodes / peers
 
     @Override
     @Scheduled(fixedDelay = SCHEDULED_FIXED_DELAY)
@@ -118,6 +116,9 @@ public class DHTNodeDiscoveryImpl implements DHTNodeDiscovery {
                 new ArrayList<DelayObject<byte[]>>();
 
         this.delayed.drainTo(objs);
+
+        LOGGER.info("processing node discovery found: " + objs.size()
+                + " out of " + this.delayed.size() + " nodes");
 
         for (DelayObject<byte[]> obj : objs) {
 

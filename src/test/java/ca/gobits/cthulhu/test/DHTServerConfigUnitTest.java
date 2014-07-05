@@ -19,6 +19,7 @@ package ca.gobits.cthulhu.test;
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
 import org.apache.commons.codec.binary.Base64;
@@ -34,30 +35,32 @@ import ca.gobits.cthulhu.DHTServerConfig;
 public final class DHTServerConfigUnitTest {
 
     /**
-     * testContructor01() - Test has "?" option.
+     * testParse01() - Test has "?" option.
      */
     @Test
-    public void testContructor01() {
+    public void testParse01() {
         // given
         String[] args = new String[] {"-?"};
+        DHTServerConfig result = new DHTServerConfig();
 
         // when
-        DHTServerConfig result = new DHTServerConfig(args);
+        result.parse(args);
 
         // then
         assertTrue(result.isShowHelp());
     }
 
     /**
-     * testContructor02() - Test has "-p" option.
+     * testParse02() - Test has "-p" option.
      */
     @Test
-    public void testContructor02() {
+    public void testParse02() {
         // given
         String[] args = new String[] {"-p", "8000"};
+        DHTServerConfig result = new DHTServerConfig();
 
         // when
-        DHTServerConfig result = new DHTServerConfig(args);
+        result.parse(args);
 
         // then
         assertFalse(result.isShowHelp());
@@ -65,60 +68,64 @@ public final class DHTServerConfigUnitTest {
     }
 
     /**
-     * testContructor03() - Test MissingArgumentException.
+     * testParse03() - Test MissingArgumentException.
      */
     @Test
-    public void testContructor03() {
+    public void testParse03() {
         // given
         String[] args = new String[] {"-p"};
+        DHTServerConfig result = new DHTServerConfig();
 
         // when
-        DHTServerConfig result = new DHTServerConfig(args);
+        result.parse(args);
 
         // then
         assertTrue(result.isShowHelp());
     }
 
     /**
-     * testContructor04() - Test UnrecognizedOptionException.
+     * testParse04() - Test UnrecognizedOptionException.
      */
     @Test
-    public void testContructor04() {
+    public void testParse04() {
         // given
         String[] args = new String[] {"-a"};
+        DHTServerConfig result = new DHTServerConfig();
 
         // when
-        DHTServerConfig result = new DHTServerConfig(args);
+        result.parse(args);
 
         // then
         assertTrue(result.isShowHelp());
     }
 
     /**
-     * testContructor05() - Test Exception.
+     * testParse05() - Test Exception.
      */
     @Test
-    public void testContructor05() {
+    public void testParse05() {
         // given
         String[] args = new String[] {"-p", "AAAA"};
+        DHTServerConfig result = new DHTServerConfig();
 
         // when
-        DHTServerConfig result = new DHTServerConfig(args);
+        result.parse(args);
 
         // then
         assertTrue(result.isShowHelp());
     }
 
     /**
-     * testContructor06() - salt used.
+     * testParse06() - salt used.
      */
     @Test
-    public void testContructor06() {
+    public void testParse06() {
         // given
         String[] args = new String[] {"-salt", "AAAA"};
+        DHTServerConfig result = new DHTServerConfig();
 
         // when
-        DHTServerConfig result = new DHTServerConfig(args);
+        result.parse(args);
 
         // then
         assertEquals("4lEhcqv4zJ9n/dSetsrPLfcbutM=",
@@ -126,62 +133,68 @@ public final class DHTServerConfigUnitTest {
     }
 
     /**
-     * testContructor07() - no params.
+     * testParse07() - no params.
      */
     @Test
-    public void testContructor07() {
+    public void testParse07() {
         // given
         String[] args = new String[] {};
-
-        // when
-        DHTServerConfig result = new DHTServerConfig(args);
-
-        // then
-        assertEquals(6881, result.getPort());
-        assertEquals(20, result.getNodeId().length);
-    }
-
-    /**
-     * testContructor08() - no params.
-     */
-    @Test
-    public void testContructor08() {
-        // given
-
-        // when
         DHTServerConfig result = new DHTServerConfig();
 
+        // when
+        result.parse(args);
+
         // then
         assertEquals(6881, result.getPort());
         assertEquals(20, result.getNodeId().length);
     }
 
     /**
-     * testContructor09() - bootstrap nodes.
+     * testParse08() - no params.
      */
     @Test
-    public void testContructor09() {
+    public void testParse08() {
         // given
-        String[] args = new String[] {"-nodes", " 23.43.12.4, 23.2.2.1 "};
+        DHTServerConfig result = new DHTServerConfig();
 
         // when
-        DHTServerConfig config = new DHTServerConfig(args);
+
+        // then
+        assertEquals(6881, result.getPort());
+        assertEquals(20, result.getNodeId().length);
+    }
+
+    /**
+     * testParse09() - bootstrap nodes.
+     */
+    @Test
+    public void testParse09() {
+        // given
+        String[] args = new String[] {"-nodes",
+                " 23.43.12.4:43, 23.2.2.1:123 " };
+        DHTServerConfig config = new DHTServerConfig();
+
+        // when
+        config.parse(args);
         String[] result = config.getBootstrapNodes();
 
         // then
-        assertArrayEquals(new String[]{"23.43.12.4", "23.2.2.1"}, result);
+        assertFalse(config.isShowHelp());
+        assertArrayEquals(new String[]{"23.43.12.4:43", "23.2.2.1:123"},
+                result);
     }
 
     /**
-     * testContructor10() - set -debug flag.
+     * testParse10() - set -debug flag.
      */
     @Test
-    public void testContructor10() {
+    public void testParse10() {
         // given
         String[] args = new String[] {"-debug"};
+        DHTServerConfig config = new DHTServerConfig();
 
         // when
-        DHTServerConfig config = new DHTServerConfig(args);
+        config.parse(args);
         Level result = config.getLogLevel();
 
         // then
@@ -189,15 +202,16 @@ public final class DHTServerConfigUnitTest {
     }
 
     /**
-     * testContructor11() - set -verbose flag.
+     * testParse11() - set -verbose flag.
      */
     @Test
-    public void testContructor11() {
+    public void testParse11() {
         // given
         String[] args = new String[] {"-verbose"};
+        DHTServerConfig config = new DHTServerConfig();
 
         // when
-        DHTServerConfig config = new DHTServerConfig(args);
+        config.parse(args);
         Level result = config.getLogLevel();
 
         // then
@@ -205,18 +219,53 @@ public final class DHTServerConfigUnitTest {
     }
 
     /**
-     * testContructor12() - set -debug and -verbose flag.
+     * testParse12() - set -debug and -verbose flag.
      */
     @Test
-    public void testContructor12() {
+    public void testParse12() {
         // given
         String[] args = new String[] {"-verbose", "-debug"};
+        DHTServerConfig config = new DHTServerConfig();
 
         // when
-        DHTServerConfig config = new DHTServerConfig(args);
+        config.parse(args);
         Level result = config.getLogLevel();
 
         // then
         assertEquals(Level.ALL, result);
+    }
+
+    /**
+     * Test bootstrap node missing port number.
+     */
+    @Test
+    public void testParse13() {
+        String[] args = new String[] {"-nodes", " 23.43.12.4, 23.2.2.1 "};
+        DHTServerConfig config = new DHTServerConfig();
+
+        // when
+        config.parse(args);
+        String[] result = config.getBootstrapNodes();
+
+        // then
+        assertTrue(config.isShowHelp());
+        assertNull(result);
+    }
+
+    /**
+     * Test invlalid bootstrap nodes.
+     */
+    @Test
+    public void testParse14() {
+        String[] args = new String[] {"-nodes", " asd"};
+        DHTServerConfig config = new DHTServerConfig();
+
+        // when
+        config.parse(args);
+        String[] result = config.getBootstrapNodes();
+
+        // then
+        assertTrue(config.isShowHelp());
+        assertNull(result);
     }
 }

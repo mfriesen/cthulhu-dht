@@ -67,6 +67,7 @@ public final class DHTInfoHashBasic implements DHTInfoHash {
         return this.peers;
     }
 
+    // TODO set MAX # of Peers / Info Hash
     /**
      * Sets Peers.
      * @param set  Set<DHTPeer>

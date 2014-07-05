@@ -76,7 +76,7 @@ public class DHTServerConfig {
      * Creates DHT Server Config from Command Line arguments.
      * @param args  args
      */
-    public DHTServerConfig(final String[] args) {
+    public void parse(final String[] args) {
 
         try {
             CommandLineParser parser = new BasicParser();
@@ -129,7 +129,33 @@ public class DHTServerConfig {
             if (cmd.hasOption("verbose")) {
                 this.logLevel = Level.ALL;
             }
+
+            if (!isValid()) {
+                this.showHelp = true;
+                this.bootstrapNodes = null;
+            }
         }
+    }
+
+    /**
+     * Validates parameters passed in are valid.
+     * @return boolean
+     */
+    private boolean isValid() {
+
+        boolean valid = true;
+
+        if (this.bootstrapNodes != null) {
+
+            for (String node : this.bootstrapNodes) {
+                if (node.split(":").length != 2) {
+                    valid = false;
+                    break;
+                }
+            }
+        }
+
+        return valid;
     }
 
     /**

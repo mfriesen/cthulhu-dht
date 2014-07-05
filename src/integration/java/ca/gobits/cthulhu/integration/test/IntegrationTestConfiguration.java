@@ -43,6 +43,6 @@ public class IntegrationTestConfiguration {
      */
     @Bean
     public DHTServerConfig serverConfig() {
-        return new DHTServerConfig(new String[]{});
+        return new DHTServerConfig();
     }
 }

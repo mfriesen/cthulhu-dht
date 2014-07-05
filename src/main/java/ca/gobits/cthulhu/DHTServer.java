@@ -76,9 +76,10 @@ public class DHTServer /*implements Lifecycle*/ {
         setLoggingLevels();
 
         LOGGER.info("starting cthulhu on " + this.serverSocket.getLocalPort());
-        bootstrap();
 
         try {
+
+            bootstrap();
 
             byte[] receiveData = new byte[RECEIVE_DATA_LENGTH];
 
@@ -144,6 +145,8 @@ public class DHTServer /*implements Lifecycle*/ {
      * Gracefully shutdown server.
      */
     public final void shutdownGracefully() {
+        LOGGER.info("shutdown cthulhu");
+
         this.stop = true;
         this.socketThreadPool.shutdown();
 

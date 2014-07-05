@@ -384,7 +384,7 @@ public final class DHTProtocolHandlerUnitTest extends EasyMockSupport {
         verifyAll();
 
         String result = new String(bytes);
-        assertEquals("d1:rd3:20212:Server Errore1:t2:aa1:y1:ee", result);
+        assertEquals("d1:rd3:20212:Server Errore1:y1:ee", result);
     }
 
     /**

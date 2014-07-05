@@ -85,6 +85,7 @@ public class DHTProtocolHandler {
 
         byte[] bytes = null;
 
+        InetAddress addr = packet.getAddress();
         Map<String, Object> response = new HashMap<String, Object>();
 
         try {
@@ -94,10 +95,21 @@ public class DHTProtocolHandler {
             if (isValid(request)) {
 
                  if (request.containsKey("q")) {
+
+                     LOGGER.info("received valid query from "
+                             + addr.getHostName() + ":" + packet.getPort());
                     bytes = queryRequestHandler(packet, request);
+
                 } else {
+
+                    LOGGER.info("received valid response from "
+                            + addr.getHostName() + ":" + packet.getPort());
                     queryResponseHandler(packet, request);
                 }
+            } else {
+
+                LOGGER.info("received INVALID request/response from "
+                        + addr.getHostName() + ":" + packet.getPort());
             }
 
         } catch (Exception e) {
@@ -157,6 +169,7 @@ public class DHTProtocolHandler {
             if (request1.containsKey("nodes")) {
                 Collection<DHTNode> nodes = toDHTNode((byte[]) request1
                         .get("nodes"), false);
+                LOGGER.info("adding " + nodes.size() + " to discovery");
                 addToDiscovery(nodes);
             }
 
@@ -164,6 +177,7 @@ public class DHTProtocolHandler {
             if (request1.containsKey("nodes6")) {
                 Collection<DHTNode> nodes = toDHTNode((byte[]) request1
                         .get("nodes6"), true);
+                LOGGER.info("adding " + nodes.size() + " to discovery");
                 addToDiscovery(nodes);
             }
         }
@@ -217,52 +231,46 @@ public class DHTProtocolHandler {
      * @param packet  DatagramPacket
      * @param request Map<String, Object>
      * @return byte[]
+     * @throws IOException  IOException
      */
     private byte[] queryRequestHandler(final DatagramPacket packet,
-            final Map<String, Object> request) {
+            final Map<String, Object> request) throws IOException {
 
         Map<String, Object> response = new HashMap<String, Object>();
 
-        try {
+        String action = new String((byte[]) request.get("q"));
 
-            String action = new String((byte[]) request.get("q"));
+        InetAddress addr = packet.getAddress();
+        int port = packet.getPort();
 
-            InetAddress addr = packet.getAddress();
-            int port = packet.getPort();
+        response.put("y", "r");
+        response.put("t", request.get("t"));
+        response.put("ip", compactAddress(addr.getAddress(), port));
 
-            response.put("y", "r");
-            response.put("t", request.get("t"));
-            response.put("ip", compactAddress(addr.getAddress(), port));
+        @SuppressWarnings("unchecked")
+        DHTArgumentRequest arguments = new DHTArgumentRequest(addr,
+                (Map<String, Object>) request.get("a"));
 
-            @SuppressWarnings("unchecked")
-            DHTArgumentRequest arguments = new DHTArgumentRequest(addr,
-                    (Map<String, Object>) request.get("a"));
+        updateNodeStatusOrPing(arguments, addr, port);
 
-            updateNodeStatusOrPing(arguments, addr, port);
+        if (action.equals("ping")) {
 
-            if (action.equals("ping")) {
+            addPingResponse(arguments, response, packet);
 
-                addPingResponse(arguments, response, packet);
+        } else if (action.equals("find_node")) {
 
-            } else if (action.equals("find_node")) {
+            addFindNodeResponse(arguments, response, packet);
 
-                addFindNodeResponse(arguments, response, packet);
+        } else if (action.equals("get_peers")) {
 
-            } else if (action.equals("get_peers")) {
+            addGetPeersResponse(arguments, response, packet);
 
-                addGetPeersResponse(arguments, response, packet);
+        } else if (action.equals("announce_peer")) {
 
-            } else if (action.equals("announce_peer")) {
+            addAnnouncePeerResponse(arguments, response, packet);
 
-                addAnnouncePeerResponse(arguments, response, packet);
-
-            } else {
-                addMethodUnknownResponse(response);
-            }
-
-        } catch (Exception e) {
-            LOGGER.warn(e, e);
-            addServerError(response);
+        } else {
+            addMethodUnknownResponse(response);
         }
 
         return bencode(response);

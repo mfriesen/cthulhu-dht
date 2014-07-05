@@ -76,10 +76,12 @@ public final class MainUnitTest {
         final String[] args = new String[]{};
 
         DHTServer mockServer = createMock(DHTServer.class);
+        DHTServerConfig mockConfig = createMock(DHTServerConfig.class);
 
         // when
-        this.ac.register(DHTServerConfig.class);
-        this.ac.refresh();
+        expect(this.ac.getBean(DHTServerConfig.class)).andReturn(mockConfig);
+        mockConfig.parse(args);
+
         expect(this.ac.getBean(DHTServer.class)).andReturn(mockServer);
         mockServer.run();
         replay(this.ac);
@@ -97,10 +99,11 @@ public final class MainUnitTest {
     public void testMain03() throws Exception {
         // given
         final String[] args = new String[]{};
+        DHTServerConfig mockConfig = createMock(DHTServerConfig.class);
 
         // when
-        this.ac.register(DHTServerConfig.class);
-        this.ac.refresh();
+        expect(this.ac.getBean(DHTServerConfig.class)).andReturn(mockConfig);
+
         expect(this.ac.getBean(DHTServer.class))
                 .andThrow(new RuntimeException());
         replay(this.ac);
