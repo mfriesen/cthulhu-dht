@@ -334,7 +334,7 @@ public final class DHTTokenTableBasicUnitTest {
         remove.start();
 
         // then
-        while (add.isAlive() && remove.isAlive()) {
+        while (add.isAlive() || remove.isAlive()) {
             Thread.sleep(50);
         }
 
