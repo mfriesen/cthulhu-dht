@@ -55,16 +55,16 @@
             <version>${spring.version}</version>            
         </dependency>
         <dependency>
-	       <groupId>org.springframework.security</groupId>
-	       <artifactId>spring-security-core</artifactId>
-	       <version>3.2.4.RELEASE</version>
+           <groupId>org.springframework.security</groupId>
+           <artifactId>spring-security-core</artifactId>
+           <version>3.2.4.RELEASE</version>
         </dependency>
         <dependency>
             <groupId>log4j</groupId>
             <artifactId>log4j</artifactId>
             <version>${log4j.version}</version>
         </dependency>    
-	   <dependency>
+       <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-log4j12</artifactId>
             <version>1.7.7</version>
@@ -149,27 +149,61 @@
                     </configuration>
                 </plugin>
                 
-                <!-- Package project -->
-			    <plugin>
-			        <groupId>org.apache.maven.plugins</groupId>
-			        <artifactId>maven-assembly-plugin</artifactId>
-			        <version>2.4</version>
-			        <configuration>
-			            <descriptors>
-			                <descriptor>src/bin/distribution.xml</descriptor>
-			            </descriptors>
-			        </configuration>
-			        <executions>
-			            <execution>
-			                <id>make-assembly</id> <!-- this is used for inheritance merges -->
-			                <phase>package</phase> <!-- append to the packaging phase. -->
-			                <goals>
-			                    <goal>single</goal> <!-- goals == mojos -->
-			                </goals>
-			            </execution>
-			        </executions>
-			    </plugin>
+                <plugin>
+                    <artifactId>maven-source-plugin</artifactId>
+                    <executions>
+                        <execution>
+                            <id>attach-sources</id>
+                            <phase>deploy</phase>
+                            <goals><goal>jar-no-fork</goal></goals> 
+                        </execution>
+                    </executions>
+                </plugin>
+                
+                <plugin> 
+                    <artifactId>maven-javadoc-plugin</artifactId> 
+                    <executions> 
+                        <execution> 
+                            <id>attach-javadocs</id>
+                            <phase>deploy</phase>
+                            <goals><goal>jar</goal></goals> 
+                        </execution> 
+                    </executions> 
+                </plugin>
+                
+                <plugin> 
+                    <!-- explicitly define maven-deploy-plugin after other to force exec order -->
+                    <artifactId>maven-deploy-plugin</artifactId> 
+                    <executions> 
+                        <execution> 
+                            <id>deploy</id>
+                            <phase>deploy</phase>
+                            <goals><goal>deploy</goal></goals> 
+                        </execution> 
+                    </executions> 
+                </plugin>
     
+                <!-- Package project -->
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-assembly-plugin</artifactId>
+                    <version>2.4</version>
+                    <configuration>
+                        <descriptors>
+                            <descriptor>src/bin/distribution.xml</descriptor>
+                        </descriptors>
+                    </configuration>
+                    <executions>
+                        <execution>
+                            <id>make-assembly</id> <!-- this is used for inheritance merges -->
+                            <phase>package</phase> <!-- append to the packaging phase. -->
+                            <goals>
+                                <goal>single</goal> <!-- goals == mojos -->
+                            </goals>
+                        </execution>
+                    </executions>
+                </plugin>
+        
                 <!--  Checkstyle -->
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
