@@ -45,7 +45,7 @@ public class DHTServerAsync {
     public void start() throws Exception {
         if (!isStarted) {
             isStarted = true;
-            this.server.run();
+            this.server.start();
         }
     }
 

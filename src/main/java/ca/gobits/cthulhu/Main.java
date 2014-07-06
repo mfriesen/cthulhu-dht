@@ -78,7 +78,7 @@ public final class Main {
             try {
 
                 DHTServer server = ac.getBean(DHTServer.class);
-                server.run();
+                server.start();
 
             } catch (Exception e) {
 

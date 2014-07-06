@@ -84,7 +84,7 @@ public final class DHTServerUnitTest extends EasyMockSupport {
         this.serverSocket.close();
 
         replayAll();
-        this.server.run();
+        this.server.start();
 
         // then
         verifyAll();

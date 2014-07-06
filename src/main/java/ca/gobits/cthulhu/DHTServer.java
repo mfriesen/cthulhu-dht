@@ -15,6 +15,7 @@
 //
 
 package ca.gobits.cthulhu;
+import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
@@ -68,10 +69,10 @@ public class DHTServer /*implements Lifecycle*/ {
     }
 
     /**
-     * Run DHTServer.
+     * Starts the DHTServer.
      * @throws Exception  Exception
      */
-    public void run() throws Exception {
+    public void start() throws Exception {
 
         setLoggingLevels();
 
@@ -81,25 +82,34 @@ public class DHTServer /*implements Lifecycle*/ {
 
             bootstrap();
 
-            byte[] receiveData = new byte[RECEIVE_DATA_LENGTH];
-
-            while (true) {
-
-                DatagramPacket receivePacket = new DatagramPacket(
-                        receiveData, receiveData.length);
-
-                this.serverSocket.receive(receivePacket);
-
-                this.socketThreadPool.execute(new DHTProtocolRunnable(
-                    this.serverSocket, this.dhtHandler, receivePacket));
-
-                if (this.stop) {
-                    break;
-                }
-            }
+            receive();
 
         } finally {
             shutdownGracefully();
+        }
+    }
+
+    /**
+     * Starts receiving packets and processing them.
+     * @throws IOException  IOException
+     */
+    private void receive() throws IOException {
+
+        byte[] receiveData = new byte[RECEIVE_DATA_LENGTH];
+
+        while (true) {
+
+            DatagramPacket receivePacket = new DatagramPacket(
+                    receiveData, receiveData.length);
+
+            this.serverSocket.receive(receivePacket);
+
+            this.socketThreadPool.execute(new DHTProtocolRunnable(
+                this.serverSocket, this.dhtHandler, receivePacket));
+
+            if (this.stop) {
+                break;
+            }
         }
     }
 

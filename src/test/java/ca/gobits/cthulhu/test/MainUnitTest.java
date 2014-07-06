@@ -83,7 +83,7 @@ public final class MainUnitTest {
         mockConfig.parse(args);
 
         expect(this.ac.getBean(DHTServer.class)).andReturn(mockServer);
-        mockServer.run();
+        mockServer.start();
         replay(this.ac);
         Main.main(args, this.ac);
 
