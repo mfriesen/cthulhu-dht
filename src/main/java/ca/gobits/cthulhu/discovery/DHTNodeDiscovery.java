@@ -33,6 +33,13 @@ public interface DHTNodeDiscovery {
     void addNode(final InetAddress addr, final int port);
 
     /**
+     * Bootstraps the DHT Server.
+     * @param addr  InetAddress
+     * @param port  port
+     */
+    void bootstrap(final InetAddress addr, final int port);
+
+    /**
      * Send find node query to InetAddress immediately.
      * @param addr  InetAddress
      * @param port  port

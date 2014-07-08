@@ -30,6 +30,7 @@ import java.util.List;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.DelayQueue;
 
+import org.apache.commons.codec.binary.Base64;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -84,18 +85,53 @@ public class DHTNodeDiscoveryImpl implements DHTNodeDiscovery {
     }
 
     @Override
+    public void bootstrap(final InetAddress addr, final int port) {
+
+        byte[] nodeId = this.config.getNodeId();
+        byte[] node0 = new byte[nodeId.length];
+
+        for (int i = 0; i < nodeId.length; i++) {
+            node0[i] = (byte) ~nodeId[i];
+        }
+
+        LOGGER.info("sending 'find_nodes' to " + addr.getHostName()
+                + ":" + port + " for node: SELF");
+
+        sendFindNodeQuery(addr, port, nodeId);
+
+        LOGGER.info("sending 'find_nodes' to " + addr.getHostName() + ":"
+                + port + " for node: " + Base64.encodeBase64String(node0));
+
+        sendFindNodeQuery(addr, port, node0);
+    }
+
+    @Override
     public void sendFindNodeQuery(final InetAddress addr, final int port) {
+        byte[] target = this.config.getNodeId();
+
+        LOGGER.info("sending 'find_nodes' to " + addr.getHostName()
+                + ":" + port + " for node: SELF");
+
+        sendFindNodeQuery(addr, port, target);
+    }
+
+    /**
+     * Sends 'find_node' DHT Query to an address.
+     * @param addr  InetAddress
+     * @param port  int port
+     * @param target  byte[]
+     */
+    private void sendFindNodeQuery(final InetAddress addr, final int port,
+            final byte[] target) {
 
         try {
+
             byte[] nodeId = this.config.getNodeId();
             String transactionId = this.tokens.getTransactionId();
 
-            LOGGER.info("sending 'find_nodes' to " + addr.getHostName()
-                    + ":" + port + " for node: SELF");
-
             List<byte[]> want = getWant();
             byte[] msg = DHTQueryProtocol.findNodeQuery(transactionId,
-                    nodeId, nodeId, want);
+                    nodeId, target, want);
 
             DatagramPacket packet = new DatagramPacket(msg, msg.length,
                     addr, port);

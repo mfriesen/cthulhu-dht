@@ -24,14 +24,9 @@ import static org.junit.Assert.assertTrue;
 import java.util.Map;
 
 import org.apache.commons.codec.binary.Base64;
-import org.junit.Before;
 import org.junit.Test;
-import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
-import ca.gobits.cthulhu.DHTConfiguration;
 import ca.gobits.cthulhu.DHTQueryProtocol;
 import ca.gobits.cthulhu.DHTServerConfig;
 import ca.gobits.dht.BDecoder;
@@ -41,27 +36,11 @@ import ca.gobits.dht.DHTConversion;
  * DHT Ping Integration Test.
  *
  */
-@RunWith(SpringJUnit4ClassRunner.class)
-@ContextConfiguration(classes = { DHTConfiguration.class,
-        IntegrationTestConfiguration.class })
-public final class DHTPingIntegrationTest {
-
-    /** Async DHT Server. */
-    @Autowired
-    private DHTServerAsync async;
+public final class DHTPingIntegrationTest extends AbstractIntegrationTest {
 
     /** DHTServerConfig. */
     @Autowired
     private DHTServerConfig config;
-
-    /** Starts DHTServer.
-     * @throws Exception  Exception
-     */
-    @Before
-    public void before() throws Exception {
-        this.async.start();
-        this.async.waitForServerStart();
-    }
 
     /**
      * testPing01() - test ping request with real response.

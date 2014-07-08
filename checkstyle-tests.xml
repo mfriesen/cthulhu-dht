@@ -63,7 +63,10 @@
     <module name="RedundantThrows"/>
     <module name="SimplifyBooleanExpression"/>
     <module name="SimplifyBooleanReturn"/>
-    <module name="DesignForExtension"/>
+    <module name="DesignForExtension">
+      <property name="severity" value="ignore"/>
+      <metadata name="net.sf.eclipsecs.core.lastEnabledSeverity" value="inherit"/>
+    </module>
     <module name="FinalClass"/>
     <module name="HideUtilityClassConstructor"/>
     <module name="InterfaceIsType"/>

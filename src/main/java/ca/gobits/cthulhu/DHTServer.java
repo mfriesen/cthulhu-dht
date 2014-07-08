@@ -20,6 +20,7 @@ import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
 
+import org.apache.commons.codec.binary.Base64;
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -76,7 +77,9 @@ public class DHTServer /*implements Lifecycle*/ {
 
         setLoggingLevels();
 
-        LOGGER.info("starting cthulhu on " + this.serverSocket.getLocalPort());
+        LOGGER.info("starting cthulhu on " + this.serverSocket.getLocalPort()
+                + " with ID "
+                + Base64.encodeBase64String(this.config.getNodeId()));
 
         try {
 
@@ -142,7 +145,7 @@ public class DHTServer /*implements Lifecycle*/ {
                     InetAddress addr = InetAddress.getByName(addrPort[0]);
                     int port = Integer.valueOf(addrPort[1]).intValue();
 
-                    this.discovery.sendFindNodeQuery(addr, port);
+                    this.discovery.bootstrap(addr, port);
 
                 } catch (Exception e) {
                     LOGGER.warn("unable to bootstrap " + node + ".", e);

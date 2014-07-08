@@ -32,12 +32,8 @@ import org.apache.commons.codec.binary.Base64;
 import org.apache.log4j.Logger;
 import org.junit.Before;
 import org.junit.Test;
-import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
-import ca.gobits.cthulhu.DHTConfiguration;
 import ca.gobits.cthulhu.DHTNodeRoutingTable;
 import ca.gobits.cthulhu.domain.DHTNode;
 import ca.gobits.cthulhu.domain.DHTNode.State;
@@ -50,10 +46,7 @@ import ca.gobits.dht.DHTConversion;
  * Integration Test for "get_peers" requests.
  *
  */
-@RunWith(SpringJUnit4ClassRunner.class)
-@ContextConfiguration(classes = { DHTConfiguration.class,
-        IntegrationTestConfiguration.class })
-public final class DHTGetPeersIntegrationTest {
+public class DHTGetPeersIntegrationTest extends AbstractIntegrationTest {
 
     /** LOGGER. */
     private static final Logger LOGGER = Logger
@@ -63,18 +56,14 @@ public final class DHTGetPeersIntegrationTest {
     @Autowired
     private DHTNodeRoutingTable nodeRoutingTable;
 
-    /** Async DHT Server. */
-    @Autowired
-    private DHTServerAsync async;
-
     /** Starts DHTServer.
      * @throws Exception  Exception
      */
+    @Override
     @Before
     public void before() throws Exception {
         this.nodeRoutingTable.clear();
-        this.async.start();
-        this.async.waitForServerStart();
+        super.before();
     }
 
     /**

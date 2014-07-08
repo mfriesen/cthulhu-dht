@@ -27,15 +27,12 @@ import ca.gobits.cthulhu.DHTServer;
  */
 public class DHTServerAsync {
 
-    /** Wait for Server to Start. */
-    private static final int SERVER_START_DELAY = 500;
-
     /** Reference to DHTServer. */
     @Autowired
     private DHTServer server;
 
-    /** Has server been started. */
-    private static boolean isStarted = false;
+//    /** Has server been started. */
+//    private static boolean isStarted = false;
 
     /**
      * Start DHTServer is not already started.
@@ -43,17 +40,16 @@ public class DHTServerAsync {
      */
     @Async
     public void start() throws Exception {
-        if (!isStarted) {
-            isStarted = true;
+//        if (!isStarted) {
+//            isStarted = true;
             this.server.start();
-        }
+//        }
     }
 
     /**
-     * For for DHTServer to be started.
-     * @throws Exception  Exception
+     * Shutdown server.
      */
-    public void waitForServerStart() throws Exception {
-        Thread.sleep(SERVER_START_DELAY);
+    public void shutdown() {
+        this.server.shutdownGracefully();
     }
 }
