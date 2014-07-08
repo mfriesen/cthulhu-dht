@@ -67,12 +67,10 @@ public final class DHTInfoHashBasic implements DHTInfoHash {
         return this.peers;
     }
 
-    // TODO set MAX # of Peers / Info Hash
     /**
      * Sets Peers.
      * @param set  Set<DHTPeer>
      */
-    @Override
     public void setPeers(final Set<DHTPeer> set) {
         this.peers = set;
     }
@@ -133,5 +131,10 @@ public final class DHTInfoHashBasic implements DHTInfoHash {
     @Override
     public void setInfoHash(final byte[] infoHashId) {
         this.infoHash = infoHashId;
+    }
+
+    @Override
+    public int getPeerCount() {
+        return this.peers != null ? this.peers.size() : 0;
     }
 }

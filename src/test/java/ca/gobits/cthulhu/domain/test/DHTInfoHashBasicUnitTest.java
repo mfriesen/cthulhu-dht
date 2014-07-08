@@ -191,7 +191,7 @@ public final class DHTInfoHashBasicUnitTest {
     public void testAddPeer03() throws Exception {
         // given
         BigInteger nodeId = new BigInteger("123");
-        DHTInfoHash node = new DHTInfoHashBasic(nodeId.toByteArray());
+        DHTInfoHashBasic node = new DHTInfoHashBasic(nodeId.toByteArray());
         byte[] address = new byte[] {127, 0, 0, 1 };
         int port = 103;
         DHTPeer peer = new DHTPeerBasic(address, port);

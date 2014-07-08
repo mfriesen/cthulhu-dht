@@ -31,10 +31,9 @@ public interface DHTInfoHash {
     Set<DHTPeer> getPeers();
 
     /**
-     * Sets Peers.
-     * @param set  Set<DHTPeer>
+     * @return  int number of peers.
      */
-    void setPeers(final Set<DHTPeer> set);
+    int getPeerCount();
 
     /**
      * Adds a peer.

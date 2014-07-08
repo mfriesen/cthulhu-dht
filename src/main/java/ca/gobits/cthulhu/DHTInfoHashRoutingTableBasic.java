@@ -37,8 +37,14 @@ public final class DHTInfoHashRoutingTableBasic implements
     private static final Logger LOGGER = Logger
             .getLogger(DHTInfoHashRoutingTableBasic.class);
 
+    /** Default Maximum number of peers. */
+    private static final int DEFAULT_PEER_MAX = 16;
+
     /** list of peers. */
     private final ConcurrentSortedList<DHTInfoHash> infoHashes;
+
+    /** Maxmimum number of peers allow. */
+    private int peerMax = DEFAULT_PEER_MAX;
 
     /**
      * constructor.
@@ -92,11 +98,30 @@ public final class DHTInfoHashRoutingTableBasic implements
                 + " port " + port + " to info hash "
                 + Arrays.toString(infoHashId));
 
-        result.addPeer(address, port);
+        if (result.getPeerCount() < (this.peerMax - 1)) {
+            result.addPeer(address, port);
+        } else {
+            LOGGER.debug("maximum number of peers reached.");
+        }
     }
 
     @Override
     public DHTInfoHash findInfoHash(final byte[] infoHash) {
         return this.infoHashes.get(new DHTInfoHashBasic(infoHash));
+    }
+
+    /**
+     * @return int
+     */
+    public int getPeerMax() {
+        return this.peerMax;
+    }
+
+    /**
+     * Sets the Peer Max.
+     * @param max  int
+     */
+    public void setPeerMax(final int max) {
+        this.peerMax = max;
     }
 }

@@ -26,7 +26,6 @@ import java.util.Iterator;
 
 import org.junit.Test;
 
-import ca.gobits.cthulhu.DHTInfoHashRoutingTable;
 import ca.gobits.cthulhu.DHTInfoHashRoutingTableBasic;
 import ca.gobits.cthulhu.domain.DHTInfoHash;
 import ca.gobits.cthulhu.domain.DHTPeer;
@@ -38,7 +37,7 @@ import ca.gobits.cthulhu.domain.DHTPeer;
 public final class DHTInfoHashRoutingTableBasicUnitTest {
 
     /** DHTInfoHashRoutingTable. */
-    private final DHTInfoHashRoutingTable rt =
+    private final DHTInfoHashRoutingTableBasic rt =
             new DHTInfoHashRoutingTableBasic();
 
     /**
@@ -124,5 +123,29 @@ public final class DHTInfoHashRoutingTableBasicUnitTest {
         assertEquals(1, result.getPeers().size());
         Iterator<DHTPeer> itr = result.getPeers().iterator();
         assertEquals("127.0.0.1", itr.next().getAddress().getHostAddress());
+    }
+
+    /**
+     * testAddPeer03() - Test Maximum number of peers.
+     * @throws Exception   Exception
+     */
+    @Test
+    public void testAddPeer03() throws Exception {
+        // given
+        byte[] infoHash = new BigInteger("12341").toByteArray();
+        byte[] address = new byte[] {127, 0, 0, 1 };
+        int port = 1234;
+        this.rt.setPeerMax(0);
+
+        // when
+        this.rt.addPeer(infoHash, address, port);
+        assertNotNull(this.rt.findInfoHash(infoHash));
+        this.rt.addPeer(infoHash, address, port);
+        DHTInfoHash result = this.rt.findInfoHash(infoHash);
+
+        // then
+        assertNotNull(result);
+        assertEquals(0, result.getPeerCount());
+        assertEquals(0, this.rt.getPeerMax());
     }
 }
