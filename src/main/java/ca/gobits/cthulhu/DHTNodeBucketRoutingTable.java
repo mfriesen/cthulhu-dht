@@ -166,7 +166,7 @@ public final class DHTNodeBucketRoutingTable implements DHTNodeRoutingTable {
      */
     private List<DHTNode> findClosestNodes(final DHTNode node,
             final int max, final boolean ipv6) {
-
+        // TODO need to add distance calculation
         int index = this.nodes.indexOf(node);
 
         int fromIndex = index > 0 ? index - 1 : 0;
