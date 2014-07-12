@@ -97,6 +97,7 @@ public class DHTNodeDiscoveryImpl implements DHTNodeDiscovery {
         LOGGER.info("sending 'find_nodes' to " + addr.getHostName()
                 + ":" + port + " for node: SELF");
 
+        // TODO change to Pings and then perform find_node later
         sendFindNodeQuery(addr, port, nodeId);
 
         LOGGER.info("sending 'find_nodes' to " + addr.getHostName() + ":"
