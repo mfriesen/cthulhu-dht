@@ -44,11 +44,11 @@ public final class DHTDistanceUnitTest {
         BigInteger id1 = new BigInteger("2"); // 0010
 
         // when
-        BigInteger result = DHTDistance.xor(id0.toByteArray(),
+        int[] result = DHTDistance.xor(id0.toByteArray(),
                 id1.toByteArray());
 
         // then
-        assertEquals(8, result.intValue());
+        assertEquals("[8]", Arrays.toString(result));
     }
 
     /**
@@ -63,12 +63,13 @@ public final class DHTDistanceUnitTest {
         BigInteger id1 = bd.toBigInteger();
 
         // when
-        BigInteger result = DHTDistance.xor(id0,
+        int[] result = DHTDistance.xor(id0,
                 id1.toByteArray());
 
         // then
-        assertEquals("1461501637330902918203684832716283019655932542976",
-                result.toString());
+        assertEquals(
+            "[1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]",
+            Arrays.toString(result));
     }
 
     /**
@@ -80,14 +81,13 @@ public final class DHTDistanceUnitTest {
         // given
         BigInteger id0 = new BigInteger("10");
         BigInteger id1 = new BigInteger("51");
-        BigInteger expect = new BigInteger("57");
 
         // when
-        BigInteger result = DHTDistance.xor(id0.toByteArray(),
+        int[] result = DHTDistance.xor(id0.toByteArray(),
                 id1.toByteArray());
 
         // then
-        assertEquals(expect, result);
+        assertEquals("[57]", Arrays.toString(result));
     }
 
     /**

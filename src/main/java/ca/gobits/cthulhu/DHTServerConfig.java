@@ -54,7 +54,7 @@ public class DHTServerConfig {
     private int port = DEFAULT_PORT;
 
     /** Default NodeId. */
-    private byte[] nodeId = DHTIdentifier.getDefaultNodeId();
+    private byte[] nodeId = DHTIdentifier.getRandomNodeId();
 
     /** Is Display Help. */
     private boolean showHelp;

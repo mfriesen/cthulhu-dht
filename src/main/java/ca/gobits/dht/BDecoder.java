@@ -27,9 +27,6 @@ import java.util.Map;
  */
 public final class BDecoder {
 
-    /** Constant to convert byte to unsigned int. */
-    static final int BYTE_TO_INT = 0xFF;
-
     /** decoder string position. */
     private int position = 0;
 

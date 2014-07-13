@@ -16,12 +16,14 @@
 
 package ca.gobits.dht;
 
-import java.math.BigInteger;
 
 /**
  * Calculates distance between DHT Nodes.
  */
 public final class DHTDistance {
+
+    /** Constant to convert byte to unsigned int. */
+    private static final int BYTE_TO_INT = 0xFF;
 
     /**
      * private constructor.
@@ -34,9 +36,9 @@ public final class DHTDistance {
      *
      * @param s1  byte[]
      * @param s2  byte[]
-     * @return BigInteger
+     * @return int[]
      */
-    public static BigInteger xor(final byte[] s1,
+    public static int[] xor(final byte[] s1,
             final byte[] s2) {
 
         if (s1.length != s2.length) {
@@ -44,9 +46,12 @@ public final class DHTDistance {
                     + " != " + s2.length);
         }
 
-        BigInteger b1 = new BigInteger(s1);
-        BigInteger b2 = new BigInteger(s2);
+        int[] r = new int[s1.length];
 
-        return b1.xor(b2);
+        for (int i = 0; i < s1.length; i++) {
+            r[i] = s1[i] & BYTE_TO_INT ^ s2[i] & BYTE_TO_INT;
+        }
+
+        return r;
     }
 }

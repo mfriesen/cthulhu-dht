@@ -251,28 +251,28 @@ public final class DHTNodeBucketRoutingTableUnitTest {
         // then
         assertEquals(8, results.size());
         assertEquals(
-                "[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4]",
+                "[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]",
                 Arrays.toString(results.get(0).getInfoHash()));
         assertEquals(
-                "[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 6]",
+                "[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2]",
                 Arrays.toString(results.get(1).getInfoHash()));
         assertEquals(
-                "[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 8]",
+                "[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4]",
                 Arrays.toString(results.get(2).getInfoHash()));
         assertEquals(
-                "[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 10]",
+                "[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 6]",
                 Arrays.toString(results.get(3).getInfoHash()));
         assertEquals(
-                "[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 12]",
+                "[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 8]",
                 Arrays.toString(results.get(4).getInfoHash()));
         assertEquals(
-                "[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 14]",
+                "[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 10]",
                 Arrays.toString(results.get(5).getInfoHash()));
         assertEquals(
-                "[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 16]",
+                "[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 12]",
                 Arrays.toString(results.get(6).getInfoHash()));
         assertEquals(
-                "[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 18]",
+                "[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 14]",
                 Arrays.toString(results.get(7).getInfoHash()));
     }
 
@@ -428,6 +428,293 @@ public final class DHTNodeBucketRoutingTableUnitTest {
 
         // then
         assertEquals(16, results.size());
+
+        assertEquals(
+                "[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]",
+                Arrays.toString(results.get(0).getInfoHash()));
+        assertEquals(
+                "[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2]",
+                Arrays.toString(results.get(1).getInfoHash()));
+        assertEquals(
+                "[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4]",
+                Arrays.toString(results.get(2).getInfoHash()));
+        assertEquals(
+                "[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 6]",
+                Arrays.toString(results.get(3).getInfoHash()));
+        assertEquals(
+                "[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 8]",
+                Arrays.toString(results.get(4).getInfoHash()));
+        assertEquals(
+                "[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 10]",
+                Arrays.toString(results.get(5).getInfoHash()));
+        assertEquals(
+                "[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 12]",
+                Arrays.toString(results.get(6).getInfoHash()));
+        assertEquals(
+                "[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 14]",
+                Arrays.toString(results.get(7).getInfoHash()));
+        assertEquals(
+                "[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 16]",
+                Arrays.toString(results.get(8).getInfoHash()));
+        assertEquals(
+                "[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 18]",
+                Arrays.toString(results.get(9).getInfoHash()));
+        assertEquals(
+                "[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 20]",
+                Arrays.toString(results.get(10).getInfoHash()));
+        assertEquals(
+                "[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 22]",
+                Arrays.toString(results.get(11).getInfoHash()));
+        assertEquals(
+                "[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 24]",
+                Arrays.toString(results.get(12).getInfoHash()));
+        assertEquals(
+                "[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 26]",
+                Arrays.toString(results.get(13).getInfoHash()));
+        assertEquals(
+                "[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 28]",
+                Arrays.toString(results.get(14).getInfoHash()));
+        assertEquals(
+                "[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 30]",
+                Arrays.toString(results.get(15).getInfoHash()));
+
+    }
+
+    /**
+     * testFindClosestNodes06() - find mixure of nodes depending on distance.
+     * Routing Table has Nodes: 10 - 26 & 100 - 150
+     * Looking for Node 40.
+     */
+    @Test
+    public void testFindClosestNodes06() {
+        // given
+        boolean ipv6 = false;
+        DHTNode n = create(new BigInteger("40").toByteArray(), this.iaddr,
+                this.port, State.UNKNOWN);
+        DHTNodeBucketRoutingTable rt = new DHTNodeBucketRoutingTable();
+
+        for (int i = 10; i < 27; i++) {
+            byte[] id = new BigInteger("" + i).toByteArray();
+            rt.addNode(id, this.iaddr, this.port, State.GOOD);
+        }
+
+        for (int i = 100; i < 151; i++) {
+            byte[] id = new BigInteger("" + i).toByteArray();
+            rt.addNode(id, this.iaddr, this.port, State.GOOD);
+        }
+
+        // when
+        List<DHTNode> results = rt.findClosestNodes(n.getInfoHash(), ipv6);
+
+        // then
+        assertEquals(16, results.size());
+
+        assertEquals(
+                "[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 11]",
+                Arrays.toString(results.get(0).getInfoHash()));
+        assertEquals(
+                "[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 12]",
+                Arrays.toString(results.get(1).getInfoHash()));
+        assertEquals(
+                "[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 13]",
+                Arrays.toString(results.get(2).getInfoHash()));
+        assertEquals(
+                "[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 14]",
+                Arrays.toString(results.get(3).getInfoHash()));
+        assertEquals(
+                "[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 15]",
+                Arrays.toString(results.get(4).getInfoHash()));
+        assertEquals(
+                "[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 16]",
+                Arrays.toString(results.get(5).getInfoHash()));
+        assertEquals(
+                "[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 17]",
+                Arrays.toString(results.get(6).getInfoHash()));
+        assertEquals(
+                "[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 18]",
+                Arrays.toString(results.get(7).getInfoHash()));
+        assertEquals(
+                "[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 19]",
+                Arrays.toString(results.get(8).getInfoHash()));
+        assertEquals(
+                "[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 20]",
+                Arrays.toString(results.get(9).getInfoHash()));
+        assertEquals(
+                "[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 21]",
+                Arrays.toString(results.get(10).getInfoHash()));
+        assertEquals(
+                "[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 22]",
+                Arrays.toString(results.get(11).getInfoHash()));
+        assertEquals(
+                "[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 23]",
+                Arrays.toString(results.get(12).getInfoHash()));
+        assertEquals(
+                "[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 24]",
+                Arrays.toString(results.get(13).getInfoHash()));
+        assertEquals(
+                "[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 25]",
+                Arrays.toString(results.get(14).getInfoHash()));
+        assertEquals(
+                "[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 26]",
+                Arrays.toString(results.get(15).getInfoHash()));
+    }
+
+    /**
+     * testFindClosestNodes07() - find start nodes of Routing Table.
+     * Routing Table has Nodes: 20 - 26 & 100 - 150
+     * Looking for Node 40.
+     */
+    @Test
+    public void testFindClosestNodes07() {
+        // given
+        boolean ipv6 = false;
+        DHTNode n = create(new BigInteger("40").toByteArray(), this.iaddr,
+                this.port, State.UNKNOWN);
+        DHTNodeBucketRoutingTable rt = new DHTNodeBucketRoutingTable();
+
+        for (int i = 20; i < 27; i++) {
+            byte[] id = new BigInteger("" + i).toByteArray();
+            rt.addNode(id, this.iaddr, this.port, State.GOOD);
+        }
+
+        for (int i = 100; i < 151; i++) {
+            byte[] id = new BigInteger("" + i).toByteArray();
+            rt.addNode(id, this.iaddr, this.port, State.GOOD);
+        }
+
+        // when
+        List<DHTNode> results = rt.findClosestNodes(n.getInfoHash(), ipv6);
+
+        // then
+        assertEquals(16, results.size());
+
+        assertEquals(
+                "[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 20]",
+                Arrays.toString(results.get(0).getInfoHash()));
+        assertEquals(
+                "[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 21]",
+                Arrays.toString(results.get(1).getInfoHash()));
+        assertEquals(
+                "[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 22]",
+                Arrays.toString(results.get(2).getInfoHash()));
+        assertEquals(
+                "[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 23]",
+                Arrays.toString(results.get(3).getInfoHash()));
+        assertEquals(
+                "[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 24]",
+                Arrays.toString(results.get(4).getInfoHash()));
+        assertEquals(
+                "[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 25]",
+                Arrays.toString(results.get(5).getInfoHash()));
+        assertEquals(
+                "[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 26]",
+                Arrays.toString(results.get(6).getInfoHash()));
+        assertEquals(
+            "[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 100]",
+            Arrays.toString(results.get(7).getInfoHash()));
+        assertEquals(
+            "[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 101]",
+            Arrays.toString(results.get(8).getInfoHash()));
+        assertEquals(
+            "[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 102]",
+            Arrays.toString(results.get(9).getInfoHash()));
+        assertEquals(
+            "[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 103]",
+            Arrays.toString(results.get(10).getInfoHash()));
+        assertEquals(
+            "[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 104]",
+            Arrays.toString(results.get(11).getInfoHash()));
+        assertEquals(
+            "[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 105]",
+            Arrays.toString(results.get(12).getInfoHash()));
+        assertEquals(
+            "[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 106]",
+            Arrays.toString(results.get(13).getInfoHash()));
+        assertEquals(
+            "[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 107]",
+            Arrays.toString(results.get(14).getInfoHash()));
+        assertEquals(
+            "[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 108]",
+            Arrays.toString(results.get(15).getInfoHash()));
+    }
+
+    /**
+     * testFindClosestNodes08() - find END nodes of the Routing Table.
+     * Routing Table has Nodes: 20 - 26 & 100 - 150
+     * Looking for Node 200.
+     */
+    @Test
+    public void testFindClosestNodes08() {
+        // given
+        boolean ipv6 = false;
+        DHTNode n = create(new BigInteger("200").toByteArray(), this.iaddr,
+                this.port, State.UNKNOWN);
+        DHTNodeBucketRoutingTable rt = new DHTNodeBucketRoutingTable();
+
+        for (int i = 20; i < 27; i++) {
+            byte[] id = new BigInteger("" + i).toByteArray();
+            rt.addNode(id, this.iaddr, this.port, State.GOOD);
+        }
+
+        for (int i = 100; i < 151; i++) {
+            byte[] id = new BigInteger("" + i).toByteArray();
+            rt.addNode(id, this.iaddr, this.port, State.GOOD);
+        }
+
+        // when
+        List<DHTNode> results = rt.findClosestNodes(n.getInfoHash(), ipv6);
+
+        // then
+        assertEquals(16, results.size());
+
+        assertEquals(
+            "[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, -121]",
+            Arrays.toString(results.get(0).getInfoHash()));
+        assertEquals(
+            "[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, -120]",
+            Arrays.toString(results.get(1).getInfoHash()));
+        assertEquals(
+            "[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, -119]",
+            Arrays.toString(results.get(2).getInfoHash()));
+        assertEquals(
+            "[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, -118]",
+            Arrays.toString(results.get(3).getInfoHash()));
+        assertEquals(
+            "[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, -117]",
+            Arrays.toString(results.get(4).getInfoHash()));
+        assertEquals(
+            "[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, -116]",
+            Arrays.toString(results.get(5).getInfoHash()));
+        assertEquals(
+            "[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, -115]",
+            Arrays.toString(results.get(6).getInfoHash()));
+        assertEquals(
+            "[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, -114]",
+            Arrays.toString(results.get(7).getInfoHash()));
+        assertEquals(
+            "[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, -113]",
+            Arrays.toString(results.get(8).getInfoHash()));
+        assertEquals(
+            "[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, -112]",
+            Arrays.toString(results.get(9).getInfoHash()));
+        assertEquals(
+            "[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, -111]",
+            Arrays.toString(results.get(10).getInfoHash()));
+        assertEquals(
+            "[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, -110]",
+            Arrays.toString(results.get(11).getInfoHash()));
+        assertEquals(
+            "[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, -109]",
+            Arrays.toString(results.get(12).getInfoHash()));
+        assertEquals(
+            "[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, -108]",
+            Arrays.toString(results.get(13).getInfoHash()));
+        assertEquals(
+            "[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, -107]",
+            Arrays.toString(results.get(14).getInfoHash()));
+        assertEquals(
+            "[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, -106]",
+            Arrays.toString(results.get(15).getInfoHash()));
     }
 
     /**

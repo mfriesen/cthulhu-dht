@@ -37,7 +37,7 @@ public final class DHTIdentifier {
      * Generates default NodeId.
      * @return byte[]
      */
-    public static byte[] getDefaultNodeId() {
+    public static byte[] getRandomNodeId() {
         BytesKeyGenerator generator = KeyGenerators.secureRandom();
         byte[] key = generator.generateKey();
         return sha1(key);
