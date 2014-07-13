@@ -48,7 +48,6 @@ import ca.gobits.dht.DHTIdentifier;
  * DHTNodeDiscovery Unit Tests.
  *
  */
-@SuppressWarnings("unchecked")
 @RunWith(EasyMockRunner.class)
 public final class DHTNodeDiscoveryImplTest extends EasyMockSupport {
 
@@ -71,52 +70,83 @@ public final class DHTNodeDiscoveryImplTest extends EasyMockSupport {
     /** Capture<DatagramPacket>. */
     private final Capture<DatagramPacket> cap0 = new Capture<DatagramPacket>();
 
-    /** Capture<DatagramPacket>. */
-    private final Capture<DatagramPacket> cap1 = new Capture<DatagramPacket>();
-
     /** Reference to BlockingQueue. */
-    private final BlockingQueue<DelayObject<byte[]>> queue
+    @SuppressWarnings("unchecked")
+    private final BlockingQueue<DelayObject<byte[]>> pingQueue
         = (BlockingQueue<DelayObject<byte[]>>)
-            ReflectionTestUtils.getField(this.discovery, "delayed");
+            ReflectionTestUtils.getField(this.discovery, "pingQueue");
 
     /**
-     * testAddNode01().
-     * @throws Exception  Exception
+     * testPing01().
+     * @throws Exception   Exception
      */
     @Test
-    public void testAddNode01() throws Exception {
-
+    public void testPing01() throws Exception {
         // given
-        int port = 2345;
+        int port = 1234;
         InetAddress addr = InetAddress.getByName("127.0.0.1");
 
         // when
-        replayAll();
-
-        this.discovery.addNode(addr, port);
+        this.discovery.ping(addr, port);
 
         // then
-        verifyAll();
-
-        assertEquals(1, this.queue.size());
+        assertEquals(1, this.pingQueue.size());
     }
 
     /**
-     * testProcess01().
+     * testProcessPingQueue01().
      * @throws Exception  Exception
      */
     @Test
-    public void testProcess01() throws Exception {
+    public void testProcessPingQueue01() throws Exception {
 
         // given
+        this.discovery.setPingDelayInMillis(0);
+
         byte[] nodeId = DHTIdentifier.sha1("salt".getBytes());
         byte[] payload = new byte[]{127, 0, 0, 1, 9, 41};
 
         DelayObject<byte[]> obj = new DelayObject<byte[]>(payload, 0);
-        this.queue.add(obj);
+        this.pingQueue.add(obj);
 
         // when
-        expect(this.config.getNodeId()).andReturn(nodeId).times(2);
+        expect(this.config.getNodeId()).andReturn(nodeId);
+        expect(this.tokens.getTransactionId()).andReturn("aa");
+
+        this.socket.send(capture(this.cap0));
+
+        replayAll();
+
+        this.discovery.processPingQueue();
+
+        // then
+        verifyAll();
+
+        DatagramPacket packet = this.cap0.getValue();
+        assertTrue(Arrays.equals(new byte[] {127, 0, 0, 1}, packet
+                .getAddress().getAddress()));
+        assertEquals(2345, packet.getPort());
+        assertEquals(
+                "ZDE6YWQyOmlkMjA6spXRFxNal2PaKC59rnOlyn0+WxFl"
+                + "MTpxNDpwaW5nMTp0MjphYTE6eTE6cWU=",
+                Base64.encodeBase64String(packet.getData()));
+    }
+
+    /**
+     * Test find nodes IPv4 request.
+     * @throws Exception   Exception
+     */
+    @Test
+    public void testFindNodes01() throws Exception {
+        // given
+        byte[] nodeId = DHTIdentifier.sha1("salt".getBytes());
+        byte[] target = DHTIdentifier.sha1("salt123".getBytes());
+
+        int port = 2345;
+        InetAddress addr = InetAddress.getByName("127.0.0.1");
+
+        // when
+        expect(this.config.getNodeId()).andReturn(nodeId);
         expect(this.tokens.getTransactionId()).andReturn("aa");
         expect(this.socket.getLocalAddress()).andReturn(
                 InetAddress.getByName("127.0.0.1"));
@@ -125,7 +155,7 @@ public final class DHTNodeDiscoveryImplTest extends EasyMockSupport {
 
         replayAll();
 
-        this.discovery.process();
+        this.discovery.findNodes(addr, port, target);
 
         // then
         verifyAll();
@@ -135,58 +165,52 @@ public final class DHTNodeDiscoveryImplTest extends EasyMockSupport {
                 .getAddress().getAddress()));
         assertEquals(2345, packet.getPort());
         assertEquals(
-                "ZDE6YWQyOmlkMjA6spXRFxNal2PaKC59rnOlyn0+WxE2OnRhcmdldDIwOrKV0R"
-                + "cTWpdj2igufa5zpcp9PlsRNDp3YW50bDI6bjRlZTE6cTk6ZmluZF9ub2RlMT"
+                "ZDE6YWQyOmlkMjA6spXRFxNal2PaKC59rnOlyn0+WxE2OnRhcmdldDIwOq79Fb"
+                + "Yd72ZumDL/mb+a3Ms9OMRcNDp3YW50bDI6bjRlZTE6cTk6ZmluZF9ub2RlMT"
                 + "p0MjphYTE6eTE6cWU=",
                 Base64.encodeBase64String(packet.getData()));
     }
 
     /**
-     * Test boot straping server.
+     * Test find nodes IPv6 request.
      * @throws Exception   Exception
      */
     @Test
-    public void testBootstrap01() throws Exception {
+    public void testFindNodes02() throws Exception {
         // given
         byte[] nodeId = DHTIdentifier.sha1("salt".getBytes());
+        byte[] target = DHTIdentifier.sha1("salt123".getBytes());
 
         int port = 2345;
-        InetAddress addr = InetAddress.getByName("127.0.0.1");
+        InetAddress addr = InetAddress
+                .getByName("805b:2d9d:dc28:0000:0000:fc57:d4c8:1fff");
+
 
         // when
-        expect(this.config.getNodeId()).andReturn(nodeId).times(3);
-        expect(this.tokens.getTransactionId()).andReturn("aa").times(2);
-        expect(this.socket.getLocalAddress()).andReturn(
-                InetAddress.getByName("127.0.0.1")).times(2);
+        expect(this.config.getNodeId()).andReturn(nodeId);
+        expect(this.tokens.getTransactionId()).andReturn("aa");
+        expect(this.socket.getLocalAddress()).andReturn(addr);
 
         this.socket.send(capture(this.cap0));
-        this.socket.send(capture(this.cap1));
 
         replayAll();
 
-        this.discovery.bootstrap(addr, port);
+        this.discovery.findNodes(addr, port, target);
 
         // then
         verifyAll();
 
         DatagramPacket packet = this.cap0.getValue();
-        assertTrue(Arrays.equals(new byte[] {127, 0, 0, 1}, packet
-                .getAddress().getAddress()));
-        assertEquals(2345, packet.getPort());
-        assertEquals(
-                "ZDE6YWQyOmlkMjA6spXRFxNal2PaKC59rnOlyn0+WxE2OnRhcmdldDIwOrKV0R"
-                + "cTWpdj2igufa5zpcp9PlsRNDp3YW50bDI6bjRlZTE6cTk6ZmluZF9ub2RlMT"
-                + "p0MjphYTE6eTE6cWU=",
-                Base64.encodeBase64String(packet.getData()));
 
-        packet = this.cap1.getValue();
-        assertTrue(Arrays.equals(new byte[] {127, 0, 0, 1}, packet
-                .getAddress().getAddress()));
+        assertTrue(Arrays.equals(new byte[] {-128, 91, 45, -99, -36, 40, 0, 0,
+                0, 0, -4, 87, -44, -56, 31, -1 }, packet.getAddress()
+                .getAddress()));
         assertEquals(2345, packet.getPort());
         assertEquals(
-                "ZDE6YWQyOmlkMjA6spXRFxNal2PaKC59rnOlyn0+WxE2OnRhcmdldDIwOk1qLu"
-                + "jspWicJdfRglGMWjWCwaTuNDp3YW50bDI6bjRlZTE6cTk6ZmluZF9ub2RlMT"
+                "ZDE6YWQyOmlkMjA6spXRFxNal2PaKC59rnOlyn0+WxE2OnRhcmdldDIwOq79Fb"
+                + "Yd72ZumDL/mb+a3Ms9OMRcNDp3YW50bDI6bjZlZTE6cTk6ZmluZF9ub2RlMT"
                 + "p0MjphYTE6eTE6cWU=",
                 Base64.encodeBase64String(packet.getData()));
     }
+
 }

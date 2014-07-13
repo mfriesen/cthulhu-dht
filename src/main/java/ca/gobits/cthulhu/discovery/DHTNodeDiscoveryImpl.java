@@ -19,7 +19,6 @@ package ca.gobits.cthulhu.discovery;
 import static ca.gobits.dht.DHTConversion.compactAddress;
 import static ca.gobits.dht.DHTConversion.compactAddressPort;
 
-import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.Inet6Address;
@@ -30,7 +29,6 @@ import java.util.List;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.DelayQueue;
 
-import org.apache.commons.codec.binary.Base64;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -38,7 +36,6 @@ import org.springframework.scheduling.annotation.Scheduled;
 import ca.gobits.cthulhu.DHTQueryProtocol;
 import ca.gobits.cthulhu.DHTServerConfig;
 import ca.gobits.cthulhu.DHTTokenTable;
-import ca.gobits.dht.DHTConversion;
 
 /**
  * DHTNodeDiscovery Implementation.
@@ -50,14 +47,11 @@ public class DHTNodeDiscoveryImpl implements DHTNodeDiscovery {
     private static final Logger LOGGER = Logger
             .getLogger(DHTNodeDiscovery.class);
 
-    /** Fixed Interval to Process Queue. */
-    private static final int SCHEDULED_FIXED_DELAY = 25000;
+    /** Default Ping Delay, 10 Seconds. */
+    private static final int DEFAULT_PING_DELAY_MILLIS = 10000;
 
-    /** Default Delay to added node. */
-    private static final int DEFAULT_DELAY_MILLIS = 60000;
-
-    /** Queue of DHTNode to contact. */
-    private final BlockingQueue<DelayObject<byte[]>> delayed =
+    /** Queue of DHTNode to ping. */
+    private final BlockingQueue<DelayObject<byte[]>> pingQueue =
             new DelayQueue<DelayObject<byte[]>>();
 
     /** Reference to DHTServerConfig. */
@@ -73,97 +67,85 @@ public class DHTNodeDiscoveryImpl implements DHTNodeDiscovery {
     private DatagramSocket socket;
 
     /** Delay for every added node. */
-    private long delayInMillis = DEFAULT_DELAY_MILLIS;
+    private long pingDelayInMillis = DEFAULT_PING_DELAY_MILLIS;
 
     @Override
-    public void addNode(final InetAddress addr, final int port) {
-        byte[] payload = DHTConversion.compactAddress(addr.getAddress(), port);
+    public void ping(final InetAddress addr, final int port) {
+
+        byte[] payload = compactAddress(addr.getAddress(), port);
         DelayObject<byte[]> obj = new DelayObject<byte[]>(payload,
-                this.delayInMillis);
+                this.pingDelayInMillis);
 
-        this.delayed.offer(obj);
+        this.pingQueue.offer(obj);
     }
 
     @Override
-    public void bootstrap(final InetAddress addr, final int port) {
-
-        byte[] nodeId = this.config.getNodeId();
-        byte[] node0 = new byte[nodeId.length];
-
-        for (int i = 0; i < nodeId.length; i++) {
-            node0[i] = (byte) ~nodeId[i];
-        }
-
-        LOGGER.info("sending 'find_nodes' to " + addr.getHostName()
-                + ":" + port + " for node: SELF");
-
-        // TODO change to Pings and then perform find_node later
-        sendFindNodeQuery(addr, port, nodeId);
-
-        LOGGER.info("sending 'find_nodes' to " + addr.getHostName() + ":"
-                + port + " for node: " + Base64.encodeBase64String(node0));
-
-        sendFindNodeQuery(addr, port, node0);
-    }
-
-    @Override
-    public void sendFindNodeQuery(final InetAddress addr, final int port) {
-        byte[] target = this.config.getNodeId();
-
-        LOGGER.info("sending 'find_nodes' to " + addr.getHostName()
-                + ":" + port + " for node: SELF");
-
-        sendFindNodeQuery(addr, port, target);
-    }
-
-    /**
-     * Sends 'find_node' DHT Query to an address.
-     * @param addr  InetAddress
-     * @param port  int port
-     * @param target  byte[]
-     */
-    private void sendFindNodeQuery(final InetAddress addr, final int port,
-            final byte[] target) {
-
-        try {
-
-            byte[] nodeId = this.config.getNodeId();
-            String transactionId = this.tokens.getTransactionId();
-
-            List<byte[]> want = getWant();
-            byte[] msg = DHTQueryProtocol.findNodeQuery(transactionId,
-                    nodeId, target, want);
-
-            DatagramPacket packet = new DatagramPacket(msg, msg.length,
-                    addr, port);
-            this.socket.send(packet);
-
-        } catch (IOException e) {
-            LOGGER.trace(e, e);
-        }
-    }
-
-    // TODO remove old nodes / peers
-
-    @Override
-    @Scheduled(fixedDelay = SCHEDULED_FIXED_DELAY)
-    public void process() {
+    @Scheduled(fixedDelay = DEFAULT_PING_DELAY_MILLIS)
+    public void processPingQueue() {
 
         Collection<DelayObject<byte[]>> objs =
                 new ArrayList<DelayObject<byte[]>>();
 
-        this.delayed.drainTo(objs);
+        this.pingQueue.drainTo(objs);
 
-        LOGGER.info("processing node discovery found: " + objs.size()
-                + " out of " + this.delayed.size() + " nodes");
+        LOGGER.info("processing ping queue: " + objs.size()
+                + " out of " + this.pingQueue.size());
 
         for (DelayObject<byte[]> obj : objs) {
 
             InetAddress addr = compactAddress(obj.getPayload());
             int port = compactAddressPort(obj.getPayload());
-            sendFindNodeQuery(addr, port);
+            sendPing(addr, port);
         }
     }
+
+    /**
+     * Sends Ping Request.
+     * @param addr  InetAddress
+     * @param port  int
+     */
+    private void sendPing(final InetAddress addr, final int port) {
+
+        String transactionId = this.tokens.getTransactionId();
+        byte[] msg = DHTQueryProtocol.pingQuery(transactionId,
+                this.config.getNodeId());
+
+        DatagramPacket packet = new DatagramPacket(msg, msg.length,
+                addr, port);
+
+        LOGGER.info("sending 'ping' to " + addr.getHostName() + ":" + port);
+
+        try {
+            this.socket.send(packet);
+        } catch (Exception e) {
+            LOGGER.trace(e.getMessage(), e);
+        }
+    }
+
+    @Override
+    public void findNodes(final InetAddress addr, final int port,
+            final byte[] target) {
+
+        List<byte[]> want = getWant();
+        byte[] nodeId = this.config.getNodeId();
+        String transactionId = this.tokens.getTransactionId();
+        byte[] msg = DHTQueryProtocol.findNodeQuery(transactionId, nodeId,
+                target, want);
+
+        DatagramPacket packet = new DatagramPacket(msg, msg.length,
+                addr, port);
+
+        LOGGER.info("sending 'find_node' to " + addr.getHostName() + ":"
+                + port);
+
+        try {
+            this.socket.send(packet);
+        } catch (Exception e) {
+            LOGGER.trace(e.getMessage(), e);
+        }
+    }
+
+    // TODO remove old nodes / peers
 
     /**
      * @return List<byte[]>  wants the local server supports.
@@ -182,7 +164,7 @@ public class DHTNodeDiscoveryImpl implements DHTNodeDiscovery {
     }
 
     @Override
-    public void setDelay(final long delay) {
-        this.delayInMillis = delay;
+    public void setPingDelayInMillis(final long delay) {
+        this.pingDelayInMillis = delay;
     }
 }

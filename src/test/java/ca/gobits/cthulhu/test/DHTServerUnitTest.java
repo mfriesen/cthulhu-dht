@@ -122,10 +122,11 @@ public final class DHTServerUnitTest extends EasyMockSupport {
         String[] nodes = new String[] {"127.0.0.1:7789"};
 
         // when
-        expect(this.config.getNodeId()).andReturn(this.nodeId);
+        expect(this.config.getNodeId()).andReturn(this.nodeId).times(2);
         expect(this.serverSocket.getLocalPort()).andReturn(port);
         expect(this.config.getBootstrapNodes()).andReturn(nodes);
-        this.discovery.bootstrap(isA(InetAddress.class), eq(7789));
+        this.discovery.findNodes(isA(InetAddress.class), eq(7789),
+                eq(this.nodeId));
 
         expect(this.config.getLogLevel()).andReturn(Level.INFO);
         this.serverSocket.receive(isA(DatagramPacket.class));

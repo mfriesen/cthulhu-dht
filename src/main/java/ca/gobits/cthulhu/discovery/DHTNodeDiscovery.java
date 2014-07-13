@@ -25,35 +25,29 @@ import java.net.InetAddress;
 public interface DHTNodeDiscovery {
 
     /**
-     * Adds a node to determine status.  The node is processed after
-     * the default delay has expired.
+     * Process the Ping Node queue.
+     */
+    void processPingQueue();
+
+    /**
+     * Pings a node to determine status.
      * @param addr  InetAddress
      * @param port  port
      */
-    void addNode(final InetAddress addr, final int port);
+    void ping(InetAddress addr, int port);
 
     /**
-     * Bootstraps the DHT Server.
+     * Sets the delay between receiving a ping
+     * request and the time the actual request is sent.
+     * @param delay  delay in milliseconds
+     */
+    void setPingDelayInMillis(long delay);
+
+    /**
+     * Sends Find Nodes request to an Address.
      * @param addr  InetAddress
      * @param port  port
+     * @param target  ID to find
      */
-    void bootstrap(final InetAddress addr, final int port);
-
-    /**
-     * Send find node query to InetAddress immediately.
-     * @param addr  InetAddress
-     * @param port  port
-     */
-    void sendFindNodeQuery(final InetAddress addr, final int port);
-
-    /**
-     * Processes added Nodes, once delay has expired.
-     */
-    void process();
-
-    /**
-     * Sets the delay in Milliseconds.
-     * @param delay  delay in Milliseconds
-     */
-    void setDelay(long delay);
+    void findNodes(InetAddress addr, int port, byte[] target);
 }

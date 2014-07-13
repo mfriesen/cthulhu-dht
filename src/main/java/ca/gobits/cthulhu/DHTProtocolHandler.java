@@ -196,7 +196,7 @@ public class DHTProtocolHandler {
             try {
 
                 InetAddress address = node.getAddress();
-                this.discovery.addNode(address, port);
+                this.discovery.ping(address, port);
 
             } catch (UnknownHostException e) {
 
@@ -222,7 +222,7 @@ public class DHTProtocolHandler {
         if (node != null) {
             node.setState(State.GOOD);
         } else {
-            this.discovery.addNode(addr, port);
+            this.discovery.ping(addr, port);
         }
     }
 

@@ -145,7 +145,8 @@ public class DHTServer /*implements Lifecycle*/ {
                     InetAddress addr = InetAddress.getByName(addrPort[0]);
                     int port = Integer.valueOf(addrPort[1]).intValue();
 
-                    this.discovery.bootstrap(addr, port);
+                    this.discovery.findNodes(addr, port,
+                            this.config.getNodeId());
 
                 } catch (Exception e) {
                     LOGGER.warn("unable to bootstrap " + node + ".", e);
