@@ -14,7 +14,7 @@
 // limitations under the License.
 //
 
-package ca.gobits.cthulhu.discovery.test;
+package ca.gobits.cthulhu.queue.test;
 
 import static org.easymock.EasyMock.capture;
 import static org.easymock.EasyMock.expect;
@@ -33,27 +33,28 @@ import org.easymock.EasyMockRunner;
 import org.easymock.EasyMockSupport;
 import org.easymock.Mock;
 import org.easymock.TestSubject;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.test.util.ReflectionTestUtils;
 
 import ca.gobits.cthulhu.DHTServerConfig;
 import ca.gobits.cthulhu.DHTTokenTable;
-import ca.gobits.cthulhu.discovery.DHTNodeDiscovery;
-import ca.gobits.cthulhu.discovery.DHTNodeDiscoveryImpl;
-import ca.gobits.cthulhu.discovery.DelayObject;
+import ca.gobits.cthulhu.queue.DHTFindNodeQueueImpl;
+import ca.gobits.cthulhu.queue.DelayObject;
 import ca.gobits.dht.DHTIdentifier;
 
 /**
- * DHTNodeDiscovery Unit Tests.
+ * DHTFindNodeQueue Unit Tests.
  *
  */
 @RunWith(EasyMockRunner.class)
-public final class DHTNodeDiscoveryImplTest extends EasyMockSupport {
+public final class DHTFindNodeQueueImplUnitTest extends EasyMockSupport {
 
-    /** Instance of DHTNodeDiscovery. */
+    /** Instance of DHTFindNodeQueueImpl. */
     @TestSubject
-    private final DHTNodeDiscovery discovery = new DHTNodeDiscoveryImpl();
+    private final DHTFindNodeQueueImpl findnodeQueue =
+        new DHTFindNodeQueueImpl();
 
     /** Mock DHTServerConfig. */
     @Mock
@@ -72,64 +73,16 @@ public final class DHTNodeDiscoveryImplTest extends EasyMockSupport {
 
     /** Reference to BlockingQueue. */
     @SuppressWarnings("unchecked")
-    private final BlockingQueue<DelayObject<byte[]>> pingQueue
+    private final BlockingQueue<DelayObject<byte[]>> queue
         = (BlockingQueue<DelayObject<byte[]>>)
-            ReflectionTestUtils.getField(this.discovery, "pingQueue");
+            ReflectionTestUtils.getField(this.findnodeQueue, "queue");
 
     /**
-     * testPing01().
-     * @throws Exception   Exception
+     * before().
      */
-    @Test
-    public void testPing01() throws Exception {
-        // given
-        int port = 1234;
-        InetAddress addr = InetAddress.getByName("127.0.0.1");
-
-        // when
-        this.discovery.ping(addr, port);
-
-        // then
-        assertEquals(1, this.pingQueue.size());
-    }
-
-    /**
-     * testProcessPingQueue01().
-     * @throws Exception  Exception
-     */
-    @Test
-    public void testProcessPingQueue01() throws Exception {
-
-        // given
-        this.discovery.setPingDelayInMillis(0);
-
-        byte[] nodeId = DHTIdentifier.sha1("salt".getBytes());
-        byte[] payload = new byte[]{127, 0, 0, 1, 9, 41};
-
-        DelayObject<byte[]> obj = new DelayObject<byte[]>(payload, 0);
-        this.pingQueue.add(obj);
-
-        // when
-        expect(this.config.getNodeId()).andReturn(nodeId);
-        expect(this.tokens.getTransactionId()).andReturn("aa");
-
-        this.socket.send(capture(this.cap0));
-
-        replayAll();
-
-        this.discovery.processPingQueue();
-
-        // then
-        verifyAll();
-
-        DatagramPacket packet = this.cap0.getValue();
-        assertTrue(Arrays.equals(new byte[] {127, 0, 0, 1}, packet
-                .getAddress().getAddress()));
-        assertEquals(2345, packet.getPort());
-        assertEquals(
-                "ZDE6YWQyOmlkMjA6spXRFxNal2PaKC59rnOlyn0+WxFl"
-                + "MTpxNDpwaW5nMTp0MjphYTE6eTE6cWU=",
-                Base64.encodeBase64String(packet.getData()));
+    @Before
+    public void before() {
+        this.findnodeQueue.setDelayInMillis(0);
     }
 
     /**
@@ -139,36 +92,65 @@ public final class DHTNodeDiscoveryImplTest extends EasyMockSupport {
     @Test
     public void testFindNodes01() throws Exception {
         // given
-        byte[] nodeId = DHTIdentifier.sha1("salt".getBytes());
         byte[] target = DHTIdentifier.sha1("salt123".getBytes());
 
         int port = 2345;
         InetAddress addr = InetAddress.getByName("127.0.0.1");
 
         // when
-        expect(this.config.getNodeId()).andReturn(nodeId);
-        expect(this.tokens.getTransactionId()).andReturn("aa");
-        expect(this.socket.getLocalAddress()).andReturn(
-                InetAddress.getByName("127.0.0.1"));
-
-        this.socket.send(capture(this.cap0));
-
         replayAll();
 
-        this.discovery.findNodes(addr, port, target);
+        this.findnodeQueue.findNodes(addr, port, target);
 
         // then
         verifyAll();
 
-        DatagramPacket packet = this.cap0.getValue();
-        assertTrue(Arrays.equals(new byte[] {127, 0, 0, 1}, packet
-                .getAddress().getAddress()));
-        assertEquals(2345, packet.getPort());
+        assertEquals(1, this.queue.size());
+        DelayObject<byte[]> obj = this.queue.element();
         assertEquals(
-                "ZDE6YWQyOmlkMjA6spXRFxNal2PaKC59rnOlyn0+WxE2OnRhcmdldDIwOq79Fb"
-                + "Yd72ZumDL/mb+a3Ms9OMRcNDp3YW50bDI6bjRlZTE6cTk6ZmluZF9ub2RlMT"
-                + "p0MjphYTE6eTE6cWU=",
-                Base64.encodeBase64String(packet.getData()));
+            "[127, 0, 0, 1, 9, 41, -82, -3, 21, -74, 29, -17, 102, 110, -104, "
+            + "50, -1, -103, -65, -102, -36, -53, 61, 56, -60, 92]",
+                Arrays.toString(obj.getPayload()));
+    }
+
+    /**
+     * testProcessQueue01() processes IPv4.
+     * @throws Exception   Exception
+     */
+    @Test
+    public void testProcessQueue01() throws Exception {
+        // given
+        byte[] nodeId = DHTIdentifier.sha1("salt".getBytes());
+        byte[] payload = new byte[] {127, 0, 0, 1, 9, 41, -82, -3, 21, -74,
+                29, -17, 102, 110, -104, 50, -1, -103, -65, -102, -36, -53, 61,
+                56, -60, 92 };
+
+        this.queue.add(new DelayObject<byte[]>(payload, 0));
+
+        // when
+        expect(this.socket.getLocalAddress()).andReturn(
+                InetAddress.getByName("127.0.0.1"));
+
+        expect(this.config.getNodeId()).andReturn(nodeId);
+        expect(this.tokens.getTransactionId()).andReturn("aa");
+
+        this.socket.send(capture(this.cap0));
+
+        replayAll();
+        this.findnodeQueue.processQueue();
+
+        // then
+        verifyAll();
+
+      DatagramPacket packet = this.cap0.getValue();
+      assertTrue(Arrays.equals(new byte[] {127, 0, 0, 1}, packet
+              .getAddress().getAddress()));
+      assertEquals(2345, packet.getPort());
+      assertEquals(
+              "ZDE6YWQyOmlkMjA6spXRFxNal2PaKC59rnOlyn0+WxE2OnRhcmdldDIwOq79Fb"
+              + "Yd72ZumDL/mb+a3Ms9OMRcNDp3YW50bDI6bjRlZTE6cTk6ZmluZF9ub2RlMT"
+              + "p0MjphYTE6eTE6cWU=",
+              Base64.encodeBase64String(packet.getData()));
     }
 
     /**
@@ -176,7 +158,7 @@ public final class DHTNodeDiscoveryImplTest extends EasyMockSupport {
      * @throws Exception   Exception
      */
     @Test
-    public void testFindNodes02() throws Exception {
+    public void testProcessQueue02() throws Exception {
         // given
         byte[] nodeId = DHTIdentifier.sha1("salt".getBytes());
         byte[] target = DHTIdentifier.sha1("salt123".getBytes());
@@ -187,6 +169,8 @@ public final class DHTNodeDiscoveryImplTest extends EasyMockSupport {
 
 
         // when
+        this.findnodeQueue.findNodes(addr, port, target);
+
         expect(this.config.getNodeId()).andReturn(nodeId);
         expect(this.tokens.getTransactionId()).andReturn("aa");
         expect(this.socket.getLocalAddress()).andReturn(addr);
@@ -195,7 +179,7 @@ public final class DHTNodeDiscoveryImplTest extends EasyMockSupport {
 
         replayAll();
 
-        this.discovery.findNodes(addr, port, target);
+        this.findnodeQueue.processQueue();
 
         // then
         verifyAll();

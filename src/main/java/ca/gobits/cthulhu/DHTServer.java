@@ -26,7 +26,7 @@ import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 
-import ca.gobits.cthulhu.discovery.DHTNodeDiscovery;
+import ca.gobits.cthulhu.queue.DHTFindNodeQueue;
 
 
 /**
@@ -55,9 +55,9 @@ public class DHTServer /*implements Lifecycle*/ {
     @Autowired
     private DatagramSocket serverSocket;
 
-    /** DHTNode Discovery Handler. */
+    /** DHTFindNodeQueue Handler. */
     @Autowired
-    private DHTNodeDiscovery discovery;
+    private DHTFindNodeQueue findNodeQueue;
 
     /** DHTServer Config. */
     @Autowired
@@ -145,7 +145,7 @@ public class DHTServer /*implements Lifecycle*/ {
                     InetAddress addr = InetAddress.getByName(addrPort[0]);
                     int port = Integer.valueOf(addrPort[1]).intValue();
 
-                    this.discovery.findNodes(addr, port,
+                    this.findNodeQueue.findNodes(addr, port,
                             this.config.getNodeId());
 
                 } catch (Exception e) {

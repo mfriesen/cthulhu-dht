@@ -36,10 +36,11 @@ import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.util.CollectionUtils;
 
-import ca.gobits.cthulhu.discovery.DHTNodeDiscovery;
 import ca.gobits.cthulhu.domain.DHTNode;
 import ca.gobits.cthulhu.domain.DHTNode.State;
 import ca.gobits.cthulhu.domain.DHTPeer;
+import ca.gobits.cthulhu.queue.DHTFindNodeQueue;
+import ca.gobits.cthulhu.queue.DHTPingQueue;
 import ca.gobits.dht.BDecoder;
 import ca.gobits.dht.BEncoder;
 
@@ -72,9 +73,13 @@ public class DHTProtocolHandler {
     @Autowired
     private DHTServerConfig config;
 
-    /** DHTNode Discovery Engine. */
+    /** DHTPingQueue instance. */
     @Autowired
-    private DHTNodeDiscovery discovery;
+    private DHTPingQueue pingQueue;
+
+    /** DHTFindNodeQueue instance. */
+    @Autowired
+    private DHTFindNodeQueue findNodeQueue;
 
     /**
      * Read DatagramPacket.
@@ -196,7 +201,7 @@ public class DHTProtocolHandler {
             try {
 
                 InetAddress address = node.getAddress();
-                this.discovery.ping(address, port);
+                this.pingQueue.ping(address, port);
 
             } catch (UnknownHostException e) {
 
@@ -222,7 +227,7 @@ public class DHTProtocolHandler {
         if (node != null) {
             node.setState(State.GOOD);
         } else {
-            this.discovery.ping(addr, port);
+            this.pingQueue.ping(addr, port);
         }
     }
 

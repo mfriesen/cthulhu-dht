@@ -14,7 +14,7 @@
 // limitations under the License.
 //
 
-package ca.gobits.cthulhu.discovery.test;
+package ca.gobits.cthulhu.queue.test;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -29,7 +29,7 @@ import org.powermock.api.easymock.PowerMock;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 
-import ca.gobits.cthulhu.discovery.DelayObject;
+import ca.gobits.cthulhu.queue.DelayObject;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 
 /**
@@ -38,7 +38,7 @@ import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
  */
 @RunWith(PowerMockRunner.class)
 @PrepareForTest(DelayObject.class)
-public final class DelayObjectTest {
+public final class DelayObjectUnitTest {
 
     /**
      * testCompare01().
@@ -99,7 +99,7 @@ public final class DelayObjectTest {
 
         // then
         assertTrue(result.startsWith(
-                "ca.gobits.cthulhu.discovery.DelayObject"));
+                "ca.gobits.cthulhu.queue.DelayObject"));
         assertTrue(result.contains("[payload=test,start="));
     }
 

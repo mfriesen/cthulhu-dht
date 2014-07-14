@@ -38,7 +38,7 @@ import org.springframework.test.util.ReflectionTestUtils;
 import ca.gobits.cthulhu.DHTProtocolHandler;
 import ca.gobits.cthulhu.DHTServer;
 import ca.gobits.cthulhu.DHTServerConfig;
-import ca.gobits.cthulhu.discovery.DHTNodeDiscovery;
+import ca.gobits.cthulhu.queue.DHTFindNodeQueue;
 import ca.gobits.dht.DHTIdentifier;
 
 /**
@@ -69,9 +69,9 @@ public final class DHTServerUnitTest extends EasyMockSupport {
     @Mock
     private DHTServerConfig config;
 
-    /** Mock DHTNodeDiscovery. */
+    /** Mock DHTFindNodeQueue. */
     @Mock
-    private DHTNodeDiscovery discovery;
+    private DHTFindNodeQueue findNodeQueue;
 
     /** Node ID. */
     private final byte[] nodeId = DHTIdentifier.sha1("salt".getBytes());
@@ -125,7 +125,7 @@ public final class DHTServerUnitTest extends EasyMockSupport {
         expect(this.config.getNodeId()).andReturn(this.nodeId).times(2);
         expect(this.serverSocket.getLocalPort()).andReturn(port);
         expect(this.config.getBootstrapNodes()).andReturn(nodes);
-        this.discovery.findNodes(isA(InetAddress.class), eq(7789),
+        this.findNodeQueue.findNodes(isA(InetAddress.class), eq(7789),
                 eq(this.nodeId));
 
         expect(this.config.getLogLevel()).andReturn(Level.INFO);

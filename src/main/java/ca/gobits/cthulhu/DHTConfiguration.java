@@ -26,8 +26,10 @@ import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 
-import ca.gobits.cthulhu.discovery.DHTNodeDiscovery;
-import ca.gobits.cthulhu.discovery.DHTNodeDiscoveryImpl;
+import ca.gobits.cthulhu.queue.DHTFindNodeQueue;
+import ca.gobits.cthulhu.queue.DHTFindNodeQueueImpl;
+import ca.gobits.cthulhu.queue.DHTPingQueue;
+import ca.gobits.cthulhu.queue.DHTPingQueueImpl;
 
 /**
  * DHT Configuration class.
@@ -112,10 +114,18 @@ public class DHTConfiguration {
     }
 
     /**
-     * @return DHTNodeDiscovery
+     * @return DHTPingQueue
      */
     @Bean
-    public DHTNodeDiscovery nodeDiscovery() {
-        return new DHTNodeDiscoveryImpl();
+    public DHTPingQueue pingQueue() {
+        return new DHTPingQueueImpl();
+    }
+
+    /**
+     * @return DHTFindNodeQueue
+     */
+    @Bean
+    public DHTFindNodeQueue findNodeQueue() {
+        return new DHTFindNodeQueueImpl();
     }
 }

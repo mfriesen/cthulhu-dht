@@ -14,20 +14,14 @@
 // limitations under the License.
 //
 
-package ca.gobits.cthulhu.discovery;
+package ca.gobits.cthulhu.queue;
 
 import java.net.InetAddress;
 
 /**
- * DHTNodeDiscovery defines methods for the discovery of new DHTNodes.
- *
+ * DHT Ping Request Queue.
  */
-public interface DHTNodeDiscovery {
-
-    /**
-     * Process the Ping Node queue.
-     */
-    void processPingQueue();
+public interface DHTPingQueue extends DHTQueue {
 
     /**
      * Pings a node to determine status.
@@ -35,19 +29,4 @@ public interface DHTNodeDiscovery {
      * @param port  port
      */
     void ping(InetAddress addr, int port);
-
-    /**
-     * Sets the delay between receiving a ping
-     * request and the time the actual request is sent.
-     * @param delay  delay in milliseconds
-     */
-    void setPingDelayInMillis(long delay);
-
-    /**
-     * Sends Find Nodes request to an Address.
-     * @param addr  InetAddress
-     * @param port  port
-     * @param target  ID to find
-     */
-    void findNodes(InetAddress addr, int port, byte[] target);
 }

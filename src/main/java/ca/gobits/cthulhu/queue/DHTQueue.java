@@ -14,5 +14,16 @@
 // limitations under the License.
 //
 
-/** DHT CThulhu Discovery Unit Test package. */
-package ca.gobits.cthulhu.discovery.test;
+package ca.gobits.cthulhu.queue;
+
+/**
+ * Interface for creating an DHTQueue.
+ *
+ */
+public interface DHTQueue {
+
+    /**
+     * Processes the queue.
+     */
+    void processQueue();
+}

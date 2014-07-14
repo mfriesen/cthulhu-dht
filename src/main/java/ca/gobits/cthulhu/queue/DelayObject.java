@@ -14,7 +14,7 @@
 // limitations under the License.
 //
 
-package ca.gobits.cthulhu.discovery;
+package ca.gobits.cthulhu.queue;
 
 import java.util.concurrent.Delayed;
 import java.util.concurrent.TimeUnit;

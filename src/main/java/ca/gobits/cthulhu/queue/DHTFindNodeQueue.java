@@ -14,5 +14,20 @@
 // limitations under the License.
 //
 
-/** DHT CThulhu Discovery package. */
-package ca.gobits.cthulhu.discovery;
+package ca.gobits.cthulhu.queue;
+
+import java.net.InetAddress;
+
+/**
+ * DHT Find Node Request Queue.
+ */
+public interface DHTFindNodeQueue extends DHTQueue {
+
+    /**
+     * Sends Find Nodes request to an Address.
+     * @param addr  InetAddress
+     * @param port  port
+     * @param target  ID to find
+     */
+    void findNodes(InetAddress addr, int port, byte[] target);
+}
