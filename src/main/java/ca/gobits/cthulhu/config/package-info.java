@@ -14,5 +14,5 @@
 // limitations under the License.
 //
 
-/** DHT CThulhu Discovery Unit Test package. */
-package ca.gobits.cthulhu.queue.test;
+/** DHT Server Config package. */
+package ca.gobits.cthulhu.config;

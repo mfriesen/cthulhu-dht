@@ -82,7 +82,7 @@ public class DHTPingQueueImpl extends DHTQueueAbstract implements DHTPingQueue {
         byte[] msg = DHTQueryProtocol.pingQuery(getTransactionId(),
                 this.config.getNodeId());
 
-        LOGGER.info("sending 'ping' to " + addr.getHostName() + ":" + port);
+        LOGGER.info("sending 'ping' to " + addr.getHostAddress() + ":" + port);
 
         sendToSocket(addr, port, msg);
     }

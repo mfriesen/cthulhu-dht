@@ -26,7 +26,7 @@ import org.springframework.test.annotation.DirtiesContext.ClassMode;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
-import ca.gobits.cthulhu.DHTConfiguration;
+import ca.gobits.cthulhu.config.DHTConfiguration;
 
 /**
  * Abstract Helper Test for Integration Tests that use DHTServer.

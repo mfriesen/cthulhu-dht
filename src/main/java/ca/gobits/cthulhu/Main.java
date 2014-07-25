@@ -20,6 +20,8 @@ import org.apache.commons.cli.HelpFormatter;
 import org.apache.log4j.Logger;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 
+import ca.gobits.cthulhu.config.DHTConfiguration;
+
 /**
  * Mainline to run DHTServer.
  *

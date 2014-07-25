@@ -102,7 +102,7 @@ public class DHTFindNodeQueueImpl extends DHTQueueAbstract implements
         byte[] msg = DHTQueryProtocol.findNodeQuery(getTransactionId(), nodeId,
                 target, want);
 
-        LOGGER.info("sending 'find_node' to " + addr.getHostName() + ":"
+        LOGGER.info("sending 'find_node' to " + addr.getHostAddress() + ":"
                 + port);
 
         sendToSocket(addr, port, msg);

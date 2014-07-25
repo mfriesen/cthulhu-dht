@@ -16,17 +16,25 @@
 
 package ca.gobits.cthulhu;
 
+import static ca.gobits.cthulhu.domain.DHTNodeFactory.NODE_ID_LENGTH;
+import static ca.gobits.dht.DHTConversion.fitToSize;
+
+import java.math.BigInteger;
 import java.net.Inet6Address;
 import java.net.InetAddress;
 import java.util.Arrays;
+import java.util.Iterator;
 import java.util.List;
 
 import org.apache.log4j.Logger;
 
+import ca.gobits.cthulhu.domain.DHTBucket;
+import ca.gobits.cthulhu.domain.DHTBucketComparator;
 import ca.gobits.cthulhu.domain.DHTNode;
 import ca.gobits.cthulhu.domain.DHTNode.State;
 import ca.gobits.cthulhu.domain.DHTNodeComparator;
 import ca.gobits.cthulhu.domain.DHTNodeFactory;
+import ca.gobits.dht.DHTConversion;
 import ca.gobits.dht.DHTDistance;
 import ca.gobits.dht.DHTIdentifier;
 
@@ -49,19 +57,50 @@ public final class DHTNodeBucketRoutingTable implements DHTNodeRoutingTable {
     private static final int MAX_NUMBER_OF_NODES = 1000000;
 
     /** IPv4 nodes. */
-    private final ConcurrentSortedList<DHTNode> nodes;
+    private final SortedCollection<DHTNode> nodes;
 
     /** IPv6 nodes. */
-    private final ConcurrentSortedList<DHTNode> nodes6;
+    private final SortedCollection<DHTNode> nodes6;
+
+    /** DHTBuckets for IPv4 nodes. */
+    private final SortedCollection<DHTBucket> buckets;
+
+    /** DHTBuckets for IPv6 nodes. */
+    private final SortedCollection<DHTBucket> buckets6;
+
+    /** Node ID of Host. */
+    private final byte[] id;
 
     /**
      * constructor.
+     * @param nodeId  Host Identifier
      */
-    public DHTNodeBucketRoutingTable() {
+    public DHTNodeBucketRoutingTable(final byte[] nodeId) {
+        this.id = nodeId;
         this.nodes = new ConcurrentSortedList<DHTNode>(
                 DHTNodeComparator.getInstance(), false);
         this.nodes6 = new ConcurrentSortedList<DHTNode>(
                 DHTNodeComparator.getInstance(), false);
+
+        this.buckets = new ConcurrentSortedList<DHTBucket>(
+                DHTBucketComparator.getInstance(), false);
+        this.buckets6 = new ConcurrentSortedList<DHTBucket>(
+                DHTBucketComparator.getInstance(), false);
+
+        addDefaultBuckets();
+    }
+
+    /**
+     * Add default buckets.
+     */
+    private void addDefaultBuckets() {
+        byte[] min = new byte[] {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+                0, 0, 0, 0, 0 };
+        byte[] max = new byte[] {-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+                -1, -1, -1, -1, -1, -1, -1, -1, -1 };
+
+        this.buckets.add(new DHTBucket(min, max));
+        this.buckets6.add(new DHTBucket(min, max));
     }
 
     @Override
@@ -86,18 +125,119 @@ public final class DHTNodeBucketRoutingTable implements DHTNodeRoutingTable {
 
         if (this.nodes.size() < MAX_NUMBER_OF_NODES) {
 
+            boolean ipv6 = addr instanceof Inet6Address;
+            DHTBucket bucket = findBucket(node.getInfoHash(), ipv6);
+
             addNodeLoggerDebug(node);
 
-            if (addr instanceof Inet6Address) {
-                this.nodes6.add(node);
-            } else {
-                this.nodes.add(node);
-            }
+            addNode(bucket, node, ipv6);
 
         } else {
             LOGGER.warn("MAXIMUM number of noded reached "
                     + MAX_NUMBER_OF_NODES);
         }
+    }
+
+    /**
+     * Adds node to list and bucket.
+     * @param bucket  bucket to add node to.
+     * @param node  node to add
+     * @param ipv6  is this an ipv6 request
+     */
+    private void addNode(final DHTBucket bucket, final DHTNode node,
+            final boolean ipv6) {
+
+        if (!bucket.isFull()) {
+
+            SortedCollection<DHTNode> nodeList = getNodes(ipv6);
+            nodeList.add(node);
+
+            bucket.incrementCount();
+         // TODO add servermode flag to add all nodes as long as MAX_NODE
+//            is not reached..
+        } else if (bucket.isInRange(this.id)) {
+//        } else if (true) {
+
+            DHTBucket nb = splitBucket(bucket, ipv6);
+
+            SortedCollection<DHTBucket> bucketList = ipv6 ? this.buckets6
+                    : this.buckets;
+            bucketList.add(nb);
+
+            DHTBucket nextBucket = findBucket(node.getInfoHash(), ipv6);
+            addNode(nextBucket, node, ipv6);
+        }
+    }
+
+    /**
+     * Splits a bucket in half and returns the top half
+     * and adjusts the passed in argument to be the lower half.
+     * @param bucket  bucket to splits
+     * @param ipv6 whether ipv6 request
+     * @return DHTBucket
+     */
+    private DHTBucket splitBucket(final DHTBucket bucket, final boolean ipv6) {
+
+        BigInteger minBI = DHTConversion.toBigInteger(bucket.getMin());
+        byte[] min = fitToSize(minBI.toByteArray(), NODE_ID_LENGTH);
+
+        BigInteger maxBI = DHTConversion.toBigInteger(bucket.getMax());
+        byte[] max = fitToSize(maxBI.toByteArray(), NODE_ID_LENGTH);
+
+        BigInteger midBI = maxBI.add(minBI).divide(new BigInteger("2"));
+        byte[] mid = fitToSize(midBI.toByteArray(), NODE_ID_LENGTH);
+
+        BigInteger topMin = midBI.add(new BigInteger("1"));
+
+        int posMin = indexOf(min, ipv6);
+        int posMax = indexOf(max, ipv6);
+        int posMid = indexOf(mid, ipv6);
+
+        bucket.setMax(mid);
+        bucket.setNodeCount(posMid - posMin);
+
+        DHTBucket nb = new DHTBucket(fitToSize(topMin.toByteArray(),
+                NODE_ID_LENGTH), max);
+        nb.setNodeCount(posMax - posMid);
+
+        return nb;
+    }
+
+    /**
+     * Finds position in RoutingTable of an infohash.
+     * @param infoHash  to find
+     * @param ipv6  whether ipv6
+     * @return int
+     */
+    private int indexOf(final byte[] infoHash, final boolean ipv6) {
+
+        DHTNode node = DHTNodeFactory.create(infoHash, null);
+        return getNodes(ipv6).indexOf(node);
+    }
+
+    /**
+     * Finds bucket to add node to.
+     * @param bytes  bytes to search for
+     * @param ipv6  whether ipv6 request.
+     * @return DHTBucket
+     */
+    private DHTBucket findBucket(final byte[] bytes, final boolean ipv6) {
+
+        DHTBucket bucket = null;
+
+//        return getBucket(ipv6).get(new DHTBucket(bytes, bytes));
+        Iterator<DHTBucket> itr = ipv6 ? this.buckets6.iterator()
+                : this.buckets.iterator();
+
+        while (itr.hasNext()) {
+            DHTBucket bb = itr.next();
+            if (bb.isInRange(bytes)) {
+                bucket = bb;
+                break;
+            }
+        }
+
+        return bucket;
     }
 
     /**
@@ -173,8 +313,7 @@ public final class DHTNodeBucketRoutingTable implements DHTNodeRoutingTable {
              final int max, final boolean ipv6) {
 
         int count = 0;
-        ConcurrentSortedList<DHTNode> nodeList = ipv6 ? this.nodes6
-                : this.nodes;
+        SortedCollection<DHTNode> nodeList = getNodes(ipv6);
 
         int index = nodeList.indexOf(node);
 
@@ -269,10 +408,20 @@ public final class DHTNodeBucketRoutingTable implements DHTNodeRoutingTable {
     }
 
     /**
-     * @return DHTBucket
+     * @return SortedCollection<DHTNode>
      */
     public SortedCollection<DHTNode> getNodes6() {
         return this.nodes6;
+    }
+
+    /**
+     * @param ipv6  whether ipv6
+     * @return SortedCollection<DHTNode>
+     */
+    private SortedCollection<DHTNode> getNodes(final boolean ipv6) {
+        SortedCollection<DHTNode> nodeList = ipv6 ? this.nodes6
+                : this.nodes;
+        return nodeList;
     }
 
     @Override
@@ -305,4 +454,26 @@ public final class DHTNodeBucketRoutingTable implements DHTNodeRoutingTable {
 
         return success;
     }
+
+    /**
+     * @return List<DHTBucket>
+     */
+    public SortedCollection<DHTBucket> getBuckets() {
+        return this.buckets;
+    }
+
+    /**
+     * @return List<DHTBucket>
+     */
+    public SortedCollection<DHTBucket> getBuckets6() {
+        return this.buckets6;
+    }
+
+//    /**
+//     * @param ipv6  whether ipv6 request
+//     * @return SortedCollection<DHTBucket>
+//     */
+//    private SortedCollection<DHTBucket> getBucket(final boolean ipv6) {
+//        return ipv6 ? getBuckets6() : getBuckets();
+//    }
 }

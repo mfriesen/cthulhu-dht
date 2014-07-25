@@ -20,6 +20,9 @@ import static ca.gobits.cthulhu.domain.DHTNodeFactory.create;
 import static org.junit.Assert.assertEquals;
 
 import java.math.BigInteger;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
 
 import org.junit.Test;
 
@@ -83,5 +86,55 @@ public final class DHTNodeComparatorUnitTest {
 
         // then
         assertEquals(3, result);
+    }
+
+    /**
+     * testCompare04().
+     */
+    @Test
+    public void testCompare04() {
+        // given
+        byte[] id0 = new byte[] {64, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+                0, 0, 0, 0, 0 };
+        byte[] id1 = new byte[] {-128, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+                0, 0, 0, 0, 0 };
+        DHTNode node0 = create(id0,
+                DHTNode.State.UNKNOWN);
+        DHTNode node1 = create(id1,
+                DHTNode.State.UNKNOWN);
+
+        List<DHTNode> list = Arrays.asList(node1, node0);
+
+        // when
+        Collections.sort(list, DHTNodeComparator.getInstance());
+
+        // then
+        assertEquals(node0, list.get(0));
+        assertEquals(node1, list.get(1));
+    }
+
+    /**
+     * testCompare05().
+     */
+    @Test
+    public void testCompare05() {
+        // given
+        byte[] id0 = new byte[] {0, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+                -1, -1, -1, -1, -1, -1, -1, -1, -1 };
+        byte[] id1 = new byte[] {-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+                -1, -1, -1, -1, -1, -1, -1, -1, -1 };
+        DHTNode node0 = create(id0,
+                DHTNode.State.UNKNOWN);
+        DHTNode node1 = create(id1,
+                DHTNode.State.UNKNOWN);
+
+        List<DHTNode> list = Arrays.asList(node1, node0);
+
+        // when
+        Collections.sort(list, DHTNodeComparator.getInstance());
+
+        // then
+        assertEquals(node0, list.get(0));
+        assertEquals(node1, list.get(1));
     }
 }

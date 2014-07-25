@@ -84,14 +84,14 @@ public final class SortedList<E> implements SortedCollection<E>, Serializable {
     @Override
     public boolean add(final E e) {
 
-        int position = indexOf(e, this.allowDuplicates);
-        boolean added = position > -1;
+        int index = indexOf(e, this.allowDuplicates);
+        boolean success = index > -1;
 
-        if (added) {
-            this.list.add(position, e);
+        if (success) {
+            this.list.add(index, e);
         }
 
-        return added;
+        return success;
     }
 
     @Override

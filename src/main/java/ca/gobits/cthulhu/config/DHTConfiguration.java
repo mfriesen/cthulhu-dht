@@ -14,7 +14,7 @@
 // limitations under the License.
 //
 
-package ca.gobits.cthulhu;
+package ca.gobits.cthulhu.config;
 
 import java.net.DatagramSocket;
 import java.net.SocketException;
@@ -26,6 +26,15 @@ import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 
+import ca.gobits.cthulhu.DHTInfoHashRoutingTable;
+import ca.gobits.cthulhu.DHTInfoHashRoutingTableBasic;
+import ca.gobits.cthulhu.DHTNodeBucketRoutingTable;
+import ca.gobits.cthulhu.DHTNodeRoutingTable;
+import ca.gobits.cthulhu.DHTProtocolHandler;
+import ca.gobits.cthulhu.DHTServer;
+import ca.gobits.cthulhu.DHTServerConfig;
+import ca.gobits.cthulhu.DHTTokenTable;
+import ca.gobits.cthulhu.DHTTokenTableBasic;
 import ca.gobits.cthulhu.queue.DHTFindNodeQueue;
 import ca.gobits.cthulhu.queue.DHTFindNodeQueueImpl;
 import ca.gobits.cthulhu.queue.DHTPingQueue;
@@ -57,7 +66,7 @@ public class DHTConfiguration {
      */
     @Bean
     public DHTNodeRoutingTable routingTable() {
-        return new DHTNodeBucketRoutingTable();
+        return new DHTNodeBucketRoutingTable(this.config.getNodeId());
     }
 
     /**

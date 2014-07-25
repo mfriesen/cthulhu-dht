@@ -76,7 +76,9 @@
     <module name="NoWhitespaceAfter"/>
   </module>
   <module name="JavadocPackage"/>
-  <module name="NewlineAtEndOfFile"/>
+  <module name="NewlineAtEndOfFile">
+    <property name="lineSeparator" value="lf"/>
+  </module>
   <module name="Translation"/>
   <module name="FileLength"/>
   <module name="FileTabCharacter"/>
@@ -93,6 +95,10 @@
   <module name="RegexpMultiline">
   <property name="format"
    value="System\.(out)|(err)\.print(ln)?\("/>
+</module>
+  <module name="RegexpMultiline">
+  <property name="format"
+   value="\.getHostName()"/>
 </module>
   <module name="SuppressionCommentFilter"/>
 </module>

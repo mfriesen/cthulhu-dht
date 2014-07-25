@@ -39,7 +39,6 @@ import org.springframework.util.CollectionUtils;
 import ca.gobits.cthulhu.domain.DHTNode;
 import ca.gobits.cthulhu.domain.DHTNode.State;
 import ca.gobits.cthulhu.domain.DHTPeer;
-import ca.gobits.cthulhu.queue.DHTFindNodeQueue;
 import ca.gobits.cthulhu.queue.DHTPingQueue;
 import ca.gobits.dht.BDecoder;
 import ca.gobits.dht.BEncoder;
@@ -77,10 +76,6 @@ public class DHTProtocolHandler {
     @Autowired
     private DHTPingQueue pingQueue;
 
-    /** DHTFindNodeQueue instance. */
-    @Autowired
-    private DHTFindNodeQueue findNodeQueue;
-
     /**
      * Read DatagramPacket.
      * @param packet  packet
@@ -102,19 +97,19 @@ public class DHTProtocolHandler {
                  if (request.containsKey("q")) {
 
                      LOGGER.info("received valid query from "
-                             + addr.getHostName() + ":" + packet.getPort());
+                             + addr.getHostAddress() + ":" + packet.getPort());
                     bytes = queryRequestHandler(packet, request);
 
                 } else {
 
                     LOGGER.info("received valid response from "
-                            + addr.getHostName() + ":" + packet.getPort());
+                            + addr.getHostAddress() + ":" + packet.getPort());
                     queryResponseHandler(packet, request);
                 }
             } else {
 
                 LOGGER.info("received INVALID request/response from "
-                        + addr.getHostName() + ":" + packet.getPort());
+                        + addr.getHostAddress() + ":" + packet.getPort());
             }
 
         } catch (Exception e) {
