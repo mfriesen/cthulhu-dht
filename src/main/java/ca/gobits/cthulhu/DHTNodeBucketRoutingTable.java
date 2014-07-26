@@ -440,21 +440,6 @@ public final class DHTNodeBucketRoutingTable implements DHTNodeRoutingTable {
         this.nodes6.clear();
     }
 
-    @Override
-    public boolean updateNodeState(final byte[] nodeId, final State state,
-            final boolean ipv6) {
-
-        boolean success = false;
-        DHTNode node = findExactNode(nodeId, ipv6);
-
-        if (node != null) {
-            node.setState(state);
-            success = true;
-        }
-
-        return success;
-    }
-
     /**
      * @return List<DHTBucket>
      */

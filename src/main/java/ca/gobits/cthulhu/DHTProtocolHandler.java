@@ -37,7 +37,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.util.CollectionUtils;
 
 import ca.gobits.cthulhu.domain.DHTNode;
-import ca.gobits.cthulhu.domain.DHTNode.State;
 import ca.gobits.cthulhu.domain.DHTPeer;
 import ca.gobits.cthulhu.queue.DHTPingQueue;
 import ca.gobits.dht.BDecoder;
@@ -75,6 +74,10 @@ public class DHTProtocolHandler {
     /** DHTPingQueue instance. */
     @Autowired
     private DHTPingQueue pingQueue;
+
+    /** DHTNodeStatusService instance. */
+    @Autowired
+    private DHTNodeStatusService statusService;
 
     /**
      * Read DatagramPacket.
@@ -155,13 +158,8 @@ public class DHTProtocolHandler {
                 if (this.tokenTable.isValidTransactionId(transId)) {
 
                     boolean ipv6 = packet.getAddress() instanceof Inet6Address;
-                    boolean success = this.routingTable.updateNodeState(id,
-                            State.GOOD, ipv6);
-
-                    if (!success) {
-                        this.routingTable.addNode(id, packet.getAddress(),
-                            packet.getPort(), State.GOOD);
-                    }
+                    this.statusService.updateStatusFromResponse(id,
+                            packet.getAddress(), packet.getPort(), ipv6);
                 }
             }
 
@@ -207,26 +205,6 @@ public class DHTProtocolHandler {
     }
 
     /**
-     * Updates DHTNode's state to Good if exists in RoutingTable
-     * or Sends Ping Request.
-     * @param argument  infohash
-     * @param addr  InetAddress
-     * @param port  port
-     */
-    private void updateNodeStatusOrPing(final DHTArgumentRequest argument,
-            final InetAddress addr, final int port) {
-
-        DHTNode node = this.routingTable.findExactNode(argument.getId(),
-                argument.isIpv6());
-
-        if (node != null) {
-            node.setState(State.GOOD);
-        } else {
-            this.pingQueue.ping(addr, port);
-        }
-    }
-
-    /**
      * Creates response from DHT Query request.
      * @param packet  DatagramPacket
      * @param request Map<String, Object>
@@ -251,7 +229,8 @@ public class DHTProtocolHandler {
         DHTArgumentRequest arguments = new DHTArgumentRequest(addr,
                 (Map<String, Object>) request.get("a"));
 
-        updateNodeStatusOrPing(arguments, addr, port);
+        this.statusService.updateStatusFromRequest(arguments.getId(),
+                packet.getAddress(), packet.getPort(), arguments.isIpv6());
 
         if (action.equals("ping")) {
 

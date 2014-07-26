@@ -21,7 +21,6 @@ import static ca.gobits.cthulhu.domain.DHTNodeFactory.create;
 import static ca.gobits.dht.DHTConversion.fitToSize;
 import static ca.gobits.dht.DHTConversion.toBigInteger;
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
@@ -46,7 +45,6 @@ import ca.gobits.cthulhu.SortedCollection;
 import ca.gobits.cthulhu.domain.DHTBucket;
 import ca.gobits.cthulhu.domain.DHTNode;
 import ca.gobits.cthulhu.domain.DHTNode.State;
-import ca.gobits.dht.DHTConversion;
 
 /**
  * DHTBucketRoutingTableTest.
@@ -1005,48 +1003,5 @@ public final class DHTNodeBucketRoutingTableUnitTest extends EasyMockSupport {
         byte[] id = fitToSize(new BigInteger("" + i).toByteArray(),
                 NODE_ID_LENGTH);
         this.rt.addNode(id, this.iaddr, this.port, State.GOOD);
-    }
-
-    /**
-     * testUpdateNodeState01() - update node status of existing node.
-     */
-    @Test
-    public void testUpdateNodeState01() {
-        // given
-        boolean ipv6 = false;
-        State state = State.UNKNOWN;
-        byte[] nodeId2 = new BigInteger("" + 2).toByteArray();
-        nodeId2 = fitToSize(nodeId2, NODE_ID_LENGTH);
-
-        // when
-        replayAll();
-        addNodes();
-        assertEquals(State.GOOD, this.rt.findExactNode(nodeId2, ipv6)
-                .getState());
-
-        boolean result = this.rt.updateNodeState(nodeId2, state, ipv6);
-
-        // then
-        verifyAll();
-        assertTrue(result);
-        assertEquals(state, this.rt.findExactNode(nodeId2, ipv6).getState());
-    }
-
-    /**
-     * testUpdateNodeState02() - update node status of NON-existing node.
-     */
-    @Test
-    public void testUpdateNodeState02() {
-        // given
-        boolean ipv6 = false;
-        State state = State.UNKNOWN;
-        byte[] nodeId2 = new BigInteger("" + 2).toByteArray();
-        nodeId2 = DHTConversion.fitToSize(nodeId2, NODE_ID_LENGTH);
-
-        // when
-        boolean result = this.rt.updateNodeState(nodeId2, state, ipv6);
-
-        // then
-        assertFalse(result);
     }
 }

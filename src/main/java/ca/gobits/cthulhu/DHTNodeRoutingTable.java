@@ -66,15 +66,6 @@ public interface DHTNodeRoutingTable {
     List<DHTNode> findClosestNodes(byte[] nodeId, int max, boolean ipv6);
 
     /**
-     *
-     * @param nodeId to find closest nodes to.
-     * @param state  State of Node
-     * @param ipv6  whether ipv6 request
-     * @return boolean whether Node's state was updated
-     */
-    boolean updateNodeState(byte[] nodeId, State state, boolean ipv6);
-
-    /**
      * @param ipv6  whether search ipv6 node list
      * @return int  number of nodes in IPv6 list.
      */

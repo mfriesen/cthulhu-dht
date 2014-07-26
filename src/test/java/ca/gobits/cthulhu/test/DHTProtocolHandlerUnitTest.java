@@ -50,13 +50,12 @@ import org.springframework.test.util.ReflectionTestUtils;
 
 import ca.gobits.cthulhu.DHTInfoHashRoutingTable;
 import ca.gobits.cthulhu.DHTNodeRoutingTable;
+import ca.gobits.cthulhu.DHTNodeStatusService;
 import ca.gobits.cthulhu.DHTProtocolHandler;
 import ca.gobits.cthulhu.DHTQueryProtocol;
 import ca.gobits.cthulhu.DHTServerConfig;
 import ca.gobits.cthulhu.DHTTokenTable;
 import ca.gobits.cthulhu.domain.DHTNode;
-import ca.gobits.cthulhu.domain.DHTNode.State;
-import ca.gobits.cthulhu.domain.DHTNodeBasic;
 import ca.gobits.cthulhu.domain.DHTNodeFactory;
 import ca.gobits.cthulhu.domain.DHTPeer;
 import ca.gobits.cthulhu.domain.DHTPeerBasic;
@@ -97,6 +96,10 @@ public final class DHTProtocolHandlerUnitTest extends EasyMockSupport {
     @Mock
     private DHTPingQueue pingQueue;
 
+    /** Mock DHTNodeStatusService. */
+    @Mock
+    private DHTNodeStatusService nodeStatusService;
+
     /** InetSocketAddress. */
     private InetAddress iaddr;
 
@@ -126,7 +129,7 @@ public final class DHTProtocolHandlerUnitTest extends EasyMockSupport {
     }
 
     /**
-     * testHandle01() - "ping" request and ping node back.
+     * testHandle01() - "ping" request.
      * @throws Exception  Exception
      */
     @Test
@@ -141,11 +144,11 @@ public final class DHTProtocolHandlerUnitTest extends EasyMockSupport {
                 this.port);
 
         // when
-        this.pingQueue.ping(this.iaddr, this.port);
+        this.nodeStatusService.updateStatusFromRequest(aryEq(id),
+                eq(this.iaddr), eq(this.port), eq(isIPv6));
+
         expect(this.config.getNodeId()).andReturn(
                 "ABCDEFGHIJKLMNOPQRST".getBytes());
-        expect(this.routingTable.findExactNode(aryEq(id), eq(isIPv6)))
-                .andReturn(null);
 
         replayAll();
         byte[] resultBytes = this.handler.handle(packet);
@@ -153,43 +156,6 @@ public final class DHTProtocolHandlerUnitTest extends EasyMockSupport {
         // then
         verifyAll();
 
-        String result = new String(resultBytes);
-
-        assertTrue(result.contains("d2:ip6:2G"));
-        assertTrue(result
-                .endsWith("81:rd2:id20:ABCDEFGHIJKLMNOPQRSTe1:t2:aa1:y1:re"));
-    }
-
-    /**
-     * testHandle02() - "ping" request and node already in RoutingTable.
-     * @throws Exception  Exception
-     */
-    @Test
-    public void testHandle02() throws Exception {
-        // given
-        boolean isIPv6 = false;
-        String dat = "d1:ad2:id20:abcdefghij0123456789e1:q4:ping1:t2:aa1:y1:qe";
-        byte[] id = "abcdefghij0123456789".getBytes();
-        byte[] bb = dat.getBytes();
-
-        DHTNode node = new DHTNodeBasic();
-        node.setState(State.UNKNOWN);
-        DatagramPacket packet = new DatagramPacket(bb, bb.length, this.iaddr,
-                this.port);
-
-        // when
-        expect(this.config.getNodeId()).andReturn(
-                "ABCDEFGHIJKLMNOPQRST".getBytes());
-        expect(this.routingTable.findExactNode(aryEq(id), eq(isIPv6)))
-                .andReturn(node);
-
-        replayAll();
-        byte[] resultBytes = this.handler.handle(packet);
-
-        // then
-        verifyAll();
-
-        assertEquals(State.GOOD, node.getState());
         String result = new String(resultBytes);
 
         assertTrue(result.contains("d2:ip6:2G"));
@@ -223,11 +189,11 @@ public final class DHTProtocolHandlerUnitTest extends EasyMockSupport {
         assertEquals(20, target.length);
 
         // when
-        expect(this.routingTable.findExactNode(aryEq(nodeId), eq(isIPv6)))
-            .andReturn(new DHTNodeBasic());
-
         expect(this.routingTable.findClosestNodes(aryEq(target), eq(isIPv6)))
             .andReturn(getFindNodes());
+
+        this.nodeStatusService.updateStatusFromRequest(aryEq(id),
+                eq(this.iaddr), eq(this.port), eq(isIPv6));
 
         replayAll();
         byte[] bytes = this.handler.handle(packet);
@@ -296,8 +262,8 @@ public final class DHTProtocolHandlerUnitTest extends EasyMockSupport {
                 this.port);
 
         // when
-        expect(this.routingTable.findExactNode(aryEq(nodeId), eq(isIPv6)))
-            .andReturn(new DHTNodeBasic());
+        this.nodeStatusService.updateStatusFromRequest(aryEq(id),
+                eq(this.iaddr6), eq(this.port), eq(isIPv6));
 
         expect(this.routingTable.findClosestNodes(aryEq(target), eq(isIPv6)))
             .andReturn(getFindNodes6());
@@ -774,8 +740,9 @@ public final class DHTProtocolHandlerUnitTest extends EasyMockSupport {
 
         // when
         expect(this.tokenTable.isValidTransactionId("aa")).andReturn(true);
-        expect(this.routingTable.updateNodeState(aryEq(id), eq(State.GOOD),
-            eq(isIPv6))).andReturn(Boolean.TRUE);
+
+        this.nodeStatusService.updateStatusFromResponse(aryEq(id),
+                eq(this.iaddr), eq(this.port), eq(isIPv6));
 
         replayAll();
 
@@ -806,11 +773,10 @@ public final class DHTProtocolHandlerUnitTest extends EasyMockSupport {
                 this.port);
 
         // when
-        expect(this.routingTable.updateNodeState(aryEq(id), eq(State.GOOD),
-                eq(isIPv6))).andReturn(Boolean.FALSE);
+        this.nodeStatusService.updateStatusFromResponse(aryEq(id),
+                eq(this.iaddr), eq(this.port), eq(isIPv6));
+
         expect(this.tokenTable.isValidTransactionId("aa")).andReturn(true);
-        this.routingTable.addNode(aryEq(id), eq(this.iaddr), eq(this.port),
-                eq(State.GOOD));
 
         replayAll();
 
@@ -1114,7 +1080,13 @@ public final class DHTProtocolHandlerUnitTest extends EasyMockSupport {
         byte[] bytes = new BigInteger(
                 "555966236078696110491139251576793858856027895865")
                 .toByteArray();
-        expect(this.routingTable.findExactNode(aryEq(bytes), eq(isIPv6)))
-                .andReturn(new DHTNodeBasic());
+
+        if (isIPv6) {
+            this.nodeStatusService.updateStatusFromRequest(aryEq(bytes),
+                    eq(this.iaddr6), eq(this.port), eq(isIPv6));
+        } else {
+            this.nodeStatusService.updateStatusFromRequest(aryEq(bytes),
+                eq(this.iaddr), eq(this.port), eq(isIPv6));
+        }
     }
 }
