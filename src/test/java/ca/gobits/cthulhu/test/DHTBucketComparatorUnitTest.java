@@ -22,6 +22,7 @@ import java.util.Comparator;
 
 import org.junit.Test;
 
+import ca.gobits.cthulhu.SortedList;
 import ca.gobits.cthulhu.domain.DHTBucket;
 import ca.gobits.cthulhu.domain.DHTBucketComparator;
 
@@ -190,5 +191,24 @@ public class DHTBucketComparatorUnitTest {
 
         // then
         assertEquals(-255, result);
+    }
+
+    /**
+     * Test finding DHTBucket from SortedList.
+     */
+    @Test
+    public void testSortedList01() {
+        // given
+        SortedList<DHTBucket> list = new SortedList<>(this.comp, false);
+        DHTBucket b0 = new DHTBucket(this.mid, this.max);
+        list.add(b0);
+
+        DHTBucket bb = new DHTBucket(this.midPlusOne, this.midPlusOne);
+
+        // when
+        DHTBucket result = list.get(bb);
+
+        // then
+        assertEquals(b0, result);
     }
 }

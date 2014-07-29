@@ -160,7 +160,7 @@ public final class SortedList<E> implements SortedCollection<E>, Serializable {
 
         if (index >= 0 && index < this.list.size()) {
             E foundNode = this.list.get(index);
-            if (foundNode.equals(e)) {
+            if (this.comparable.compare(e, foundNode) == 0) {
                 nodeMatch = foundNode;
             }
         }
