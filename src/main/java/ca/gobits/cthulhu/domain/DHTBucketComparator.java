@@ -29,6 +29,10 @@ public class DHTBucketComparator implements Comparator<DHTBucket> {
     /** static comparator instance. */
     private static DHTBucketComparator comparator = new DHTBucketComparator();
 
+    /** Unisgned Bytes Comparator. */
+    private static final Comparator<byte[]> COMPARATOR = UnsignedBytes
+            .lexicographicalComparator();
+
     /**
      * @return Comparator<DHTBucket>
      */
@@ -38,23 +42,43 @@ public class DHTBucketComparator implements Comparator<DHTBucket> {
 
     @Override
     public int compare(final DHTBucket o1, final DHTBucket o2) {
-        return UnsignedBytes.lexicographicalComparator()
-                .compare(o1.getMin(), o2.getMin());
-//        int result = 1;
-//        int min = UnsignedBytes.lexicographicalComparator()
-//                .compare(o1.getMin(), o2.getMin());
-//
-//        if (min <= 0) {
-//
-//            result = UnsignedBytes.lexicographicalComparator()
-//                    .compare(o1.getMax(), o2.getMax());
-//
-//            if (result <= 0) {
-//                result = 0;
-//            }
-//        }
-//
-//        return result;
+
+        int result = 0;
+        boolean is1Sames = o1.getMin().equals(o1.getMax());
+        boolean is2Sames = o2.getMin().equals(o2.getMax());
+
+        if (is1Sames) {
+            result = isInRange(o2, o1.getMin());
+        } else if (is2Sames) {
+            result = isInRange(o1, o2.getMin());
+        } else {
+            result = UnsignedBytes.lexicographicalComparator()
+                    .compare(o1.getMin(), o2.getMin());
+
+            if (result <= 0) {
+
+                int maxResult = UnsignedBytes.lexicographicalComparator()
+                        .compare(o1.getMax(), o2.getMax());
+
+                if (maxResult != 0) {
+                    result = maxResult;
+                }
+            }
+        }
+
+        return result;
     }
 
+    /**
+     * Compares a byte[] to a DHTBucket range.
+     * @param bucket  DHTBucket
+     * @param bytes byte[]
+     * @return int
+     */
+    private int isInRange(final DHTBucket bucket, final byte[] bytes) {
+        int min = COMPARATOR.compare(bucket.getMin(), bytes);
+        int max = COMPARATOR.compare(bytes, bucket.getMax());
+
+        return min <= 0 && max <= 0 ? 0 : min < 0 ? min : max;
+    }
 }
