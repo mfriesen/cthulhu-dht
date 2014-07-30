@@ -157,10 +157,8 @@ public final class DHTNodeBucketRoutingTable implements DHTNodeRoutingTable {
             nodeList.add(node);
 
             bucket.incrementCount();
-         // TODO add servermode flag to add all nodes as long as MAX_NODE
-//            is not reached..
+
         } else if (this.serverMode || bucket.isInRange(this.id)) {
-//        } else if (true) {
 
             DHTBucket nb = splitBucket(bucket, ipv6);
 
