@@ -76,9 +76,9 @@ public class DHTBucketComparator implements Comparator<DHTBucket> {
      * @return int
      */
     private int isInRange(final DHTBucket bucket, final byte[] bytes) {
-        int min = COMPARATOR.compare(bucket.getMin(), bytes);
+        int min = COMPARATOR.compare(bytes, bucket.getMin());
         int max = COMPARATOR.compare(bytes, bucket.getMax());
 
-        return min <= 0 && max <= 0 ? 0 : min < 0 ? min : max;
+        return min >= 0 && max <= 0 ? 0 : min < 0 ? min : max;
     }
 }

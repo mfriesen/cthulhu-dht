@@ -23,7 +23,6 @@ import java.math.BigInteger;
 import java.net.Inet6Address;
 import java.net.InetAddress;
 import java.util.Arrays;
-import java.util.Iterator;
 import java.util.List;
 
 import org.apache.log4j.Logger;
@@ -160,8 +159,7 @@ public final class DHTNodeBucketRoutingTable implements DHTNodeRoutingTable {
 
             DHTBucket nb = splitBucket(bucket, ipv6);
 
-            SortedCollection<DHTBucket> bucketList = ipv6 ? this.buckets6
-                    : this.buckets;
+            SortedCollection<DHTBucket> bucketList = getBuckets(ipv6);
             bucketList.add(nb);
 
             DHTBucket nextBucket = findBucket(node.getInfoHash(), ipv6);
@@ -223,21 +221,11 @@ public final class DHTNodeBucketRoutingTable implements DHTNodeRoutingTable {
      */
     private DHTBucket findBucket(final byte[] bytes, final boolean ipv6) {
 
-        DHTBucket bucket = null;
+        SortedCollection<DHTBucket> list = getBuckets(ipv6);
+        DHTBucket bb = new DHTBucket(bytes, bytes);
 
-//        return getBucket(ipv6).get(new DHTBucket(bytes, bytes));
-        Iterator<DHTBucket> itr = ipv6 ? this.buckets6.iterator()
-                : this.buckets.iterator();
-
-        while (itr.hasNext()) {
-            DHTBucket bb = itr.next();
-            if (bb.isInRange(bytes)) {
-                bucket = bb;
-                break;
-            }
-        }
-
-        return bucket;
+        DHTBucket r = list.get(bb);
+        return r;
     }
 
     /**
@@ -454,11 +442,11 @@ public final class DHTNodeBucketRoutingTable implements DHTNodeRoutingTable {
         return this.buckets6;
     }
 
-//    /**
-//     * @param ipv6  whether ipv6 request
-//     * @return SortedCollection<DHTBucket>
-//     */
-//    private SortedCollection<DHTBucket> getBucket(final boolean ipv6) {
-//        return ipv6 ? getBuckets6() : getBuckets();
-//    }
+    /**
+     * @param ipv6  whether ipv6 request
+     * @return SortedCollection<DHTBucket>
+     */
+    private SortedCollection<DHTBucket> getBuckets(final boolean ipv6) {
+        return ipv6 ? getBuckets6() : getBuckets();
+    }
 }

@@ -172,7 +172,7 @@ public class DHTBucketComparatorUnitTest {
         int result = this.comp.compare(o1, o2);
 
         // then
-        assertEquals(-255, result);
+        assertEquals(-127, result);
     }
 
     /**
@@ -190,7 +190,7 @@ public class DHTBucketComparatorUnitTest {
         int result = this.comp.compare(o1, o2);
 
         // then
-        assertEquals(-255, result);
+        assertEquals(255, result);
     }
 
     /**
@@ -207,6 +207,105 @@ public class DHTBucketComparatorUnitTest {
 
         // when
         DHTBucket result = list.get(bb);
+
+        // then
+        assertEquals(b0, result);
+    }
+
+    /**
+     * testSortedList02().
+     */
+    @Test
+    public void testSortedList02() {
+
+        // given
+        byte[] bb = new byte[] {0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+                0, 0, 0, 0, 0, 0, 0, 0, 0, 32 };
+        SortedList<DHTBucket> list = new SortedList<>(this.comp, false);
+        DHTBucket b0 = new DHTBucket(new byte[] {0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+                0, 0, 0, 0, 0, 0, 0, 0, 0, 0 }, new byte[] {0, 0, 0, 0, 0, 0,
+                0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 15 });
+        DHTBucket b1 = new DHTBucket(new byte[] {0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+                0, 0, 0, 0, 0, 0, 0, 0, 0, 16 }, new byte[] {0, 0, 0, 0, 0, 0,
+                0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 31 });
+        DHTBucket b2 = new DHTBucket(new byte[] {0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+                0, 0, 0, 0, 0, 0, 0, 0, 0, 32 }, new byte[] {0, 0, 0, 0, 0, 0,
+                0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 64 });
+
+        list.add(b1);
+        list.add(b2);
+        list.add(b0);
+
+        DHTBucket b = new DHTBucket(bb, bb);
+
+        // when
+        DHTBucket result = list.get(b);
+
+        // then
+        assertEquals(b2, result);
+    }
+
+    /**
+     * testSortedList03().
+     */
+    @Test
+    public void testSortedList03() {
+
+        // given
+        byte[] bb = new byte[] {0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+                0, 0, 0, 0, 0, 0, 0, 0, 0, 16 };
+        SortedList<DHTBucket> list = new SortedList<>(this.comp, false);
+        DHTBucket b0 = new DHTBucket(new byte[] {0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+                0, 0, 0, 0, 0, 0, 0, 0, 0, 0 }, new byte[] {0, 0, 0, 0, 0, 0,
+                0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 15 });
+        DHTBucket b1 = new DHTBucket(new byte[] {0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+                0, 0, 0, 0, 0, 0, 0, 0, 0, 16 }, new byte[] {0, 0, 0, 0, 0, 0,
+                0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 31 });
+        DHTBucket b2 = new DHTBucket(new byte[] {0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+                0, 0, 0, 0, 0, 0, 0, 0, 0, 32 }, new byte[] {0, 0, 0, 0, 0, 0,
+                0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 64 });
+
+        list.add(b1);
+        list.add(b2);
+        list.add(b0);
+
+        DHTBucket b = new DHTBucket(bb, bb);
+
+        // when
+        DHTBucket result = list.get(b);
+
+        // then
+        assertEquals(b1, result);
+    }
+
+    /**
+     * testSortedList04().
+     */
+    @Test
+    public void testSortedList04() {
+
+        // given
+        byte[] bb = new byte[] {0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+                0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
+        SortedList<DHTBucket> list = new SortedList<>(this.comp, false);
+        DHTBucket b0 = new DHTBucket(new byte[] {0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+                0, 0, 0, 0, 0, 0, 0, 0, 0, 0 }, new byte[] {0, 0, 0, 0, 0, 0,
+                0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 15 });
+        DHTBucket b1 = new DHTBucket(new byte[] {0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+                0, 0, 0, 0, 0, 0, 0, 0, 0, 16 }, new byte[] {0, 0, 0, 0, 0, 0,
+                0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 31 });
+        DHTBucket b2 = new DHTBucket(new byte[] {0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+                0, 0, 0, 0, 0, 0, 0, 0, 0, 32 }, new byte[] {0, 0, 0, 0, 0, 0,
+                0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 64 });
+
+        list.add(b1);
+        list.add(b2);
+        list.add(b0);
+
+        DHTBucket b = new DHTBucket(bb, bb);
+
+        // when
+        DHTBucket result = list.get(b);
 
         // then
         assertEquals(b0, result);
