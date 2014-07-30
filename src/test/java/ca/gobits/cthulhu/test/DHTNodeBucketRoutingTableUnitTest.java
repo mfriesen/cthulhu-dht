@@ -36,7 +36,7 @@ import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 import org.easymock.EasyMockRunner;
 import org.easymock.EasyMockSupport;
-import org.junit.Ignore;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -51,10 +51,6 @@ import ca.gobits.cthulhu.domain.DHTNode.State;
  */
 @RunWith(EasyMockRunner.class)
 public final class DHTNodeBucketRoutingTableUnitTest extends EasyMockSupport {
-
-    /** LOGGER. */
-    private static final Logger LOGGER = Logger
-            .getLogger(DHTNodeBucketRoutingTableUnitTest.class);
 
     /** Dummy Node Id. */
     private final byte[] nodeId = fitToSize(new BigInteger("11").toByteArray(),
@@ -81,6 +77,12 @@ public final class DHTNodeBucketRoutingTableUnitTest extends EasyMockSupport {
         this.iaddr = InetAddress.getByName("50.71.50.12");
         this.iaddr6 = InetAddress
                 .getByName("805b:2d9d:dc28:0000:0000:fc57:d4c8:1fff");
+    }
+
+    /** before(). */
+    @Before
+    public void before() {
+        this.rt.setServerMode(false);
     }
 
     /**
@@ -127,9 +129,7 @@ public final class DHTNodeBucketRoutingTableUnitTest extends EasyMockSupport {
     /**
      * testAddNode02() - test Max Number of nodes.
      */
-    // TODO rename once server mode works..
     @Test
-    @Ignore
     public void testAddNode02() {
         // given
         boolean ipv6 = false;
@@ -142,18 +142,14 @@ public final class DHTNodeBucketRoutingTableUnitTest extends EasyMockSupport {
             infohashes.add(bb);
         }
 
+        this.rt.setServerMode(true);
+
         // when
         replayAll();
 
-        int i = 0;
         for (byte[] bb : infohashes) {
             this.rt.addNode(bb, this.iaddr,
                     this.port, State.GOOD);
-            i++;
-
-            if (i % 100 == 0) {
-                LOGGER.info("COUNT " + i);
-            }
         }
 
         // then

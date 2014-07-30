@@ -71,6 +71,11 @@ public final class DHTNodeBucketRoutingTable implements DHTNodeRoutingTable {
     private final byte[] id;
 
     /**
+     * Is Routing Table in ServerMode. Maximizes number of nodes to store.
+     */
+    private boolean serverMode;
+
+    /**
      * constructor.
      * @param nodeId  Host Identifier
      */
@@ -154,7 +159,7 @@ public final class DHTNodeBucketRoutingTable implements DHTNodeRoutingTable {
             bucket.incrementCount();
          // TODO add servermode flag to add all nodes as long as MAX_NODE
 //            is not reached..
-        } else if (bucket.isInRange(this.id)) {
+        } else if (this.serverMode || bucket.isInRange(this.id)) {
 //        } else if (true) {
 
             DHTBucket nb = splitBucket(bucket, ipv6);
@@ -451,5 +456,20 @@ public final class DHTNodeBucketRoutingTable implements DHTNodeRoutingTable {
      */
     private SortedCollection<DHTBucket> getBuckets(final boolean ipv6) {
         return ipv6 ? getBuckets6() : getBuckets();
+    }
+
+    /**
+     * @return boolean
+     */
+    public boolean isServerMode() {
+        return this.serverMode;
+    }
+
+    /**
+     * Sets ServerMode.
+     * @param useServerMode whether in server mode
+     */
+    public void setServerMode(final boolean useServerMode) {
+        this.serverMode = useServerMode;
     }
 }
