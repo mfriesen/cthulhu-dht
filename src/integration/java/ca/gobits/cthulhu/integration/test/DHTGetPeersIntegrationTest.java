@@ -131,6 +131,9 @@ public class DHTGetPeersIntegrationTest extends AbstractIntegrationTest {
             this.nodeRoutingTable.addNode(node.getInfoHash(), addr,
                 node.getPort(), State.GOOD);
         }
+
+        assertEquals(16, nodes.size());
+        assertEquals(16, this.nodeRoutingTable.getTotalNodeCount(false));
     }
 
     /**

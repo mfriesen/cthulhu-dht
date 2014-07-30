@@ -16,9 +16,11 @@
 
 package ca.gobits.cthulhu.integration.test;
 
+import org.apache.commons.codec.binary.Base64;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.scheduling.annotation.EnableAsync;
+import org.springframework.test.util.ReflectionTestUtils;
 
 import ca.gobits.cthulhu.DHTServerConfig;
 
@@ -43,6 +45,9 @@ public class IntegrationTestConfiguration {
      */
     @Bean
     public DHTServerConfig serverConfig() {
-        return new DHTServerConfig();
+        DHTServerConfig config = new DHTServerConfig();
+        ReflectionTestUtils.setField(config, "nodeId",
+                Base64.decodeBase64("UcskDNtZ7xTdlIoJY7KwuA2cg3c="));
+        return config;
     }
 }
