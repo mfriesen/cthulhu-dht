@@ -302,6 +302,7 @@ public final class DHTNodeBucketRoutingTable implements DHTNodeRoutingTable {
 
         int count = 0;
         SortedCollection<DHTNode> nodeList = getNodes(ipv6);
+        int size = nodeList.size();
 
         int index = nodeList.indexOf(node);
 
@@ -333,6 +334,8 @@ public final class DHTNodeBucketRoutingTable implements DHTNodeRoutingTable {
         }
 
         lowIndex = lowIndex < 0 ? 0 : lowIndex;
+        hiIndex = hiIndex < size ? hiIndex : size;
+
         return this.nodes.subList(lowIndex, hiIndex);
     }
 

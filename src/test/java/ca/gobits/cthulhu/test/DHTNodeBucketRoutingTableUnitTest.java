@@ -902,6 +902,52 @@ public final class DHTNodeBucketRoutingTableUnitTest extends EasyMockSupport {
     }
 
     /**
+     * testFindClosestNodes09() - routing table has 5 nodes.
+     * Routing Table has Nodes: 20 - 25
+     * Looking for Node 40.
+     */
+    @Test
+    public void testFindClosestNodes09() {
+        // given
+        boolean ipv6 = false;
+        DHTNode n = create(new BigInteger("40").toByteArray(), this.iaddr,
+                this.port, State.UNKNOWN);
+
+        // when
+        replayAll();
+
+        for (int i = 20; i < 26; i++) {
+            byte[] id = new BigInteger("" + i).toByteArray();
+            this.rt.addNode(id, this.iaddr, this.port, State.GOOD);
+        }
+
+        List<DHTNode> results = this.rt.findClosestNodes(n.getInfoHash(), ipv6);
+
+        // then
+        verifyAll();
+        assertEquals(6, results.size());
+
+        assertEquals(
+                "[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 20]",
+                Arrays.toString(results.get(0).getInfoHash()));
+        assertEquals(
+                "[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 21]",
+                Arrays.toString(results.get(1).getInfoHash()));
+        assertEquals(
+                "[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 22]",
+                Arrays.toString(results.get(2).getInfoHash()));
+        assertEquals(
+                "[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 23]",
+                Arrays.toString(results.get(3).getInfoHash()));
+        assertEquals(
+                "[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 24]",
+                Arrays.toString(results.get(4).getInfoHash()));
+        assertEquals(
+                "[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 25]",
+                Arrays.toString(results.get(5).getInfoHash()));
+    }
+
+    /**
      * testFindExactNode01() - index < size().
      */
     @Test
