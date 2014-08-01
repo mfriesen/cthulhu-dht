@@ -30,8 +30,6 @@ import ca.gobits.cthulhu.DHTInfoHashRoutingTable;
 import ca.gobits.cthulhu.DHTInfoHashRoutingTableBasic;
 import ca.gobits.cthulhu.DHTNodeBucketRoutingTable;
 import ca.gobits.cthulhu.DHTNodeRoutingTable;
-import ca.gobits.cthulhu.DHTNodeStatusService;
-import ca.gobits.cthulhu.DHTNodeStatusServiceImpl;
 import ca.gobits.cthulhu.DHTProtocolHandler;
 import ca.gobits.cthulhu.DHTServer;
 import ca.gobits.cthulhu.DHTServerConfig;
@@ -39,6 +37,8 @@ import ca.gobits.cthulhu.DHTTokenTable;
 import ca.gobits.cthulhu.DHTTokenTableBasic;
 import ca.gobits.cthulhu.queue.DHTFindNodeQueue;
 import ca.gobits.cthulhu.queue.DHTFindNodeQueueImpl;
+import ca.gobits.cthulhu.queue.DHTNodeStatusQueue;
+import ca.gobits.cthulhu.queue.DHTNodeStatusQueueImpl;
 import ca.gobits.cthulhu.queue.DHTPingQueue;
 import ca.gobits.cthulhu.queue.DHTPingQueueImpl;
 
@@ -141,10 +141,10 @@ public class DHTConfiguration {
     }
 
     /**
-     * @return DHTNodeStatusService
+     * @return DHTNodeStatusQueue
      */
     @Bean
-    public DHTNodeStatusService nodeStatusService() {
-        return new DHTNodeStatusServiceImpl();
+    public DHTNodeStatusQueue nodeStatusQueue() {
+        return new DHTNodeStatusQueueImpl();
     }
 }

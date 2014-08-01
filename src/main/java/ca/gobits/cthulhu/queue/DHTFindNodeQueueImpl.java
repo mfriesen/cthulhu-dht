@@ -48,7 +48,7 @@ public class DHTFindNodeQueueImpl extends DHTQueueAbstract implements
     private DHTServerConfig config;
 
     @Override
-    public void findNodes(final InetAddress addr, final int port,
+    public void findNodesWithDelay(final InetAddress addr, final int port,
             final byte[] target) {
 
         byte[] addrPayload = compactAddress(addr.getAddress(), port);
@@ -84,17 +84,12 @@ public class DHTFindNodeQueueImpl extends DHTQueueAbstract implements
 
             InetAddress addr = compactAddress(baddr);
             int port = compactAddressPort(baddr);
-            sendFindnode(addr, port, target);
+            findNodes(addr, port, target);
         }
     }
 
-    /**
-     * Send 'findnode' request.
-     * @param addr  InetAddress
-     * @param port  int
-     * @param target  byte[]
-     */
-    private void sendFindnode(final InetAddress addr, final int port,
+    @Override
+    public void findNodes(final InetAddress addr, final int port,
             final byte[] target) {
 
         List<byte[]> want = getWant();

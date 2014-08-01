@@ -24,7 +24,7 @@ import java.util.List;
  * The root interface in the Sorted Collection hierarchy.
  * @param <E>
  */
-public interface SortedCollection<E> {
+public interface SortedCollection<E> extends Iterable<E> {
 
     /**
      * Adds object to list.
@@ -74,6 +74,7 @@ public interface SortedCollection<E> {
     /**
      * @return Iterator<E>
      */
+    @Override
     Iterator<E> iterator();
 
     /**

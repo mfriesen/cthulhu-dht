@@ -50,7 +50,7 @@ public final class DHTConversion {
     private static final int BYTES_IPV4_LENGTH = 4;
 
     /** Constant to convert byte to unsigned int. */
-    private static final int BYTE_TO_INT = 0xFF;
+    public static final int BYTE_TO_INT = 0xFF;
 
     /** Constant number of Bits per Byte. */
     private static final int BITS_PER_BYTE = 8;

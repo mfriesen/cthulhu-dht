@@ -16,6 +16,8 @@
 
 package ca.gobits.dht;
 
+import static ca.gobits.dht.DHTConversion.BYTE_TO_INT;
+
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.Collection;
@@ -29,9 +31,6 @@ import java.util.TreeMap;
  *
  */
 public final class BEncoder {
-
-    /** Constant to convert byte to unsigned int. */
-    private static final int BYTE_TO_INT = 0xFF;
 
     /**
      * private constructor.

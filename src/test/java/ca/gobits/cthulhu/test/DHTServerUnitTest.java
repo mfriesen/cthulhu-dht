@@ -125,7 +125,7 @@ public final class DHTServerUnitTest extends EasyMockSupport {
         expect(this.config.getNodeId()).andReturn(this.nodeId).times(2);
         expect(this.serverSocket.getLocalPort()).andReturn(port);
         expect(this.config.getBootstrapNodes()).andReturn(nodes);
-        this.findNodeQueue.findNodes(isA(InetAddress.class), eq(7789),
+        this.findNodeQueue.findNodesWithDelay(isA(InetAddress.class), eq(7789),
                 eq(this.nodeId));
 
         expect(this.config.getLogLevel()).andReturn(Level.INFO);

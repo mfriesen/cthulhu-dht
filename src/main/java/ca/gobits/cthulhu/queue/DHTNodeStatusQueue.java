@@ -19,24 +19,27 @@ package ca.gobits.cthulhu.queue;
 import java.net.InetAddress;
 
 /**
- * DHT Find Node Request Queue.
+ * DHT Node Status Queue.
+ *
  */
-public interface DHTFindNodeQueue extends DHTQueue {
+public interface DHTNodeStatusQueue extends DHTQueue {
 
     /**
-     * Sends Find Nodes request to an Address with a delay.
-     * @param addr  InetAddress
-     * @param port  port
-     * @param target  ID to find
+     * Update Node Status when request/response from existing node.
+     *
+     * @param nodeId node's identifier.
+     * @param ipv6 whether ipv6 request
      */
-    void findNodesWithDelay(InetAddress addr, int port, byte[] target);
+    void updateExistingNodeToGood(byte[] nodeId, boolean ipv6);
 
     /**
-     * Sends Find Nodes request to an Address without delay.
+     * Update Node Status when Find Node response is received.
+     *
+     * @param nodeId node's identifier.
      * @param addr  InetAddress
-     * @param port  port
-     * @param target  ID to find
+     * @param port  int
+     * @param ipv6 whether ipv6 request
      */
-    void findNodes(final InetAddress addr, final int port,
-            final byte[] target);
+    void receivedFindNodeResponse(byte[] nodeId,
+            InetAddress addr, int port, boolean ipv6);
 }

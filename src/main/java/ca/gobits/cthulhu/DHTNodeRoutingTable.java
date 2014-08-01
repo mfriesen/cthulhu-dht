@@ -19,6 +19,7 @@ package ca.gobits.cthulhu;
 import java.net.InetAddress;
 import java.util.List;
 
+import ca.gobits.cthulhu.domain.DHTBucket;
 import ca.gobits.cthulhu.domain.DHTNode;
 import ca.gobits.cthulhu.domain.DHTNode.State;
 
@@ -66,6 +67,14 @@ public interface DHTNodeRoutingTable {
     List<DHTNode> findClosestNodes(byte[] nodeId, int max, boolean ipv6);
 
     /**
+     * Finds Bucket Node belongs to.
+     * @param nodeId  node to find bucket for
+     * @param ipv6  whether ipv6 request
+     * @return DHTBucket
+     */
+    DHTBucket findBucket(final byte[] nodeId, final boolean ipv6);
+
+    /**
      * @param ipv6  whether search ipv6 node list
      * @return int  number of nodes in IPv6 list.
      */
@@ -81,4 +90,9 @@ public interface DHTNodeRoutingTable {
      */
     void clear();
 
+    /**
+     * @param ipv6 whether ipv6 request
+     * @return SortedCollection<DHTBucket>
+     */
+    SortedCollection<DHTBucket> getBuckets(final boolean ipv6);
 }

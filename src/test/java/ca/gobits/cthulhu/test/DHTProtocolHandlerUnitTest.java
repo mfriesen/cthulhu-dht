@@ -20,6 +20,7 @@ import static ca.gobits.cthulhu.test.DHTTestHelper.assertNodesEquals;
 import static org.easymock.EasyMock.aryEq;
 import static org.easymock.EasyMock.eq;
 import static org.easymock.EasyMock.expect;
+import static org.easymock.EasyMock.isA;
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -50,7 +51,6 @@ import org.springframework.test.util.ReflectionTestUtils;
 
 import ca.gobits.cthulhu.DHTInfoHashRoutingTable;
 import ca.gobits.cthulhu.DHTNodeRoutingTable;
-import ca.gobits.cthulhu.DHTNodeStatusService;
 import ca.gobits.cthulhu.DHTProtocolHandler;
 import ca.gobits.cthulhu.DHTQueryProtocol;
 import ca.gobits.cthulhu.DHTServerConfig;
@@ -59,6 +59,7 @@ import ca.gobits.cthulhu.domain.DHTNode;
 import ca.gobits.cthulhu.domain.DHTNodeFactory;
 import ca.gobits.cthulhu.domain.DHTPeer;
 import ca.gobits.cthulhu.domain.DHTPeerBasic;
+import ca.gobits.cthulhu.queue.DHTNodeStatusQueue;
 import ca.gobits.cthulhu.queue.DHTPingQueue;
 import ca.gobits.dht.BDecoder;
 import ca.gobits.dht.BEncoder;
@@ -96,9 +97,9 @@ public final class DHTProtocolHandlerUnitTest extends EasyMockSupport {
     @Mock
     private DHTPingQueue pingQueue;
 
-    /** Mock DHTNodeStatusService. */
+    /** Mock DHTNodeStatusQueue. */
     @Mock
-    private DHTNodeStatusService nodeStatusService;
+    private DHTNodeStatusQueue nodeStatusQueue;
 
     /** InetSocketAddress. */
     private InetAddress iaddr;
@@ -144,8 +145,7 @@ public final class DHTProtocolHandlerUnitTest extends EasyMockSupport {
                 this.port);
 
         // when
-        this.nodeStatusService.updateStatusFromRequest(aryEq(id),
-                eq(this.iaddr), eq(this.port), eq(isIPv6));
+        this.nodeStatusQueue.updateExistingNodeToGood(aryEq(id), eq(isIPv6));
 
         expect(this.config.getNodeId()).andReturn(
                 "ABCDEFGHIJKLMNOPQRST".getBytes());
@@ -192,8 +192,7 @@ public final class DHTProtocolHandlerUnitTest extends EasyMockSupport {
         expect(this.routingTable.findClosestNodes(aryEq(target), eq(isIPv6)))
             .andReturn(getFindNodes());
 
-        this.nodeStatusService.updateStatusFromRequest(aryEq(id),
-                eq(this.iaddr), eq(this.port), eq(isIPv6));
+        this.nodeStatusQueue.updateExistingNodeToGood(aryEq(id), eq(isIPv6));
 
         replayAll();
         byte[] bytes = this.handler.handle(packet);
@@ -262,8 +261,7 @@ public final class DHTProtocolHandlerUnitTest extends EasyMockSupport {
                 this.port);
 
         // when
-        this.nodeStatusService.updateStatusFromRequest(aryEq(id),
-                eq(this.iaddr6), eq(this.port), eq(isIPv6));
+        this.nodeStatusQueue.updateExistingNodeToGood(aryEq(id), eq(isIPv6));
 
         expect(this.routingTable.findClosestNodes(aryEq(target), eq(isIPv6)))
             .andReturn(getFindNodes6());
@@ -312,7 +310,6 @@ public final class DHTProtocolHandlerUnitTest extends EasyMockSupport {
 
         DatagramPacket packet = new DatagramPacket(bb, bb.length, this.iaddr,
                 this.port);
-        expectUpdateNodeStatus(false);
 
         // when
         replayAll();
@@ -322,11 +319,7 @@ public final class DHTProtocolHandlerUnitTest extends EasyMockSupport {
         verifyAll();
 
         String result = new String(bytes);
-        assertTrue(result.endsWith(":rd3:20414:Method Unknowne1:t2:aa1:y1:ee"));
-
-        assertEquals("ZDI6aXA2OjJH1ov8ODE6cmQzOjIwNDE0Ok1ldGh"
-                + "vZCBVbmtub3duZTE6dDI6YWExOnkxOmVl",
-                Base64.encodeBase64String(bytes));
+        assertEquals("d1:rd3:20414:Method Unknowne1:t2:aa1:y1:ee", result);
     }
 
     /**
@@ -678,204 +671,23 @@ public final class DHTProtocolHandlerUnitTest extends EasyMockSupport {
     }
 
     /**
-     * testHandle15() - test request is NOT "r".
-     * @throws Exception  Exception
+     * Valid Response with "nodes" & "nodes6" in response.
+     * @throws Exception Exception
      */
     @Test
     public void testHandle15() throws Exception {
-        // given
-        String s = "d1:t2:aa1:y1:re";
-        byte[] bb = s.getBytes();
-        DatagramPacket packet = new DatagramPacket(bb, bb.length, this.iaddr,
-                this.port);
-
-        // when
-        replayAll();
-
-        byte[] bytes = this.handler.handle(packet);
-
-        // then
-        verifyAll();
-
-        assertNull(bytes);
-    }
-
-    /**
-     * testHandle16() - test request is HAS "r", not does not have "id".
-     * @throws Exception  Exception
-     */
-    @Test
-    public void testHandle16() throws Exception {
-        // given
-        String s = "d1:rd2:ia20:mnopqrstuvwxyz123456e1:t2:aa1:y1:re";
-        byte[] bb = s.getBytes();
-        DatagramPacket packet = new DatagramPacket(bb, bb.length, this.iaddr,
-                this.port);
-
-        // when
-        replayAll();
-
-        byte[] bytes = this.handler.handle(packet);
-
-        // then
-        verifyAll();
-
-        assertNull(bytes);
-    }
-
-    /**
-     * testHandle17() - test request HAS "id" and NODE IS found.
-     * @throws Exception  Exception
-     */
-    @Test
-    public void testHandle17() throws Exception {
-        // given
-        boolean isIPv6 = false;
-        byte[] id = new byte[] {109, 110, 111, 112, 113, 114, 115, 116, 117,
-                118, 119, 120, 121, 122, 49, 50, 51, 52, 53, 54 };
-        String s = "d1:rd2:id20:mnopqrstuvwxyz123456e1:t2:aa1:y1:re";
-        byte[] bb = s.getBytes();
-        DatagramPacket packet = new DatagramPacket(bb, bb.length, this.iaddr,
-                this.port);
-
-        // when
-        expect(this.tokenTable.isValidTransactionId("aa")).andReturn(true);
-
-        this.nodeStatusService.updateStatusFromResponse(aryEq(id),
-                eq(this.iaddr), eq(this.port), eq(isIPv6));
-
-        replayAll();
-
-        byte[] bytes = this.handler.handle(packet);
-
-        // then
-        verifyAll();
-
-        assertNull(bytes);
-    }
-
-    /**
-     * testHandle18() - test request HAS "id" and NODE IS NOT found.
-     * Transaction ID is valid.
-     * @throws Exception  Exception
-     */
-    @Test
-    public void testHandle18() throws Exception {
 
         // given
-        boolean isIPv6 = false;
-        byte[] id = new byte[] {109, 110, 111, 112, 113, 114, 115, 116, 117,
-                118, 119, 120, 121, 122, 49, 50, 51, 52, 53, 54 };
-
-        String s = "d1:rd2:id20:mnopqrstuvwxyz123456e1:t2:aa1:y1:re";
-        byte[] bb = s.getBytes();
-        DatagramPacket packet = new DatagramPacket(bb, bb.length, this.iaddr,
-                this.port);
-
-        // when
-        this.nodeStatusService.updateStatusFromResponse(aryEq(id),
-                eq(this.iaddr), eq(this.port), eq(isIPv6));
-
-        expect(this.tokenTable.isValidTransactionId("aa")).andReturn(true);
-
-        replayAll();
-
-        byte[] bytes = this.handler.handle(packet);
-
-        // then
-        verifyAll();
-
-        assertNull(bytes);
-    }
-
-    /**
-     * testHandle19() - test request HAS "id" and NODE IS NOT found.
-     * Transaction ID is NOT valid.
-     * @throws Exception  Exception
-     */
-    @Test
-    public void testHandle19() throws Exception {
-
-        // given
-        String s = "d1:rd2:id20:mnopqrstuvwxyz123456e1:t2:aa1:y1:re";
-        byte[] bb = s.getBytes();
-        DatagramPacket packet = new DatagramPacket(bb, bb.length, this.iaddr,
-                this.port);
-
-        // when
-        expect(this.tokenTable.isValidTransactionId("aa")).andReturn(false);
-
-        replayAll();
-
-        byte[] bytes = this.handler.handle(packet);
-
-        // then
-        verifyAll();
-
-        assertNull(bytes);
-    }
-
-    /**
-     * testHandle20() - test invalid packet missing "T" param.
-     * @throws Exception  Exception
-     */
-    @Test
-    public void testHandle20() throws Exception {
-        // given
-        String dat = "d1:ad2:id20:abcdefghij0123456789e1:q4:ping1:z2:aa1:y1:qe";
-        byte[] bb = dat.getBytes();
-
-        DatagramPacket packet = new DatagramPacket(bb, bb.length, this.iaddr,
-                this.port);
-
-        // when
-        replayAll();
-        byte[] result = this.handler.handle(packet);
-
-        // then
-        verifyAll();
-
-        assertNull(result);
-    }
-
-    /**
-     * testHandle21() - test invalid packet missing "Y" param.
-     * @throws Exception  Exception
-     */
-    @Test
-    public void testHandle21() throws Exception {
-        // given
-        String dat = "d1:ad2:id20:abcdefghij0123456789e1:q4:ping1:t2:aa1:z1:qe";
-        byte[] bb = dat.getBytes();
-
-        DatagramPacket packet = new DatagramPacket(bb, bb.length, this.iaddr,
-                this.port);
-
-        // when
-        replayAll();
-        byte[] result = this.handler.handle(packet);
-
-        // then
-        verifyAll();
-
-        assertNull(result);
-    }
-
-    /**
-     * Handles DHT Query "find_nodes" ipv4 Response.
-     * @throws Exception  Exception
-     */
-    @Test
-    public void testHandle22() throws Exception {
-        // given
+        byte[] id = new byte[] {29, -68, -20, 35, -58, 105, 115, 81, -1, 74,
+                -20, 41, -51, -70, -85, -14, -5, -29, 70, 103 };
         byte[] bb = Base64.decodeBase64(getBase64FindNodeResponse());
+
         DatagramPacket packet = new DatagramPacket(bb, bb.length, this.iaddr,
                 this.port);
 
-        expect(this.tokenTable.isValidTransactionId("aa")).andReturn(
-                Boolean.FALSE);
+        this.nodeStatusQueue.receivedFindNodeResponse(aryEq(id),
+                isA(InetAddress.class), eq(64568), eq(false));
 
-        // when
         this.pingQueue.ping(InetAddress.getByName("37.76.160.28"), 37518);
         this.pingQueue.ping(InetAddress.getByName("182.59.176.199"), 11503);
         this.pingQueue.ping(InetAddress.getByName("178.124.205.49"), 16911);
@@ -893,7 +705,9 @@ public final class DHTProtocolHandlerUnitTest extends EasyMockSupport {
         this.pingQueue.ping(InetAddress.getByName("92.99.87.123"), 26120);
         this.pingQueue.ping(InetAddress.getByName("176.12.59.50"), 61553);
 
+        // when
         replayAll();
+
         byte[] result = this.handler.handle(packet);
 
         // then
@@ -907,13 +721,14 @@ public final class DHTProtocolHandlerUnitTest extends EasyMockSupport {
      * @throws Exception  Exception
      */
     @Test
-    public void testHandle23() throws Exception {
+    public void testHandle16() throws Exception {
         // given
+        byte[] id = DHTIdentifier.sha1("salt".getBytes());
         Map<Object, Object> map = new HashMap<Object, Object>();
         map.put("t", "aa");
         map.put("y", "r");
         Map<Object, Object> r = new HashMap<Object, Object>();
-        r.put("id", DHTIdentifier.sha1("salt".getBytes()));
+        r.put("id", id);
         r.put("nodes6", new byte[] {80, 13, -127, -86, -2, 99, 119, 23, -91,
                 47, -122, 80, -27, 66, 6, -26, 77, -93, 61, 39, -1, -1, -1, -1,
                 -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 0, 123, -7, 55,
@@ -926,8 +741,8 @@ public final class DHTProtocolHandlerUnitTest extends EasyMockSupport {
         DatagramPacket packet = new DatagramPacket(bb, bb.length, this.iaddr,
                 this.port);
 
-        expect(this.tokenTable.isValidTransactionId("aa")).andReturn(
-                Boolean.FALSE);
+        this.nodeStatusQueue.receivedFindNodeResponse(aryEq(id),
+                isA(InetAddress.class), eq(64568), eq(false));
 
         // when
         this.pingQueue.ping(InetAddress
@@ -942,6 +757,54 @@ public final class DHTProtocolHandlerUnitTest extends EasyMockSupport {
         verifyAll();
 
         assertNull(result);
+    }
+
+    /**
+     * testHandle17() - test invalid packet missing "T" param.
+     * @throws Exception  Exception
+     */
+    @Test
+    public void testHandle17() throws Exception {
+        // given
+        String dat = "d1:ad2:id20:abcdefghij0123456789e1:q4:ping1:z2:aa1:y1:qe";
+        byte[] bb = dat.getBytes();
+
+        DatagramPacket packet = new DatagramPacket(bb, bb.length, this.iaddr,
+                this.port);
+
+        // when
+        replayAll();
+        byte[] result = this.handler.handle(packet);
+
+        // then
+        verifyAll();
+
+        assertEquals("d1:rd3:20318:invalid arguementse1:y1:ee",
+                new String(result));
+    }
+
+    /**
+     * testHandle18() - test invalid packet missing "Y" param.
+     * @throws Exception  Exception
+     */
+    @Test
+    public void testHandle18() throws Exception {
+        // given
+        String dat = "d1:ad2:id20:abcdefghij0123456789e1:q4:ping1:t2:aa1:z1:qe";
+        byte[] bb = dat.getBytes();
+
+        DatagramPacket packet = new DatagramPacket(bb, bb.length, this.iaddr,
+                this.port);
+
+        // when
+        replayAll();
+        byte[] result = this.handler.handle(packet);
+
+        // then
+        verifyAll();
+
+        assertEquals("d1:rd3:20318:invalid arguementse1:t2:aa1:y1:ee",
+                new String(result));
     }
 
     /**
@@ -1082,11 +945,11 @@ public final class DHTProtocolHandlerUnitTest extends EasyMockSupport {
                 .toByteArray();
 
         if (isIPv6) {
-            this.nodeStatusService.updateStatusFromRequest(aryEq(bytes),
-                    eq(this.iaddr6), eq(this.port), eq(isIPv6));
+            this.nodeStatusQueue.updateExistingNodeToGood(aryEq(bytes),
+                    eq(isIPv6));
         } else {
-            this.nodeStatusService.updateStatusFromRequest(aryEq(bytes),
-                eq(this.iaddr), eq(this.port), eq(isIPv6));
+            this.nodeStatusQueue.updateExistingNodeToGood(aryEq(bytes),
+                    eq(isIPv6));
         }
     }
 }

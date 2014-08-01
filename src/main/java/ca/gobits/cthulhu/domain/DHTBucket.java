@@ -43,6 +43,9 @@ public class DHTBucket {
     /** Number of nodes in bucket. */
     private int nodeCount = 0;
 
+    /** Property to indicate how "fresh" the contents are. */
+    private Date lastChanged;
+
     /**
      * Comparator used to determine whether byte[] are between
      * rangeStart/rangeEnd.
@@ -66,15 +69,6 @@ public class DHTBucket {
      */
     public boolean isFull() {
         return this.nodeCount == MAX_NODE_COUNT;
-    }
-
-    /**
-     * How "fresh" are the nodes in the bucket.
-     * @return Date
-     */
-    public Date getLastChanged() {
-        // TODO implement
-        return null;
     }
 
     /**
@@ -175,5 +169,20 @@ public class DHTBucket {
             .append(this.min, rhs.getMin())
             .append(this.max, rhs.getMax())
             .isEquals();
+    }
+
+    /**
+     * @return Date
+     */
+    public Date getLastChanged() {
+        return this.lastChanged;
+    }
+
+    /**
+     * Sets the Last Changed Date.
+     * @param date last changed date
+     */
+    public void setLastChanged(final Date date) {
+        this.lastChanged = date;
     }
 }

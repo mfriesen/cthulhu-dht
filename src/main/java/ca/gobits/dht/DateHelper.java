@@ -14,29 +14,36 @@
 // limitations under the License.
 //
 
-package ca.gobits.cthulhu.queue;
+package ca.gobits.dht;
 
-import java.net.InetAddress;
+import java.util.Calendar;
+import java.util.Date;
 
 /**
- * DHT Find Node Request Queue.
+ * Date Helper Methods.
+ *
  */
-public interface DHTFindNodeQueue extends DHTQueue {
+public final class DateHelper {
 
     /**
-     * Sends Find Nodes request to an Address with a delay.
-     * @param addr  InetAddress
-     * @param port  port
-     * @param target  ID to find
+     * private constructor.
      */
-    void findNodesWithDelay(InetAddress addr, int port, byte[] target);
+    private DateHelper() {
+    }
 
     /**
-     * Sends Find Nodes request to an Address without delay.
-     * @param addr  InetAddress
-     * @param port  port
-     * @param target  ID to find
+     * Verify that now is past date + minutes.
+     * @param now  current date
+     * @param date  date
+     * @param minutes  number of minutes
+     * @return boolean
      */
-    void findNodes(final InetAddress addr, final int port,
-            final byte[] target);
+    public static boolean isPastDateInMinutes(final Date now, final Date date,
+            final int minutes) {
+        Calendar c = Calendar.getInstance();
+        c.setTime(date);
+        c.add(Calendar.MINUTE, minutes);
+
+        return now.after(c.getTime());
+    }
 }

@@ -16,6 +16,8 @@
 
 package ca.gobits.dht;
 
+import static ca.gobits.dht.DHTConversion.BYTE_TO_INT;
+
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 
@@ -41,6 +43,39 @@ public final class DHTIdentifier {
         BytesKeyGenerator generator = KeyGenerators.secureRandom();
         byte[] key = generator.generateKey();
         return sha1(key);
+    }
+
+    /**
+     * Generates random NodId between MIN / MAX.
+     * @param min minimum NodeId value
+     * @param max maximum NodeId value
+     * @return byte[]
+     */
+    public static byte[] getRandomNodeId(final byte[] min, final byte[] max) {
+
+        if (min.length != max.length) {
+            throw new IllegalArgumentException(
+                    "parameter lengths do not match.");
+        }
+
+        byte[] result = new byte[min.length];
+        for (int i = 0; i < min.length; i++) {
+            result[i] = (byte) random(min[i] & BYTE_TO_INT,
+                    max[i] & BYTE_TO_INT);
+        }
+
+        return result;
+    }
+
+
+    /**
+     * Generate Random Number in range.
+     * @param min minumum value
+     * @param max maximum value
+     * @return int
+     */
+    private static int random(final int min, final int max) {
+        return min + (int) (Math.random() * ((max - min) + 1));
     }
 
     /**

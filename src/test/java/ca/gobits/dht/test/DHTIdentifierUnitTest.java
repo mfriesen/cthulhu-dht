@@ -16,11 +16,14 @@
 
 package ca.gobits.dht.test;
 
+import static ca.gobits.dht.DHTConversion.toBigInteger;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Modifier;
+import java.math.BigInteger;
 
 import org.apache.commons.codec.binary.Hex;
 import org.junit.Test;
@@ -114,4 +117,63 @@ public final class DHTIdentifierUnitTest {
         constructor.setAccessible(true);
         constructor.newInstance();
     }
+
+    /**
+     * testGetRandomNodeId01().
+     */
+    @Test
+    public void testGetRandomNodeId01() {
+        // given
+
+        // when
+        byte[] result = DHTIdentifier.getRandomNodeId();
+
+        // then
+        assertNotNull(result);
+        assertEquals(20, result.length);
+    }
+
+    /**
+     * Test random node between MIN / MAX.
+     */
+    @Test
+    public void testGetRandomNodeId02() {
+        // given
+        byte[] min = new byte[] {45, -120, 19, 20, -94, 98, -71, -42, -10, 62,
+                -62, -117, 24, 110, -36, 126, -96, -64, 25, 67 };
+        byte[] max = new byte[] {68, 30, 96, 101, -84, -52, -103, 61, -9,
+                -118, 12, -46, 22, 119, -2, 37, 100, 29, 101, 64 };
+
+        assertEquals("259939148189000534887301309959004089947921586499",
+                toBigInteger(min).toString());
+        assertEquals("388888792149635066292906337717816357183937144128",
+                toBigInteger(max).toString());
+
+        // when
+        byte[] result = DHTIdentifier.getRandomNodeId(min, max);
+
+        // then
+        assertNotNull(result);
+        assertEquals(20, result.length);
+
+        BigInteger bi = toBigInteger(result);
+        assertEquals(1, bi.compareTo(toBigInteger(min)));
+        assertEquals(-1, bi.compareTo(toBigInteger(max)));
+    }
+
+    /**
+     * Test Length of Min / Max not EQUAL.
+     */
+    @Test(expected = IllegalArgumentException.class)
+    public void testGetRandomNodeId03() {
+        // given
+        byte[] min = new byte[] {45, -120 };
+        byte[] max = new byte[] {68, 30, 96 };
+
+        // when
+        DHTIdentifier.getRandomNodeId(min, max);
+
+        // then
+    }
+
 }

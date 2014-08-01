@@ -100,7 +100,7 @@ public final class DHTFindNodeQueueImplUnitTest extends EasyMockSupport {
         // when
         replayAll();
 
-        this.findnodeQueue.findNodes(addr, port, target);
+        this.findnodeQueue.findNodesWithDelay(addr, port, target);
 
         // then
         verifyAll();
@@ -169,7 +169,7 @@ public final class DHTFindNodeQueueImplUnitTest extends EasyMockSupport {
 
 
         // when
-        this.findnodeQueue.findNodes(addr, port, target);
+        this.findnodeQueue.findNodesWithDelay(addr, port, target);
 
         expect(this.config.getNodeId()).andReturn(nodeId);
         expect(this.tokens.getTransactionId()).andReturn("aa");

@@ -145,7 +145,7 @@ public class DHTServer /*implements Lifecycle*/ {
                     InetAddress addr = InetAddress.getByName(addrPort[0]);
                     int port = Integer.valueOf(addrPort[1]).intValue();
 
-                    this.findNodeQueue.findNodes(addr, port,
+                    this.findNodeQueue.findNodesWithDelay(addr, port,
                             this.config.getNodeId());
 
                 } catch (Exception e) {

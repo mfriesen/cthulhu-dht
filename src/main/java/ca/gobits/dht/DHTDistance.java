@@ -16,14 +16,12 @@
 
 package ca.gobits.dht;
 
+import static ca.gobits.dht.DHTConversion.BYTE_TO_INT;
 
 /**
  * Calculates distance between DHT Nodes.
  */
 public final class DHTDistance {
-
-    /** Constant to convert byte to unsigned int. */
-    private static final int BYTE_TO_INT = 0xFF;
 
     /**
      * private constructor.

@@ -23,7 +23,6 @@ import static ca.gobits.dht.DHTConversion.toDHTNode;
 
 import java.io.IOException;
 import java.net.DatagramPacket;
-import java.net.Inet6Address;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.Collection;
@@ -38,12 +37,15 @@ import org.springframework.util.CollectionUtils;
 
 import ca.gobits.cthulhu.domain.DHTNode;
 import ca.gobits.cthulhu.domain.DHTPeer;
+import ca.gobits.cthulhu.queue.DHTNodeStatusQueue;
 import ca.gobits.cthulhu.queue.DHTPingQueue;
 import ca.gobits.dht.BDecoder;
 import ca.gobits.dht.BEncoder;
+import ca.gobits.dht.DHTParameters;
+import ca.gobits.dht.DHTParameters.DHTQueryType;
 
 /**
- * DHTProtocolHandler  implementation of the BitTorrent protocol.
+ * DHTProtocolHandler implementation of the BitTorrent protocol.
  * http://www.bittorrent.org/beps/bep_0005.html
  */
 public class DHTProtocolHandler {
@@ -75,13 +77,14 @@ public class DHTProtocolHandler {
     @Autowired
     private DHTPingQueue pingQueue;
 
-    /** DHTNodeStatusService instance. */
+    /** DHTNodeStatusQueue instance. */
     @Autowired
-    private DHTNodeStatusService statusService;
+    private DHTNodeStatusQueue statusQueue;
 
     /**
      * Read DatagramPacket.
-     * @param packet  packet
+     *
+     * @param packet DatagramPacket
      * @return byte[]
      */
     public byte[] handle(final DatagramPacket packet) {
@@ -94,22 +97,39 @@ public class DHTProtocolHandler {
         try {
 
             Map<String, Object> request = bdecode(packet.getData());
+            DHTParameters params = new DHTParameters(addr, request);
 
-            if (isValid(request)) {
+            boolean valid = isValid(params);
 
-                 if (request.containsKey("q")) {
+            if (valid) {
 
-                     LOGGER.info("received valid query from "
-                             + addr.getHostAddress() + ":" + packet.getPort());
-                    bytes = queryRequestHandler(packet, request);
+                if (params.isQuery()) {
+
+                    valid = isValidQuery(params);
+
+                    if (valid) {
+
+                        LOGGER.info("received valid query from "
+                            + addr.getHostAddress() + ":" + packet.getPort());
+                        bytes = queryRequestHandler(packet, params);
+                    }
 
                 } else {
 
-                    LOGGER.info("received valid response from "
+                    valid = isValidResponse(params);
+
+                    if (valid) {
+
+                        LOGGER.info("received valid response from "
                             + addr.getHostAddress() + ":" + packet.getPort());
-                    queryResponseHandler(packet, request);
+                        queryResponseHandler(packet, params);
+                    }
                 }
-            } else {
+            }
+
+            if (!valid) {
+
+                bytes = handleInvalidParameters(response, params);
 
                 LOGGER.info("received INVALID request/response from "
                         + addr.getHostAddress() + ":" + packet.getPort());
@@ -126,64 +146,107 @@ public class DHTProtocolHandler {
     }
 
     /**
+     * Handle Invalid Parameters and determine error message.
+     * @param response Map<String, Object>
+     * @param params DHTParameters
+     * @return byte[]
+     */
+    private byte[] handleInvalidParameters(final Map<String, Object> response,
+            final DHTParameters params) {
+
+        if (params.getT() != null) {
+            response.put("t", params.getT());
+        }
+
+        if (params.getQueryType() == null) {
+            addMethodUnknownResponse(response);
+        } else {
+            addInvalidArguementsErrorResponse(response);
+        }
+
+        return bencode(response);
+    }
+
+    /**
      * Whether Request is valid.
-     * @param request  Map<String, Object>
+     *
+     * @param params DHTParameters
      * @return boolean
      */
-    private boolean isValid(final Map<String, Object> request) {
+    private boolean isValid(final DHTParameters params) {
 
-        return request.containsKey("t")
-                && request.containsKey("y");
+        return params.getT() != null && params.getY() != null;
+    }
+
+    /**
+     * Is Query Request Valid.
+     * @param params DHTParameters
+     * @return boolean
+     */
+    private boolean isValidQuery(final DHTParameters params) {
+        return params.getT() != null && params.getY() != null
+                && isQValid(params);
+    }
+
+    /**
+     * Is Q parameter valid.
+     * @param params DHTParameters
+     * @return boolean
+     */
+    private boolean isQValid(final DHTParameters params) {
+        return params.getQueryType() != null;
+    }
+
+    /**
+     * Is Query Response Valid.
+     * @param params DHTParameters
+     * @return boolean
+     */
+    private boolean isValidResponse(final DHTParameters params) {
+        return params.getT() != null && params.getY() != null;
     }
 
     /**
      * Handles DHT Query Response.
-     * @param packet  DatagramPacket
-     * @param request Map<String, Object>
+     *
+     * @param packet DatagramPacket
+     * @param params DHTParameters
      */
     private void queryResponseHandler(final DatagramPacket packet,
-        final Map<String, Object> request) {
+            final DHTParameters params) {
 
-        if (request.containsKey("r")) {
+        byte[] id = params.getId();
+        boolean ipv6 = params.isIpv6();
 
-            @SuppressWarnings("unchecked")
-            Map<String, Object> request1 =
-                (Map<String, Object>) request.get("r");
+        if (params.getNodes() != null || params.getNodes6() != null) {
 
-            if (request1.containsKey("id")) {
-
-                byte[] id = (byte[]) request1.get("id");
-
-                String transId = new String((byte[]) request.get("t"));
-                if (this.tokenTable.isValidTransactionId(transId)) {
-
-                    boolean ipv6 = packet.getAddress() instanceof Inet6Address;
-                    this.statusService.updateStatusFromResponse(id,
-                            packet.getAddress(), packet.getPort(), ipv6);
-                }
-            }
+            this.statusQueue.receivedFindNodeResponse(id,
+                    packet.getAddress(), packet.getPort(), ipv6);
 
             // find_nodes ipv4
-            if (request1.containsKey("nodes")) {
-                Collection<DHTNode> nodes = toDHTNode((byte[]) request1
-                        .get("nodes"), false);
+            if (params.getNodes() != null) {
+                Collection<DHTNode> nodes = toDHTNode(params.getNodes(), false);
                 LOGGER.info("adding " + nodes.size() + " to discovery");
                 addToDiscovery(nodes);
             }
 
             // find_nodes ipv6
-            if (request1.containsKey("nodes6")) {
-                Collection<DHTNode> nodes = toDHTNode((byte[]) request1
-                        .get("nodes6"), true);
+            if (params.getNodes6() != null) {
+                Collection<DHTNode> nodes = toDHTNode(params.getNodes6(), true);
                 LOGGER.info("adding " + nodes.size() + " to discovery");
                 addToDiscovery(nodes);
             }
+
+        } else {
+
+            this.statusQueue.updateExistingNodeToGood(id, ipv6);
         }
     }
 
     /**
      * Adds nodes to be discovery list.
-     * @param nodes  Collection of DHTNodes
+     *
+     * @param nodes Collection of DHTNodes
      */
     private void addToDiscovery(final Collection<DHTNode> nodes) {
 
@@ -206,50 +269,44 @@ public class DHTProtocolHandler {
 
     /**
      * Creates response from DHT Query request.
-     * @param packet  DatagramPacket
-     * @param request Map<String, Object>
+     *
+     * @param packet DatagramPacket
+     * @param params DHTParameters
      * @return byte[]
-     * @throws IOException  IOException
+     * @throws IOException IOException
      */
     private byte[] queryRequestHandler(final DatagramPacket packet,
-            final Map<String, Object> request) throws IOException {
+            final DHTParameters params) throws IOException {
 
         Map<String, Object> response = new HashMap<String, Object>();
 
-        String action = new String((byte[]) request.get("q"));
+        DHTQueryType qt = params.getQueryType();
 
         InetAddress addr = packet.getAddress();
         int port = packet.getPort();
 
         response.put("y", "r");
-        response.put("t", request.get("t"));
+        response.put("t", params.getT());
         response.put("ip", compactAddress(addr.getAddress(), port));
 
-        @SuppressWarnings("unchecked")
-        DHTArgumentRequest arguments = new DHTArgumentRequest(addr,
-                (Map<String, Object>) request.get("a"));
+        this.statusQueue.updateExistingNodeToGood(params.getId(),
+                params.isIpv6());
 
-        this.statusService.updateStatusFromRequest(arguments.getId(),
-                packet.getAddress(), packet.getPort(), arguments.isIpv6());
+        if (DHTQueryType.PING == qt) {
 
-        if (action.equals("ping")) {
+            addPingResponse(response);
 
-            addPingResponse(arguments, response, packet);
+        } else if (DHTQueryType.FIND_NODE == qt) {
 
-        } else if (action.equals("find_node")) {
+            addFindNodeResponse(params, response, packet);
 
-            addFindNodeResponse(arguments, response, packet);
+        } else if (DHTQueryType.GET_PEERS == qt) {
 
-        } else if (action.equals("get_peers")) {
+            addGetPeersResponse(params, response, packet);
 
-            addGetPeersResponse(arguments, response, packet);
+        } else if (DHTQueryType.ANNOUNCE_PEER == qt) {
 
-        } else if (action.equals("announce_peer")) {
-
-            addAnnouncePeerResponse(arguments, response, packet);
-
-        } else {
-            addMethodUnknownResponse(response);
+            addAnnouncePeerResponse(params, response, packet);
         }
 
         return bencode(response);
@@ -257,7 +314,9 @@ public class DHTProtocolHandler {
 
     /**
      * BEncodes response.
-     * @param response  Map<String, Object>
+     *
+     * @param response
+     *            Map<String, Object>
      * @return byte[]
      */
     private byte[] bencode(final Map<String, Object> response) {
@@ -267,22 +326,24 @@ public class DHTProtocolHandler {
 
     /**
      * Announces that a peer has joined an InfoHash.
-     * @param arguments  DHTArgumentRequest
-     * @param response  Map<String, Object>
-     * @param packet  DatagramPacket
-     * @throws UnknownHostException  UnknownHostException
+     *
+     * @param params DHTParameters
+     * @param response Map<String, Object>
+     * @param packet DatagramPacket
+     * @throws UnknownHostException
+     *             UnknownHostException
      */
-    private void addAnnouncePeerResponse(final DHTArgumentRequest arguments,
+    private void addAnnouncePeerResponse(final DHTParameters params,
             final Map<String, Object> response, final DatagramPacket packet)
-                    throws UnknownHostException {
+            throws UnknownHostException {
 
-        int port = isImpliedPort(arguments) ? packet.getPort()
-                : arguments.getPort().intValue();
+        int port = isImpliedPort(params) ? packet.getPort() : params
+                .getPort().intValue();
 
         if (this.tokenTable.valid(packet.getAddress(), port,
-                arguments.getToken())) {
+                params.getToken())) {
 
-            byte[] infoHash = arguments.getInfoHash();
+            byte[] infoHash = params.getInfoHash();
 
             InetAddress addr = packet.getAddress();
             byte[] address = addr.getAddress();
@@ -290,7 +351,7 @@ public class DHTProtocolHandler {
             this.peerRoutingTable.addPeer(infoHash, address, port);
 
             Map<String, Object> rp = new HashMap<String, Object>();
-            rp.put("id", arguments.getInfoHash());
+            rp.put("id", params.getInfoHash());
             response.put("r", rp);
 
         } else {
@@ -301,14 +362,15 @@ public class DHTProtocolHandler {
     }
 
     /**
-     * Is "implied_port" value is set and non-zero, the port argument
-     * should be ignored and the source port of the UDP packet should
-     * be used as the peer's port instead.
-     * @param arguments  DHTArgumentRequest
+     * Is "implied_port" value is set and non-zero, the port argument should be
+     * ignored and the source port of the UDP packet should be used as the
+     * peer's port instead.
+     *
+     * @param params DHTParameters
      * @return boolean
      */
-    private boolean isImpliedPort(final DHTArgumentRequest arguments) {
-        Long impliedPort = arguments.getImpliedPort();
+    private boolean isImpliedPort(final DHTParameters params) {
+        Long impliedPort = params.getImpliedPort();
         return impliedPort != null && impliedPort.intValue() > 0;
     }
 
@@ -318,19 +380,19 @@ public class DHTProtocolHandler {
      * in the queried nodes routing table closest to the infohash supplied in
      * the query.
      *
-     * @param arguments DHTArgumentRequest
-     * @param response  Map<String, Object>
-     * @param packet  DatagramPacket
-     * @throws IOException  IOException
+     * @param params DHTParameters
+     * @param response Map<String, Object>
+     * @param packet DatagramPacket
+     * @throws IOException IOException
      */
-    private void addGetPeersResponse(final DHTArgumentRequest arguments,
-        final Map<String, Object> response, final DatagramPacket packet)
+    private void addGetPeersResponse(final DHTParameters params,
+            final Map<String, Object> response, final DatagramPacket packet)
             throws IOException {
 
-        boolean isIPv6 = arguments.isIpv6();
+        boolean isIPv6 = params.isIpv6();
         Map<String, Object> responseParameter = new HashMap<String, Object>();
 
-        byte[] infoHash = arguments.getInfoHash();
+        byte[] infoHash = params.getInfoHash();
 
         Collection<DHTPeer> peers = this.peerRoutingTable.findPeers(infoHash);
 
@@ -350,7 +412,7 @@ public class DHTProtocolHandler {
                 responseParameter.put("nodes6", transformNodes);
             }
 
-            if (arguments.isIpv4()) {
+            if (params.isIpv4()) {
                 List<DHTNode> nodes = this.routingTable.findClosestNodes(
                         infoHash, false);
 
@@ -361,13 +423,14 @@ public class DHTProtocolHandler {
         }
 
         responseParameter.put("token", generateToken());
-        responseParameter.put("id", arguments.getId());
+        responseParameter.put("id", params.getId());
 
         response.put("r", responseParameter);
     }
 
     /**
      * Add Method Unknown Error to response.
+     *
      * @param response Map<String, Object>
      */
     private void addMethodUnknownResponse(final Map<String, Object> response) {
@@ -376,46 +439,56 @@ public class DHTProtocolHandler {
     }
 
     /**
-     * Add "find_node" data to response.
-     * @param arguments  DHTArgumentRequest
-     * @param response  Map<String, Object>
-     * @param packet  DatagramPacket
-     * @throws IOException  IOException
+     * Add Invalid arguements Error to response.
+     *
+     * @param response Map<String, Object>
      */
-    private void addFindNodeResponse(final DHTArgumentRequest arguments,
-            final Map<String, Object> response,
-            final DatagramPacket packet) throws IOException {
+    private void addInvalidArguementsErrorResponse(
+            final Map<String, Object> response) {
+        addServerError(response);
+        response.put("r", map("203", "invalid arguements"));
+    }
 
-        boolean isIPv6 = arguments.isIpv6();
+    /**
+     * Add "find_node" data to response.
+     *
+     * @param params DHTParameters
+     * @param response Map<String, Object>
+     * @param packet DatagramPacket
+     * @throws IOException IOException
+     */
+    private void addFindNodeResponse(final DHTParameters params,
+            final Map<String, Object> response, final DatagramPacket packet)
+            throws IOException {
+
+        boolean isIPv6 = params.isIpv6();
         Map<String, Object> responseParameter = new HashMap<String, Object>();
         response.put("r", responseParameter);
-        responseParameter.put("id", arguments.getId());
+        responseParameter.put("id", params.getId());
 
-        List<DHTNode> nodes = findClosestNodes(arguments.getTarget(),
-                isIPv6);
+        List<DHTNode> nodes = findClosestNodes(params.getTarget(), isIPv6);
 
-        byte[] transformNodes = toByteArrayFromDHTNode(nodes,
-                isIPv6);
+        byte[] transformNodes = toByteArrayFromDHTNode(nodes, isIPv6);
         responseParameter.put(isIPv6 ? "nodes6" : "nodes", transformNodes);
     }
 
     /**
      * Add "ping" data to response.
-     * @param arguments  DHTArgumentRequest
-     * @param response  Map<String, Object>
-     * @param packet DatagramPacket
+     *
+     * @param response Map<String, Object>
      */
-    private void addPingResponse(final DHTArgumentRequest arguments,
-            final Map<String, Object> response,
-            final DatagramPacket packet) {
+    private void addPingResponse(final Map<String, Object> response) {
 
         response.put("r", map("id", this.config.getNodeId()));
     }
 
     /**
      * Find the closest X nodes to the target.
-     * @param targetBytes  ID of the target node to find
-     * @param isIPv6  Is request an IPv6
+     *
+     * @param targetBytes
+     *            ID of the target node to find
+     * @param isIPv6
+     *            Is request an IPv6
      * @return List<DHTNode>
      */
     private List<DHTNode> findClosestNodes(final byte[] targetBytes,
@@ -425,8 +498,11 @@ public class DHTProtocolHandler {
 
     /**
      * Create Map.
-     * @param key  map key
-     * @param value map value
+     *
+     * @param key
+     *            map key
+     * @param value
+     *            map value
      * @return Map<String, Object>
      */
     private Map<String, Object> map(final String key, final Object value) {
@@ -437,7 +513,9 @@ public class DHTProtocolHandler {
 
     /**
      * Add server error to Map object.
-     * @param map  Map<String, Object>
+     *
+     * @param map
+     *            Map<String, Object>
      */
     private void addServerError(final Map<String, Object> map) {
         map.put("y", "e");
@@ -447,7 +525,8 @@ public class DHTProtocolHandler {
     /**
      * Extract Byte Array using BDecoder.
      *
-     * @param bytes  bytes
+     * @param bytes
+     *            bytes
      * @return Map<String, Object>
      */
     @SuppressWarnings("unchecked")
@@ -459,8 +538,9 @@ public class DHTProtocolHandler {
     }
 
     /**
-     * Token returned to a get_peers request.
-     * This is to prevent malicious hosts from signing up other hosts
+     * Token returned to a get_peers request. This is to prevent malicious hosts
+     * from signing up other hosts
+     *
      * @return byte[]
      */
     private byte[] generateToken() {

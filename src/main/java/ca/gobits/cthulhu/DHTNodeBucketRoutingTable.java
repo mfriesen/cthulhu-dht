@@ -17,6 +17,7 @@
 package ca.gobits.cthulhu;
 
 import static ca.gobits.cthulhu.domain.DHTNodeFactory.NODE_ID_LENGTH;
+import static ca.gobits.dht.DHTConversion.BYTE_TO_INT;
 import static ca.gobits.dht.DHTConversion.fitToSize;
 
 import java.math.BigInteger;
@@ -48,9 +49,6 @@ public final class DHTNodeBucketRoutingTable implements DHTNodeRoutingTable {
     /** LOGGER. */
     private static final Logger LOGGER = Logger
             .getLogger(DHTNodeBucketRoutingTable.class);
-
-    /** Constant to convert byte to unsigned int. */
-    private static final int BYTE_TO_INT = 0xFF;
 
     /** Maximum number of nodes Routing Table holds. */
     private static final int MAX_NUMBER_OF_NODES = 1000000;
@@ -222,7 +220,8 @@ public final class DHTNodeBucketRoutingTable implements DHTNodeRoutingTable {
      * @param ipv6  whether ipv6 request.
      * @return DHTBucket
      */
-    private DHTBucket findBucket(final byte[] bytes, final boolean ipv6) {
+    @Override
+    public DHTBucket findBucket(final byte[] bytes, final boolean ipv6) {
 
         SortedCollection<DHTBucket> list = getBuckets(ipv6);
         DHTBucket bb = new DHTBucket(bytes, bytes);
@@ -448,11 +447,8 @@ public final class DHTNodeBucketRoutingTable implements DHTNodeRoutingTable {
         return this.buckets6;
     }
 
-    /**
-     * @param ipv6  whether ipv6 request
-     * @return SortedCollection<DHTBucket>
-     */
-    private SortedCollection<DHTBucket> getBuckets(final boolean ipv6) {
+    @Override
+    public SortedCollection<DHTBucket> getBuckets(final boolean ipv6) {
         return ipv6 ? getBuckets6() : getBuckets();
     }
 
