@@ -36,13 +36,21 @@ public class DHTQueueScheduler {
     @Autowired
     private DHTFindNodeQueue findNodeQueue;
 
+    /** Reference to DHTNodeStatusQueue. */
+    @Autowired
+    private DHTNodeStatusQueue nodeStatusQueue;
+
     /**
      * Processes the queues on a FixedDelay schedule.
      */
     @Scheduled(fixedDelay = PROCESS_QUEUE_SCHEDULE_MILLIS)
     public void process() {
+
         this.pingQueue.processQueue();
+
         this.findNodeQueue.processQueue();
+
+        this.nodeStatusQueue.processQueue();
 
         // TODO process DHTBuckets
         /*
