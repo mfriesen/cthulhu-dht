@@ -154,7 +154,6 @@ public final class BEncoderUnitTest {
 
         // when
         byte[] result = BEncoder.bencoding(bytes);
-//        byte[] resultBytes = result.toByteArray();
 
         // then
         assertEquals(3 + bytes.length, result.length);
@@ -164,6 +163,29 @@ public final class BEncoderUnitTest {
         assertEquals(bytes[0], result[3]);
         assertEquals(bytes[1], result[4]);
         assertEquals(bytes[2], result[5]);
+    }
+
+    /**
+     * Test encoding int array.
+     * @throws Exception  Exception
+     */
+    @Test
+    public void testBencoding07() throws Exception {
+        // given
+        int[] i = new int[] {-15, 14, 40, 33, -69,
+            -66, -91, 39, -22, 2, 32, 3, 82, 49, 59, -64, 89, 68, 81, -112 };
+
+        // when
+        byte[] result = BEncoder.bencoding(i);
+
+        // then
+        assertEquals(3 + i.length, result.length);
+        assertEquals('2', result[0]);
+        assertEquals('0', result[1]);
+        assertEquals(':', result[2]);
+        assertEquals(i[0], result[3]);
+        assertEquals(i[1], result[4]);
+        assertEquals(i[2], result[5]);
     }
 
     /**
