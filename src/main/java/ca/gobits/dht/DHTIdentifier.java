@@ -16,7 +16,7 @@
 
 package ca.gobits.dht;
 
-import static ca.gobits.dht.DHTConversion.BYTE_TO_INT;
+import static ca.gobits.dht.util.DHTConversion.BYTE_TO_INT;
 
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -28,6 +28,9 @@ import org.springframework.security.crypto.keygen.KeyGenerators;
  * Calculates DHT Node Identifier.
  */
 public final class DHTIdentifier {
+
+    /** Length Node ID. */
+    public static final int NODE_ID_LENGTH = 20;
 
     /**
      * private constructor.

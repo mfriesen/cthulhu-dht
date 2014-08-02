@@ -16,7 +16,7 @@
 
 package ca.gobits.dht;
 
-import static ca.gobits.dht.DHTConversion.BYTE_TO_INT;
+import static ca.gobits.dht.util.DHTConversion.BYTE_TO_INT;
 
 /**
  * Calculates distance between DHT Nodes.
