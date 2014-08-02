@@ -16,4 +16,4 @@
 /**
  * Integration tests package.
  */
-package ca.gobits.dht.server.integration.test;
+package ca.gobits.test.dht.integration;

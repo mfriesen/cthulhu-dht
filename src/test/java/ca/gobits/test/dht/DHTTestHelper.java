@@ -14,7 +14,7 @@
 // limitations under the License.
 //
 
-package ca.gobits.test.dht.server;
+package ca.gobits.test.dht;
 
 import static ca.gobits.dht.DHTIdentifier.NODE_ID_LENGTH;
 import static org.junit.Assert.assertEquals;

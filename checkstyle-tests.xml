@@ -31,6 +31,9 @@
     <module name="LineLength">
         <property name="ignorePattern" value="^import.*$"/>
     </module>
+    <module name="ImportControl">
+        <property name="file" value="${basedir}/import-control-tests.xml"/>
+    </module>
     <module name="MethodLength"/>
     <module name="ParameterNumber"/>
     <module name="EmptyForIteratorPad"/>

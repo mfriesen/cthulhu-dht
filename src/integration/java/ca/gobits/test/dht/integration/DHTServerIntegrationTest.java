@@ -14,10 +14,10 @@
 // limitations under the License.
 //
 
-package ca.gobits.dht.server.integration.test;
+package ca.gobits.test.dht.integration;
 
-import static ca.gobits.dht.server.integration.test.DHTServerIntegrationHelper.DATA_PACKET_LENGTH;
-import static ca.gobits.dht.server.integration.test.DHTServerIntegrationHelper.sendUDPPacket;
+import static ca.gobits.test.dht.integration.DHTServerIntegrationHelper.DATA_PACKET_LENGTH;
+import static ca.gobits.test.dht.integration.DHTServerIntegrationHelper.sendUDPPacket;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 

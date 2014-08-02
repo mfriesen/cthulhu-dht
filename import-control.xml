@@ -30,22 +30,8 @@
 	        <allow pkg="org.springframework.context" />
 	        <allow pkg="org.springframework.scheduling" />
 	        <allow pkg="org.springframework.util" />
-	        
-	        <!-- ca.gobits.dht.server.integration.test -->
-	        <subpackage name="integration.test">
-	            <allow pkg="org.springframework.test" />
-	        </subpackage>
-	    
+	        	    
 	    </subpackage>
     </subpackage>
-    
-    <!--  ca.gobits.test.dht -->
-    <subpackage name="test.dht">
-        <allow pkg="ca.gobits.dht" />
-        <allow pkg="java.math" />
-        <allow pkg="java.net" />
-        <allow pkg="java.util" />
-        <allow pkg="org.junit" />
-    </subpackage>
-    
+        
 </import-control>

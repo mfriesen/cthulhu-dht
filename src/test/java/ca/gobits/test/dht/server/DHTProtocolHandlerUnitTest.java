@@ -16,7 +16,7 @@
 
 package ca.gobits.test.dht.server;
 
-import static ca.gobits.test.dht.server.DHTTestHelper.assertNodesEquals;
+import static ca.gobits.test.dht.DHTTestHelper.assertNodesEquals;
 import static org.easymock.EasyMock.aryEq;
 import static org.easymock.EasyMock.eq;
 import static org.easymock.EasyMock.expect;

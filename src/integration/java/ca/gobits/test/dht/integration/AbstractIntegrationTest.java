@@ -14,7 +14,7 @@
 // limitations under the License.
 //
 
-package ca.gobits.dht.server.integration.test;
+package ca.gobits.test.dht.integration;
 
 import org.junit.After;
 import org.junit.AfterClass;
