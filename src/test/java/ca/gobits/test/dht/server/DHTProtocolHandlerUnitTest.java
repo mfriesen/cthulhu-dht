@@ -63,7 +63,7 @@ import ca.gobits.dht.server.DHTQueryProtocol;
 import ca.gobits.dht.server.DHTServerConfig;
 import ca.gobits.dht.server.queue.DHTNodeStatusQueue;
 import ca.gobits.dht.server.queue.DHTPingQueue;
-import ca.gobits.dht.server.queue.DHTTokenTable;
+import ca.gobits.dht.server.queue.DHTTokenQueue;
 import ca.gobits.dht.util.DHTConversion;
 
 /**
@@ -87,7 +87,7 @@ public final class DHTProtocolHandlerUnitTest extends EasyMockSupport {
 
     /** Mock DHT Token Table. */
     @Mock
-    private DHTTokenTable tokenTable;
+    private DHTTokenQueue tokenTable;
 
     /** Mock DHTServerConfig. */
     @Mock

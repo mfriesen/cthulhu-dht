@@ -36,8 +36,8 @@ import ca.gobits.dht.server.queue.DHTNodeStatusQueue;
 import ca.gobits.dht.server.queue.DHTNodeStatusQueueImpl;
 import ca.gobits.dht.server.queue.DHTPingQueue;
 import ca.gobits.dht.server.queue.DHTPingQueueImpl;
-import ca.gobits.dht.server.queue.DHTTokenTable;
-import ca.gobits.dht.server.queue.DHTTokenTableBasic;
+import ca.gobits.dht.server.queue.DHTTokenQueue;
+import ca.gobits.dht.server.queue.DHTTokenQueueImpl;
 
 /**
  * DHT Configuration class.
@@ -80,8 +80,8 @@ public class DHTConfiguration {
      * @return DHTTokenTable
      */
     @Bean
-    public DHTTokenTable dhtTokenTable() {
-        return new DHTTokenTableBasic();
+    public DHTTokenQueue dhtTokenTable() {
+        return new DHTTokenQueueImpl();
     }
 
     /**

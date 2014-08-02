@@ -26,7 +26,6 @@ import java.util.List;
 import java.util.Random;
 
 import org.apache.log4j.Logger;
-import org.springframework.scheduling.annotation.Scheduled;
 
 import ca.gobits.dht.DHTToken;
 import ca.gobits.dht.DHTTokenBasic;
@@ -36,7 +35,7 @@ import ca.gobits.dht.util.ConcurrentSortedList;
 /**
  * Basic implementation of DHTTokenTable.
  */
-public final class DHTTokenTableBasic implements DHTTokenTable {
+public final class DHTTokenQueueImpl implements DHTTokenQueue {
 
     /** Used to build output as Hex. */
     private static final char[] HEX_CHARS = {'0', '1', '2', '3', '4', '5',
@@ -51,12 +50,9 @@ public final class DHTTokenTableBasic implements DHTTokenTable {
     /** How to Token stays valid. */
     private int tokenExpiryInMinutes = DEFAULT_TOKEN_EXPIRY;
 
-    /** Check for Expired Tokens every 5 minutes. */
-    private static final int EXPIRED_TOKEN_TIMER = 1000 * 60 * 5;
-
     /** DHTTokenTableBasic Logger. */
     private static final Logger LOGGER = Logger
-            .getLogger(DHTTokenTableBasic.class);
+            .getLogger(DHTTokenQueueImpl.class);
 
     /** List of Tokens. */
     private final ConcurrentSortedList<DHTToken> tokens =
@@ -135,36 +131,6 @@ public final class DHTTokenTableBasic implements DHTTokenTable {
     }
 
     /**
-     * Every 15 minutes check for expired Tokens.
-     */
-    @Scheduled(fixedDelay = EXPIRED_TOKEN_TIMER)
-    public void removeExpiredTokens() {
-
-        Date now = new Date();
-        LOGGER.debug("deleting expired tokens " + now);
-
-        List<DHTToken> removeTokens = new ArrayList<DHTToken>();
-
-        Object[] objs = this.tokens.toArray();
-
-        for (int i = 0; i < objs.length; i++) {
-
-            DHTToken token = (DHTToken) objs[i];
-            if (!isValid(token, now)) {
-                LOGGER.debug("removing expired token "
-                        + Arrays.toString(token.getInfoHash()) + " added "
-                        + token.getAddedDate() + " now " + now);
-
-                removeTokens.add(token);
-            }
-        }
-
-        if (!removeTokens.isEmpty()) {
-            this.tokens.removeAll(removeTokens);
-        }
-    }
-
-    /**
      * Creates a token.
      * @param addr  address
      * @param port  port
@@ -228,5 +194,32 @@ public final class DHTTokenTableBasic implements DHTTokenTable {
         }
 
         return valid;
+    }
+
+    @Override
+    public void processQueue() {
+
+        Date now = new Date();
+        LOGGER.debug("deleting expired tokens " + now);
+
+        List<DHTToken> removeTokens = new ArrayList<DHTToken>();
+
+        Object[] objs = this.tokens.toArray();
+
+        for (int i = 0; i < objs.length; i++) {
+
+            DHTToken token = (DHTToken) objs[i];
+            if (!isValid(token, now)) {
+                LOGGER.debug("removing expired token "
+                        + Arrays.toString(token.getInfoHash()) + " added "
+                        + token.getAddedDate() + " now " + now);
+
+                removeTokens.add(token);
+            }
+        }
+
+        if (!removeTokens.isEmpty()) {
+            this.tokens.removeAll(removeTokens);
+        }
     }
 }

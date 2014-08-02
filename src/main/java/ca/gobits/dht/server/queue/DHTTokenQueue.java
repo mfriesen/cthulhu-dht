@@ -24,8 +24,7 @@ import ca.gobits.dht.DHTToken;
 /**
  * DHTTokenTable - maintain a list of secrets / ip addresses.
  */
-// TODO make this a queue
-public interface DHTTokenTable {
+public interface DHTTokenQueue extends DHTQueue {
 
     /**
      * Adds Address / Token to Token.

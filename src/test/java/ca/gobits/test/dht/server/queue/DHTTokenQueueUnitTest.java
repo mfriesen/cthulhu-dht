@@ -32,15 +32,15 @@ import org.springframework.test.util.ReflectionTestUtils;
 
 import ca.gobits.dht.DHTToken;
 import ca.gobits.dht.DHTTokenBasic;
-import ca.gobits.dht.server.queue.DHTTokenTable;
-import ca.gobits.dht.server.queue.DHTTokenTableBasic;
+import ca.gobits.dht.server.queue.DHTTokenQueue;
+import ca.gobits.dht.server.queue.DHTTokenQueueImpl;
 import ca.gobits.dht.util.ConcurrentSortedList;
 
 /**
- * DHTTokenTableBasicTest.
+ * DHTTokenQueue Unit Tests.
  *
  */
-public final class DHTTokenTableBasicUnitTest {
+public final class DHTTokenQueueUnitTest {
 
     /**
      * testAdd01().
@@ -49,7 +49,7 @@ public final class DHTTokenTableBasicUnitTest {
     @Test
     public void testAdd01() throws Exception {
         // given
-        DHTTokenTable tt = new DHTTokenTableBasic();
+        DHTTokenQueue tt = new DHTTokenQueueImpl();
         String secret = "secret";
         int port = 64568;
         InetAddress addr = InetAddress.getByName("50.71.214.139");
@@ -69,7 +69,7 @@ public final class DHTTokenTableBasicUnitTest {
     @Test
     public void testValid01() throws Exception {
         // given
-        DHTTokenTable tt = new DHTTokenTableBasic();
+        DHTTokenQueue tt = new DHTTokenQueueImpl();
         String secret = "secret";
         int port = 64568;
         InetAddress addr = InetAddress.getByName("50.71.214.139");
@@ -88,7 +88,7 @@ public final class DHTTokenTableBasicUnitTest {
     @Test
     public void testValid02() throws Exception {
         // given
-        DHTTokenTable tt = new DHTTokenTableBasic();
+        DHTTokenQueue tt = new DHTTokenQueueImpl();
         String secret = "secret";
         int port = 64568;
         InetAddress addr = InetAddress.getByName("50.71.214.139");
@@ -109,7 +109,7 @@ public final class DHTTokenTableBasicUnitTest {
     @Test
     public void testValid03() throws Exception {
         // given
-        DHTTokenTableBasic tt = new DHTTokenTableBasic();
+        DHTTokenQueueImpl tt = new DHTTokenQueueImpl();
         String secret = "secret";
         int port = 64568;
         InetAddress addr = InetAddress.getByName("50.71.214.139");
@@ -137,7 +137,7 @@ public final class DHTTokenTableBasicUnitTest {
     @Test
     public void testValid04() throws Exception {
         // given
-        DHTTokenTable tt = new DHTTokenTableBasic();
+        DHTTokenQueue tt = new DHTTokenQueueImpl();
         String secret = "secret";
         int port0 = 64568;
         InetAddress addr0 = InetAddress.getByName("50.71.214.139");
@@ -161,7 +161,7 @@ public final class DHTTokenTableBasicUnitTest {
     @Test
     public void testValid05() throws Exception {
         // given
-        DHTTokenTable tt = new DHTTokenTableBasic();
+        DHTTokenQueue tt = new DHTTokenQueueImpl();
         String secret = "secret";
         int port = 64568;
         InetAddress addr0 = InetAddress.getByName("50.71.214.139");
@@ -184,7 +184,7 @@ public final class DHTTokenTableBasicUnitTest {
     @Test
     public void testValid06() throws Exception {
         // given
-        DHTTokenTableBasic tt = new DHTTokenTableBasic();
+        DHTTokenQueueImpl tt = new DHTTokenQueueImpl();
         tt.setTokenExpiryInMinutes(-20);
 
         String secret = "secret";
@@ -208,7 +208,7 @@ public final class DHTTokenTableBasicUnitTest {
     @Test
     public void testRemoveExpiredTokens01() throws Exception {
         // given
-        DHTTokenTableBasic tt = new DHTTokenTableBasic();
+        DHTTokenQueueImpl tt = new DHTTokenQueueImpl();
         ConcurrentSortedList<DHTToken> list = (ConcurrentSortedList<DHTToken>)
                 ReflectionTestUtils.getField(tt, "tokens");
 
@@ -226,7 +226,7 @@ public final class DHTTokenTableBasicUnitTest {
         list.addAll(Arrays.asList(t0, t1, t2));
 
         // when
-        tt.removeExpiredTokens();
+        tt.processQueue();
 
         // then
         assertEquals(2, list.size());
@@ -243,7 +243,7 @@ public final class DHTTokenTableBasicUnitTest {
     @Test
     public void testRemoveExpiredTokens02() throws Exception {
         // given
-        DHTTokenTableBasic tt = new DHTTokenTableBasic();
+        DHTTokenQueueImpl tt = new DHTTokenQueueImpl();
         ConcurrentSortedList<DHTToken> list = (ConcurrentSortedList<DHTToken>)
                 ReflectionTestUtils.getField(tt, "tokens");
 
@@ -254,7 +254,7 @@ public final class DHTTokenTableBasicUnitTest {
         list.addAll(Arrays.asList(t0));
 
         // when
-        tt.removeExpiredTokens();
+        tt.processQueue();
 
         // then
         assertEquals(1, list.size());
@@ -269,7 +269,7 @@ public final class DHTTokenTableBasicUnitTest {
     @Test
     public void testRemoveExpiredTokens03() throws Exception {
         // given
-        DHTTokenTableBasic tt = new DHTTokenTableBasic();
+        DHTTokenQueueImpl tt = new DHTTokenQueueImpl();
         ConcurrentSortedList<DHTToken> list = (ConcurrentSortedList<DHTToken>)
                 ReflectionTestUtils.getField(tt, "tokens");
 
@@ -280,7 +280,7 @@ public final class DHTTokenTableBasicUnitTest {
         list.addAll(Arrays.asList(t0));
 
         // when
-        tt.removeExpiredTokens();
+        tt.processQueue();
 
         // then
         assertEquals(1, list.size());
@@ -297,7 +297,7 @@ public final class DHTTokenTableBasicUnitTest {
     @Test
     public void testRemoveExpiredTokens04() throws Exception {
         // given
-        final DHTTokenTableBasic tt = new DHTTokenTableBasic();
+        final DHTTokenQueueImpl tt = new DHTTokenQueueImpl();
         final ConcurrentSortedList<DHTToken> list =
             (ConcurrentSortedList<DHTToken>)
                 ReflectionTestUtils.getField(tt, "tokens");
@@ -327,7 +327,7 @@ public final class DHTTokenTableBasicUnitTest {
             @Override
             public void run() {
                 for (int i = 0; i < 100; i++) {
-                    tt.removeExpiredTokens();
+                    tt.processQueue();
                 }
             }
         });
@@ -350,7 +350,7 @@ public final class DHTTokenTableBasicUnitTest {
     @Test
     public void testGetTransactionId01() {
         // given
-        DHTTokenTable t = new DHTTokenTableBasic();
+        DHTTokenQueue t = new DHTTokenQueueImpl();
         assertNull(ReflectionTestUtils.getField(t, "transactionId1"));
         assertNull(ReflectionTestUtils.getField(t, "transactionId2"));
 
@@ -369,7 +369,7 @@ public final class DHTTokenTableBasicUnitTest {
     @Test
     public void testGetTransactionId02() {
         // given
-        DHTTokenTable tt = new DHTTokenTableBasic();
+        DHTTokenQueue tt = new DHTTokenQueueImpl();
         Calendar c = Calendar.getInstance();
         c.add(Calendar.MINUTE, -16);
         ReflectionTestUtils.setField(tt, "transactionLastUpdated", c.getTime());
@@ -389,7 +389,7 @@ public final class DHTTokenTableBasicUnitTest {
     @Test
     public void testGetTransactionId03() {
         // given
-        DHTTokenTable tt = new DHTTokenTableBasic();
+        DHTTokenQueue tt = new DHTTokenQueueImpl();
         Calendar c = Calendar.getInstance();
         c.add(Calendar.MINUTE, -14);
         ReflectionTestUtils.setField(tt, "transactionLastUpdated", c.getTime());
@@ -410,7 +410,7 @@ public final class DHTTokenTableBasicUnitTest {
     @Test
     public void testGetTransactionId04() {
         // given
-        DHTTokenTable tt = new DHTTokenTableBasic();
+        DHTTokenQueue tt = new DHTTokenQueueImpl();
 
         // when
         ReflectionTestUtils.setField(tt, "transactionId1", "aa");

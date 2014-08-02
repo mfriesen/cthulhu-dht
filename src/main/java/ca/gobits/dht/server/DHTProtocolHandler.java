@@ -44,7 +44,7 @@ import ca.gobits.dht.bencoding.BEncoder;
 import ca.gobits.dht.server.DHTParameters.DHTQueryType;
 import ca.gobits.dht.server.queue.DHTNodeStatusQueue;
 import ca.gobits.dht.server.queue.DHTPingQueue;
-import ca.gobits.dht.server.queue.DHTTokenTable;
+import ca.gobits.dht.server.queue.DHTTokenQueue;
 
 /**
  * DHTProtocolHandler implementation of the BitTorrent protocol.
@@ -69,7 +69,7 @@ public class DHTProtocolHandler {
 
     /** DHT Token Table. */
     @Autowired
-    private DHTTokenTable tokenTable;
+    private DHTTokenQueue tokenTable;
 
     /** DHTServerConfig. */
     @Autowired

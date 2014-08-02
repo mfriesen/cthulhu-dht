@@ -41,7 +41,7 @@ import org.springframework.test.util.ReflectionTestUtils;
 import ca.gobits.dht.DHTIdentifier;
 import ca.gobits.dht.server.DHTServerConfig;
 import ca.gobits.dht.server.queue.DHTFindNodeQueueImpl;
-import ca.gobits.dht.server.queue.DHTTokenTable;
+import ca.gobits.dht.server.queue.DHTTokenQueue;
 import ca.gobits.dht.server.queue.DelayObject;
 
 /**
@@ -62,7 +62,7 @@ public final class DHTFindNodeQueueImplUnitTest extends EasyMockSupport {
 
     /** Mock DHTTokenTable. */
     @Mock
-    private DHTTokenTable tokens;
+    private DHTTokenQueue tokens;
 
     /** Mock DatagramSocket. */
     @Mock

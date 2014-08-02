@@ -40,11 +40,17 @@ public class DHTQueueScheduler {
     @Autowired
     private DHTNodeStatusQueue nodeStatusQueue;
 
+    /** Reference to DHTTokenQueue. */
+    @Autowired
+    private DHTTokenQueue tokenQueue;
+
     /**
      * Processes the queues on a FixedDelay schedule.
      */
     @Scheduled(fixedDelay = PROCESS_QUEUE_SCHEDULE_MILLIS)
     public void process() {
+
+        this.tokenQueue.processQueue();
 
         this.pingQueue.processQueue();
 

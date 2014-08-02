@@ -41,7 +41,7 @@ public abstract class DHTQueueAbstract {
 
     /** Reference to DHTTokenTable. */
     @Autowired
-    private DHTTokenTable tokens;
+    private DHTTokenQueue tokens;
 
     /**
      * Delay in Millis for adding nodes to queue.
