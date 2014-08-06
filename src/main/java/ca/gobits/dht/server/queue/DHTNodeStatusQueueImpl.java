@@ -17,19 +17,12 @@
 package ca.gobits.dht.server.queue;
 
 import java.net.InetAddress;
-import java.net.UnknownHostException;
-import java.util.Date;
-import java.util.List;
 
-import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import ca.gobits.dht.DHTBucket;
-import ca.gobits.dht.DHTIdentifier;
 import ca.gobits.dht.DHTNode;
-import ca.gobits.dht.DHTNodeRoutingTable;
 import ca.gobits.dht.DHTNode.State;
-import ca.gobits.dht.util.DateHelper;
+import ca.gobits.dht.DHTNodeRoutingTable;
 
 /**
  * Implementation of DHTNodeStatusQueue.
@@ -37,67 +30,21 @@ import ca.gobits.dht.util.DateHelper;
  */
 public class DHTNodeStatusQueueImpl implements DHTNodeStatusQueue {
 
-    /** DHTPingQueue Logger. */
-    private static final Logger LOGGER = Logger
-            .getLogger(DHTNodeStatusQueue.class);
-
-    /** Number of minutes until Bucket expires. */
-    private static final int BUCKET_EXPIRY_IN_MINUTES = 15;
+//    /** DHTNodeStatusQueue Logger. */
+//    private static final Logger LOGGER = Logger
+//            .getLogger(DHTNodeStatusQueue.class);
 
     /** Reference to Node Routing Table. */
     @Autowired
     private DHTNodeRoutingTable rt;
 
-    /** Refernece to DHTFindNode Queue. */
+    /** Reference to DHTBucketStatusQueue. */
     @Autowired
-    private DHTFindNodeQueue findNodeQueue;
+    private DHTBucketStatusQueue bucketStatusQueue;
 
     @Override
     public void processQueue() {
-
-        processBuckets(false);
-        processBuckets(true);
-    }
-
-    /**
-     * Buckets that have not been changed in 15 minutes should be
-     * "refreshed." This is done by picking a random ID in the range of the
-     * bucket and performing a find_nodes search on it.
-     *
-     * @param ipv6 whether IPv6
-     */
-    private void processBuckets(final boolean ipv6) {
-
-        for (DHTBucket bucket : this.rt.getBuckets(ipv6)) {
-
-            if (isExpired(bucket)) {
-
-                byte[] randomId = DHTIdentifier.getRandomNodeId(
-                        bucket.getMin(), bucket.getMax());
-
-                List<DHTNode> nodes = this.rt.findClosestNodes(randomId, ipv6);
-
-                for (DHTNode node : nodes) {
-
-                    try {
-                        this.findNodeQueue.findNodes(node.getAddress(),
-                            node.getPort(), randomId);
-                    } catch (UnknownHostException e) {
-                        LOGGER.trace(e, e);
-                    }
-                }
-            }
-        }
-    }
-
-    /**
-     * Is Bucket Expired.
-     * @param bucket  DHTBucket
-     * @return boolean
-     */
-    private boolean isExpired(final DHTBucket bucket) {
-        return DateHelper.isPastDateInMinutes(new Date(),
-                bucket.getLastChanged(), BUCKET_EXPIRY_IN_MINUTES);
+        // TODO
     }
 
     @Override
@@ -115,7 +62,7 @@ public class DHTNodeStatusQueueImpl implements DHTNodeStatusQueue {
 
             this.rt.addNode(nodeId, addr, port, State.GOOD);
 
-            updateBucketLastChanged(nodeId, ipv6);
+            this.bucketStatusQueue.updateBucketLastChanged(nodeId, ipv6);
         }
     }
 
@@ -135,23 +82,11 @@ public class DHTNodeStatusQueueImpl implements DHTNodeStatusQueue {
 
             node.setState(State.GOOD);
 
-            updateBucketLastChanged(nodeId, ipv6);
+            this.bucketStatusQueue.updateBucketLastChanged(nodeId, ipv6);
 
             updated = true;
         }
 
         return updated;
-    }
-
-    /**
-     * Update Bucket's Last Changed Date.
-     * @param nodeId  node identifier
-     * @param ipv6  whether ipv6 request
-     */
-    private void updateBucketLastChanged(final byte[] nodeId,
-            final boolean ipv6) {
-
-        DHTBucket bucket = this.rt.findBucket(nodeId, ipv6);
-        bucket.setLastChanged(new Date());
     }
 }

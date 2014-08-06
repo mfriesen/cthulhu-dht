@@ -30,6 +30,8 @@ import ca.gobits.dht.DHTInfoHashRoutingTable;
 import ca.gobits.dht.DHTInfoHashRoutingTableBasic;
 import ca.gobits.dht.DHTNodeBucketRoutingTable;
 import ca.gobits.dht.DHTNodeRoutingTable;
+import ca.gobits.dht.server.queue.DHTBucketStatusQueue;
+import ca.gobits.dht.server.queue.DHTBucketStatusQueueImpl;
 import ca.gobits.dht.server.queue.DHTFindNodeQueue;
 import ca.gobits.dht.server.queue.DHTFindNodeQueueImpl;
 import ca.gobits.dht.server.queue.DHTNodeStatusQueue;
@@ -143,5 +145,13 @@ public class DHTConfiguration {
     @Bean
     public DHTNodeStatusQueue nodeStatusQueue() {
         return new DHTNodeStatusQueueImpl();
+    }
+
+    /**
+     * @return DHTBucketStatusQueue
+     */
+    @Bean
+    public DHTBucketStatusQueue bucketStatusQueue() {
+        return new DHTBucketStatusQueueImpl();
     }
 }
