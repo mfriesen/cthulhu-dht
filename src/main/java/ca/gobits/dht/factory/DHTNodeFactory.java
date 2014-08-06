@@ -23,7 +23,6 @@ import java.net.InetAddress;
 import java.util.Date;
 
 import ca.gobits.dht.DHTNode;
-import ca.gobits.dht.DHTNodeBasic;
 import ca.gobits.dht.DHTNode.State;
 
 /**
@@ -46,7 +45,7 @@ public final class DHTNodeFactory {
      */
     public static DHTNode create(final byte[] infoHash, final State state) {
 
-        DHTNodeBasic node = new DHTNodeBasic();
+        DHTNode node = new DHTNode();
         node.setLastUpdated(new Date());
         updateInfoHash(node, infoHash);
         node.setState(state);
@@ -64,7 +63,7 @@ public final class DHTNodeFactory {
     public static DHTNode create(final byte[] infoHash,
             final InetAddress addr, final int port, final State state) {
 
-        DHTNodeBasic node = new DHTNodeBasic();
+        DHTNode node = new DHTNode();
         node.setLastUpdated(new Date());
         updateInfoHash(node, infoHash);
         node.setState(state);
@@ -80,7 +79,7 @@ public final class DHTNodeFactory {
      * @param node  DHTNode
      * @param infoHash  infohash
      */
-    private static void updateInfoHash(final DHTNodeBasic node,
+    private static void updateInfoHash(final DHTNode node,
             final byte[] infoHash) {
         node.setInfoHash(fitToSize(infoHash, NODE_ID_LENGTH));
     }

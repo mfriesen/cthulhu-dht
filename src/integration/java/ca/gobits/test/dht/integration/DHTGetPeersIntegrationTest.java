@@ -35,8 +35,8 @@ import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import ca.gobits.dht.DHTNode;
-import ca.gobits.dht.DHTNodeRoutingTable;
 import ca.gobits.dht.DHTNode.State;
+import ca.gobits.dht.DHTNodeRoutingTable;
 import ca.gobits.dht.bencoding.BDecoder;
 import ca.gobits.dht.bencoding.BEncoder;
 import ca.gobits.dht.util.DHTConversion;

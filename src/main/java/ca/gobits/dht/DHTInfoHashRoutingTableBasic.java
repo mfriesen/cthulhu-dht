@@ -60,7 +60,7 @@ public final class DHTInfoHashRoutingTableBasic implements
         LOGGER.debug("findPeers: looking for peers for "
                 + Arrays.toString(infoHash));
 
-        DHTInfoHash peer = this.infoHashes.get(new DHTInfoHashBasic(infoHash));
+        DHTInfoHash peer = this.infoHashes.get(new DHTInfoHash(infoHash));
 
         if (peer != null) {
 
@@ -78,12 +78,13 @@ public final class DHTInfoHashRoutingTableBasic implements
     public void addPeer(final byte[] infoHashId, final byte[] address,
             final int port) {
 
+        // TODO ping peers every so often..
         LOGGER.debug("addPeer: " + Arrays.toString(infoHashId) + " "
                 + java.util.Arrays.toString(address) + " port " + port);
 
-        DHTInfoHash infoHash = new DHTInfoHashBasic(infoHashId);
+        DHTInfoHash infoHash = new DHTInfoHash(infoHashId);
         DHTInfoHash result = this.infoHashes.get(
-                new DHTInfoHashBasic(infoHashId));
+                new DHTInfoHash(infoHashId));
 
         if (result == null) {
             LOGGER.debug("InfoHash " + Arrays.toString(infoHashId)
@@ -105,7 +106,7 @@ public final class DHTInfoHashRoutingTableBasic implements
 
     @Override
     public DHTInfoHash findInfoHash(final byte[] infoHash) {
-        return this.infoHashes.get(new DHTInfoHashBasic(infoHash));
+        return this.infoHashes.get(new DHTInfoHash(infoHash));
     }
 
     /**

@@ -31,7 +31,6 @@ import org.junit.Test;
 import org.springframework.test.util.ReflectionTestUtils;
 
 import ca.gobits.dht.DHTToken;
-import ca.gobits.dht.DHTTokenBasic;
 import ca.gobits.dht.server.queue.DHTTokenQueue;
 import ca.gobits.dht.server.queue.DHTTokenQueueImpl;
 import ca.gobits.dht.util.ConcurrentSortedList;
@@ -216,12 +215,12 @@ public final class DHTTokenQueueUnitTest {
 
         Calendar c = Calendar.getInstance();
         c.add(Calendar.MINUTE, -1 * tt.getTokenExpiryInMinutes() - 1);
-        DHTTokenBasic t0 = new DHTTokenBasic(new byte[]{1}, addr, 10);
+        DHTToken t0 = new DHTToken(new byte[]{1}, addr, 10);
         t0.setAddedDate(c.getTime());
 
-        DHTToken t1 = new DHTTokenBasic(new byte[]{2}, addr, 10);
+        DHTToken t1 = new DHTToken(new byte[]{2}, addr, 10);
 
-        DHTToken t2 = new DHTTokenBasic(new byte[]{3}, addr, 10);
+        DHTToken t2 = new DHTToken(new byte[]{3}, addr, 10);
 
         list.addAll(Arrays.asList(t0, t1, t2));
 
@@ -249,7 +248,7 @@ public final class DHTTokenQueueUnitTest {
 
         byte[] addr = InetAddress.getByName("50.71.214.139").getAddress();
 
-        DHTToken t0 = new DHTTokenBasic(new byte[]{1}, addr, 10);
+        DHTToken t0 = new DHTToken(new byte[]{1}, addr, 10);
 
         list.addAll(Arrays.asList(t0));
 
@@ -275,7 +274,7 @@ public final class DHTTokenQueueUnitTest {
 
         byte[] addr = InetAddress.getByName("50.71.214.139").getAddress();
 
-        DHTToken t0 = new DHTTokenBasic(new byte[]{1}, addr, 10);
+        DHTToken t0 = new DHTToken(new byte[]{1}, addr, 10);
 
         list.addAll(Arrays.asList(t0));
 
@@ -314,7 +313,7 @@ public final class DHTTokenQueueUnitTest {
             public void run() {
                 for (int i = 0; i < 100; i++) {
                     tt.add(addr, port, "secret".getBytes());
-                    DHTTokenBasic t0 = new DHTTokenBasic(new byte[] {(byte) i},
+                    DHTToken t0 = new DHTToken(new byte[] {(byte) i},
                             addr.getAddress(), 10);
                     t0.setAddedDate(expired.getTime());
                     list.add(t0);

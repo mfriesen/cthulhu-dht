@@ -16,34 +16,141 @@
 
 package ca.gobits.dht;
 
+import static ca.gobits.dht.util.DHTConversion.toInetAddress;
+import static ca.gobits.dht.util.DHTConversion.toInetAddressAsString;
+
 import java.net.InetAddress;
-import java.net.UnknownHostException;
 import java.util.Date;
+
+import org.apache.commons.lang3.builder.EqualsBuilder;
+import org.apache.commons.lang3.builder.HashCodeBuilder;
+import org.apache.commons.lang3.builder.ToStringBuilder;
+
+import ca.gobits.dht.util.DHTConversion;
+
+import com.google.common.primitives.UnsignedLong;
 
 /**
  * DHTToken - holder for an Address / Token combination.
  *
  */
-public interface DHTToken {
+public class DHTToken {
+
+    /** Node identifier. */
+    private byte[] infoHash;
+
+    /** Compact IP-address format  0 - 63 bytes. */
+    private UnsignedLong highAddress;
+
+    /** Compact IP-address format  64 - 128 bytes. */
+    private UnsignedLong lowAddress;
+
+    /** Port info. */
+    private int port;
+
+    /** Date the node was last pinged. */
+    private Date addedDate;
+
+    /**
+     * constructor.
+     */
+    public DHTToken() {
+        this.addedDate = new Date();
+    }
+
+    /**
+     * constructor.
+     * @param nodeId Identifier
+     * @param addr IP address
+     * @param lport listening port
+     */
+    public DHTToken(final byte[] nodeId, final byte[] addr,
+            final int lport) {
+        this();
+        this.infoHash = nodeId;
+
+        UnsignedLong[] address = DHTConversion.toUnsignedLong(addr);
+        this.highAddress = address[0];
+        this.lowAddress = address.length > 1 ? address[1] : null;
+
+        this.port = lport;
+    }
+
+    @Override
+    public String toString() {
+        ToStringBuilder builder = new ToStringBuilder(this);
+        builder.append("infohash", this.infoHash);
+        builder.append("address",
+                toInetAddressAsString(this.highAddress, this.lowAddress));
+        builder.append("port", this.port);
+        builder.append("addedDate", this.addedDate);
+        return builder.toString();
+    }
+
+    @Override
+    public int hashCode() {
+        return new HashCodeBuilder()
+            .append(this.infoHash)
+            .toHashCode();
+    }
+
+    @Override
+    public boolean equals(final Object obj) {
+        if (obj == null) {
+            return false;
+        }
+
+        if (obj == this) {
+            return true;
+        }
+
+        if (!(obj instanceof DHTToken)) {
+            return false;
+        }
+
+        DHTToken rhs = (DHTToken) obj;
+        return new EqualsBuilder()
+            .append(this.infoHash, rhs.getInfoHash())
+            .isEquals();
+    }
 
     /**
      * @return byte[]
      */
-    byte[] getInfoHash();
+    public byte[] getInfoHash() {
+        return this.infoHash;
+    }
 
     /**
      * @return InetAddress
-     * @throws UnknownHostException  UnknownHostException
      */
-    InetAddress getAddress() throws UnknownHostException;
+    public InetAddress getAddress() {
+        try {
+            return toInetAddress(this.highAddress, this.lowAddress);
+        } catch (Exception e) {
+            return null;
+        }
+    }
 
     /**
      * @return Date
      */
-    Date getAddedDate();
+    public Date getAddedDate() {
+        return this.addedDate;
+    }
 
     /**
      * @return int
      */
-    int getPort();
+    public int getPort() {
+        return this.port;
+    }
+
+    /**
+     * Set Added Date.
+     * @param date Date
+     */
+    public void setAddedDate(final Date date) {
+        this.addedDate = date;
+    }
 }

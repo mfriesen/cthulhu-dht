@@ -55,7 +55,6 @@ import ca.gobits.dht.DHTInfoHashRoutingTable;
 import ca.gobits.dht.DHTNode;
 import ca.gobits.dht.DHTNodeRoutingTable;
 import ca.gobits.dht.DHTPeer;
-import ca.gobits.dht.DHTPeerBasic;
 import ca.gobits.dht.bencoding.BDecoder;
 import ca.gobits.dht.bencoding.BEncoder;
 import ca.gobits.dht.factory.DHTNodeFactory;
@@ -385,7 +384,7 @@ public final class DHTProtocolHandlerUnitTest extends EasyMockSupport {
         DatagramPacket packet = new DatagramPacket(bb, bb.length, this.iaddr,
                 this.port);
 
-        DHTPeer peer = new DHTPeerBasic(InetAddress.getByName("240.120.222.12")
+        DHTPeer peer = new DHTPeer(InetAddress.getByName("240.120.222.12")
                 .getAddress(), 23);
         Collection<DHTPeer> peers = Arrays.asList(peer);
 

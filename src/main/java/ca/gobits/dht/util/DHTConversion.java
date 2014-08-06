@@ -29,11 +29,10 @@ import java.util.Collection;
 import java.util.List;
 
 import org.apache.commons.lang3.StringUtils;
-import org.apache.log4j.Logger;
 
 import ca.gobits.dht.DHTNode;
-import ca.gobits.dht.DHTPeer;
 import ca.gobits.dht.DHTNode.State;
+import ca.gobits.dht.DHTPeer;
 
 import com.google.common.primitives.UnsignedLong;
 
@@ -57,10 +56,6 @@ public final class DHTConversion {
 
     /** Maxmimum number of bytes in an unsigned long. */
     private static final int MAX_LONG_BYTES_LENGTH = 64;
-
-    /** Logger. */
-    private static final Logger LOGGER = Logger
-            .getLogger(DHTConversion.class);
 
     /**
      * private constructor.
@@ -214,11 +209,11 @@ public final class DHTConversion {
 
         for (DHTPeer peer : peers) {
 
-            try {
+            InetAddress addr = peer.getAddress();
+
+            if (addr != null) {
                 byte[] bb = compactAddress(peer.getAddress(), peer.getPort());
                 list.add(bb);
-            } catch (UnknownHostException e) {
-                LOGGER.trace("Unknown Peer Host: " + peer.toString());
             }
         }
 

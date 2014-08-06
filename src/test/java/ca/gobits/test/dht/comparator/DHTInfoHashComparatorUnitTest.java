@@ -21,7 +21,6 @@ import static org.junit.Assert.assertEquals;
 import org.junit.Test;
 
 import ca.gobits.dht.DHTInfoHash;
-import ca.gobits.dht.DHTInfoHashBasic;
 import ca.gobits.dht.comparator.DHTInfoHashComparator;
 
 /**
@@ -35,8 +34,8 @@ public final class DHTInfoHashComparatorUnitTest {
     @Test
     public void testCompare01() {
         // given
-        DHTInfoHash node0 = new DHTInfoHashBasic(new byte[]{2});
-        DHTInfoHash node1 = new DHTInfoHashBasic(new byte[]{2});
+        DHTInfoHash node0 = new DHTInfoHash(new byte[]{2});
+        DHTInfoHash node1 = new DHTInfoHash(new byte[]{2});
 
         // when
         int result = DHTInfoHashComparator.getInstance().compare(node0, node1);
@@ -51,8 +50,8 @@ public final class DHTInfoHashComparatorUnitTest {
     @Test
     public void testCompare02() {
         // given
-        DHTInfoHash node0 = new DHTInfoHashBasic(new byte[]{2});
-        DHTInfoHash node1 = new DHTInfoHashBasic(new byte[]{5});
+        DHTInfoHash node0 = new DHTInfoHash(new byte[]{2});
+        DHTInfoHash node1 = new DHTInfoHash(new byte[]{5});
 
         // when
         int result = DHTInfoHashComparator.getInstance().compare(node0, node1);
@@ -67,8 +66,8 @@ public final class DHTInfoHashComparatorUnitTest {
     @Test
     public void testCompare03() {
         // given
-        DHTInfoHash node0 = new DHTInfoHashBasic(new byte[]{5});
-        DHTInfoHash node1 = new DHTInfoHashBasic(new byte[]{2});
+        DHTInfoHash node0 = new DHTInfoHash(new byte[]{5});
+        DHTInfoHash node1 = new DHTInfoHash(new byte[]{2});
 
         // when
         int result = DHTInfoHashComparator.getInstance().compare(node0, node1);

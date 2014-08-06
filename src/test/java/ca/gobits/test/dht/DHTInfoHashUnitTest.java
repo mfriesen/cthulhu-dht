@@ -30,15 +30,13 @@ import java.util.Set;
 import org.junit.Test;
 
 import ca.gobits.dht.DHTInfoHash;
-import ca.gobits.dht.DHTInfoHashBasic;
 import ca.gobits.dht.DHTPeer;
-import ca.gobits.dht.DHTPeerBasic;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 
 /**
- * Unit Test for DHTInfoHashBasic.
+ * Unit Test for DHTInfoHash.
  */
-public final class DHTInfoHashBasicUnitTest {
+public final class DHTInfoHashUnitTest {
 
     /**
      * testConstructor01().
@@ -49,7 +47,7 @@ public final class DHTInfoHashBasicUnitTest {
         byte[] infohash = new byte[]{123};
 
         // when
-        DHTInfoHash result = new DHTInfoHashBasic(infohash);
+        DHTInfoHash result = new DHTInfoHash(infohash);
 
         // then
         assertTrue(Arrays.equals(infohash, result.getInfoHash()));
@@ -62,7 +60,7 @@ public final class DHTInfoHashBasicUnitTest {
     public void testConstructor03() {
         // given
         byte[] nodeId = new byte[]{123};
-        DHTInfoHash result = new DHTInfoHashBasic();
+        DHTInfoHash result = new DHTInfoHash();
 
         // when
         result.setInfoHash(nodeId);
@@ -78,7 +76,7 @@ public final class DHTInfoHashBasicUnitTest {
     public void testEquals01() {
         // given
         BigInteger nodeId = new BigInteger("123");
-        DHTInfoHash node = new DHTInfoHashBasic(nodeId.toByteArray());
+        DHTInfoHash node = new DHTInfoHash(nodeId.toByteArray());
 
         // when
         boolean result = node.equals(null);
@@ -94,7 +92,7 @@ public final class DHTInfoHashBasicUnitTest {
     public void testEquals02() {
         // given
         BigInteger nodeId = new BigInteger("123");
-        DHTInfoHash node = new DHTInfoHashBasic(nodeId.toByteArray());
+        DHTInfoHash node = new DHTInfoHash(nodeId.toByteArray());
 
         // when
         boolean result = node.equals(node);
@@ -111,7 +109,7 @@ public final class DHTInfoHashBasicUnitTest {
     public void testEquals03() {
         // given
         BigInteger nodeId = new BigInteger("123");
-        DHTInfoHash node = new DHTInfoHashBasic(nodeId.toByteArray());
+        DHTInfoHash node = new DHTInfoHash(nodeId.toByteArray());
 
         // when
         boolean result = node.equals("");
@@ -127,8 +125,8 @@ public final class DHTInfoHashBasicUnitTest {
     public void testEquals04() {
         // given
         BigInteger nodeId = new BigInteger("123");
-        DHTInfoHash node = new DHTInfoHashBasic(nodeId.toByteArray());
-        DHTInfoHash node1 = new DHTInfoHashBasic(nodeId.toByteArray());
+        DHTInfoHash node = new DHTInfoHash(nodeId.toByteArray());
+        DHTInfoHash node1 = new DHTInfoHash(nodeId.toByteArray());
 
         // when
         boolean result = node.equals(node1);
@@ -145,7 +143,7 @@ public final class DHTInfoHashBasicUnitTest {
     public void testAddPeer01() throws Exception {
         // given
         BigInteger nodeId = new BigInteger("123");
-        DHTInfoHash node = new DHTInfoHashBasic(nodeId.toByteArray());
+        DHTInfoHash node = new DHTInfoHash(nodeId.toByteArray());
         byte[] address = new byte[] {127, 0, 0, 1 };
         int port = 103;
 
@@ -168,7 +166,7 @@ public final class DHTInfoHashBasicUnitTest {
     public void testAddPeer02() {
         // given
         BigInteger nodeId = new BigInteger("123");
-        DHTInfoHash node = new DHTInfoHashBasic(nodeId.toByteArray());
+        DHTInfoHash node = new DHTInfoHash(nodeId.toByteArray());
         byte[] address = new byte[] {127, 0, 0, 1 };
         int port = 103;
 
@@ -191,10 +189,10 @@ public final class DHTInfoHashBasicUnitTest {
     public void testAddPeer03() throws Exception {
         // given
         BigInteger nodeId = new BigInteger("123");
-        DHTInfoHashBasic node = new DHTInfoHashBasic(nodeId.toByteArray());
+        DHTInfoHash node = new DHTInfoHash(nodeId.toByteArray());
         byte[] address = new byte[] {127, 0, 0, 1 };
         int port = 103;
-        DHTPeer peer = new DHTPeerBasic(address, port);
+        DHTPeer peer = new DHTPeer(address, port);
         Set<DHTPeer> peers = new HashSet<DHTPeer>();
         peers.add(peer);
 
@@ -216,7 +214,7 @@ public final class DHTInfoHashBasicUnitTest {
     public void testToString01() {
         // given
         BigInteger nodeId = new BigInteger("123");
-        DHTInfoHash node = new DHTInfoHashBasic(nodeId.toByteArray());
+        DHTInfoHash node = new DHTInfoHash(nodeId.toByteArray());
 
         // when
         String result = node.toString();
@@ -232,7 +230,7 @@ public final class DHTInfoHashBasicUnitTest {
     public void testToString02() {
         // given
         BigInteger nodeId = new BigInteger("123");
-        DHTInfoHash node = new DHTInfoHashBasic(nodeId.toByteArray());
+        DHTInfoHash node = new DHTInfoHash(nodeId.toByteArray());
         byte[] addr = new byte[] {127, 0, 0, 1 };
         int port = 103;
         node.addPeer(addr, port);

@@ -25,7 +25,6 @@ import java.net.InetAddress;
 import org.junit.Test;
 
 import ca.gobits.dht.DHTPeer;
-import ca.gobits.dht.DHTPeerBasic;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 
 /**
@@ -45,7 +44,7 @@ public final class DHTPeerBasicUnitTest {
         int port = 8000;
 
         // when
-        DHTPeer result = new DHTPeerBasic(addr, port);
+        DHTPeer result = new DHTPeer(addr, port);
 
         // then
         assertEquals("3.4.5.6", result.getAddress().getHostAddress());
@@ -60,7 +59,7 @@ public final class DHTPeerBasicUnitTest {
         // given
         int port = 123;
         InetAddress addr = InetAddress.getByName("127.0.0.1");
-        DHTPeer peer = new DHTPeerBasic(addr.getAddress(), port);
+        DHTPeer peer = new DHTPeer(addr.getAddress(), port);
 
         // when
         String result = peer.toString();
@@ -77,7 +76,7 @@ public final class DHTPeerBasicUnitTest {
     @Test
     public void testEquals01() {
         // given
-        DHTPeer node = new DHTPeerBasic();
+        DHTPeer node = new DHTPeer();
 
         // when
         boolean result = node.equals(null);
@@ -92,7 +91,7 @@ public final class DHTPeerBasicUnitTest {
     @Test
     public void testEquals02() {
         // given
-        DHTPeer node = new DHTPeerBasic();
+        DHTPeer node = new DHTPeer();
 
         // when
         boolean result = node.equals(node);
@@ -108,7 +107,7 @@ public final class DHTPeerBasicUnitTest {
     @SuppressFBWarnings(value = "EC_UNRELATED_TYPES")
     public void testEquals03() {
         // given
-        DHTPeer node = new DHTPeerBasic();
+        DHTPeer node = new DHTPeer();
 
         // when
         boolean result = node.equals("");
@@ -126,8 +125,8 @@ public final class DHTPeerBasicUnitTest {
         byte[] addr = new byte[] {3, 4, 5, 6 };
         int port = 8000;
 
-        DHTPeer node = new DHTPeerBasic(addr, port);
-        DHTPeer node1 = new DHTPeerBasic(addr, port);
+        DHTPeer node = new DHTPeer(addr, port);
+        DHTPeer node1 = new DHTPeer(addr, port);
 
         // when
         boolean result = node.equals(node1);

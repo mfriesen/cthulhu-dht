@@ -33,7 +33,6 @@ import org.junit.runner.RunWith;
 import ca.gobits.dht.DHTIdentifier;
 import ca.gobits.dht.DHTNode;
 import ca.gobits.dht.DHTNode.State;
-import ca.gobits.dht.DHTNodeBasic;
 import ca.gobits.dht.DHTNodeRoutingTable;
 import ca.gobits.dht.server.queue.DHTBucketStatusQueue;
 import ca.gobits.dht.server.queue.DHTNodeStatusQueueImpl;
@@ -74,7 +73,7 @@ public class DHTNodeStatusQueueImplUnitTest extends EasyMockSupport {
         // given
         byte[] nodeId = DHTIdentifier.getRandomNodeId();
         boolean ipv6 = false;
-        DHTNode node = new DHTNodeBasic();
+        DHTNode node = new DHTNode();
 
         // when
         expect(this.rt.findExactNode(nodeId, ipv6)).andReturn(node);
@@ -117,7 +116,7 @@ public class DHTNodeStatusQueueImplUnitTest extends EasyMockSupport {
         // given
         int port = 8080;
         boolean ipv6 = false;
-        DHTNode node = new DHTNodeBasic();
+        DHTNode node = new DHTNode();
         byte[] nodeId = DHTIdentifier.getRandomNodeId();
         InetAddress addr = InetAddress.getByName("127.0.0.1");
 

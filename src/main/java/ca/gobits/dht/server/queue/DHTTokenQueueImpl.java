@@ -28,7 +28,6 @@ import java.util.Random;
 import org.apache.log4j.Logger;
 
 import ca.gobits.dht.DHTToken;
-import ca.gobits.dht.DHTTokenBasic;
 import ca.gobits.dht.comparator.DHTTokenComparator;
 import ca.gobits.dht.util.ConcurrentSortedList;
 
@@ -139,7 +138,7 @@ public final class DHTTokenQueueImpl implements DHTTokenQueue {
      */
     private DHTToken createToken(final InetAddress addr, final int port,
             final byte[] secret) {
-        DHTToken dhtToken = new DHTTokenBasic(secret, addr.getAddress(), port);
+        DHTToken dhtToken = new DHTToken(secret, addr.getAddress(), port);
         return dhtToken;
     }
 

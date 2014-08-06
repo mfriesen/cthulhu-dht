@@ -16,19 +16,30 @@
 
 package ca.gobits.dht;
 
+import static ca.gobits.dht.util.DHTConversion.toInetAddress;
+import static ca.gobits.dht.util.DHTConversion.toInetAddressAsString;
+
 import java.io.Serializable;
 import java.net.InetAddress;
 import java.util.Date;
 
+import org.apache.commons.lang3.builder.EqualsBuilder;
+import org.apache.commons.lang3.builder.HashCodeBuilder;
+import org.apache.commons.lang3.builder.ToStringBuilder;
+
+import ca.gobits.dht.util.DHTConversion;
+
+import com.google.common.primitives.UnsignedLong;
+
 /**
  * DHTNode - holder for information about a DHT Node.
  */
-public interface DHTNode extends Serializable {
+public class DHTNode implements Serializable {
 
     /**
      * State of DHTNode.
      */
-    enum State {
+    public enum State {
         /** Node has sent or responded to request last 15 minutes. */
         GOOD,
         /** Haven't heard from the Node for 15 minutes. */
@@ -37,46 +48,178 @@ public interface DHTNode extends Serializable {
         UNKNOWN
     }
 
+    /** serialVersionUID. */
+    private static final long serialVersionUID = -9209374329583239161L;
+
+    /** Node identifier. */
+    private byte[] infoHash;
+
+    /** Compact IP-address format  0 - 63 bytes. */
+    private UnsignedLong highAddress;
+
+    /** Compact IP-address format  64 - 128 bytes. */
+    private UnsignedLong lowAddress;
+
+    /** IP Port. */
+    private int port;
+
+    /** State of Node. */
+    private State state;
+
+    /** Date the node was last pinged. */
+    private Date lastUpdated;
+
+    /**
+     * constructor.
+     */
+    public DHTNode() {
+    }
+
+    @Override
+    public String toString() {
+        ToStringBuilder builder = new ToStringBuilder(this);
+        builder.append("infohash", this.infoHash);
+
+        if (this.highAddress != null) {
+            builder.append("address",
+                toInetAddressAsString(this.highAddress, this.lowAddress));
+        } else {
+            builder.append("address", "null");
+        }
+
+        builder.append("port", this.port);
+        builder.append("state", this.state);
+        builder.append("lastUpdated", this.lastUpdated);
+        return builder.toString();
+    }
+
+    @Override
+    public int hashCode() {
+        return new HashCodeBuilder()
+            .append(this.infoHash)
+            .toHashCode();
+    }
+
+    @Override
+    public boolean equals(final Object obj) {
+        if (obj == null) {
+            return false;
+        }
+
+        if (obj == this) {
+            return true;
+        }
+
+        if (!(obj instanceof DHTNode)) {
+            return false;
+        }
+
+        DHTNode rhs = (DHTNode) obj;
+        return new EqualsBuilder()
+            .append(this.infoHash, rhs.getInfoHash())
+            .isEquals();
+    }
+
     /**
      * @return Date
      */
-    Date getLastUpdated();
+    public Date getLastUpdated() {
+        return this.lastUpdated;
+    }
 
     /**
-     * Sets Last Updated Date.
-     * @param date Date
+     * Sets the Last Updated Date.
+     * @param date sets Last Updated Date
      */
-    void setLastUpdated(Date date);
+    public void setLastUpdated(final Date date) {
+        this.lastUpdated = date;
+    }
 
     /**
      * @return byte[]
      */
-    byte[] getInfoHash();
+    public byte[] getInfoHash() {
+        return this.infoHash;
+    }
+
+    /**
+     * Sets the Info Hash.
+     * @param infoHashId  infoHash
+     */
+    public void setInfoHash(final byte[] infoHashId) {
+        this.infoHash = infoHashId;
+    }
 
     /**
      * @return InetAddress
      */
-    InetAddress getAddress();
+    public InetAddress getAddress() {
+        try {
+            return toInetAddress(this.highAddress, this.lowAddress);
+        } catch (Exception e) {
+            return null;
+        }
+    }
+
+    /**
+     * Sets Address.
+     * @param addr InetAddress
+     */
+    public void setAddress(final InetAddress addr) {
+        UnsignedLong[] ul = DHTConversion.toUnsignedLong(addr.getAddress());
+        this.highAddress = ul[0];
+        this.lowAddress = null;
+
+        if (ul.length > 1) {
+            this.lowAddress = ul[1];
+        }
+    }
+
+    /**
+     * Sets Address.
+     * @param high  UnsignedLong most sig
+     * @param low   UnsignedLong least sig
+     */
+    public void setAddress(final UnsignedLong high, final UnsignedLong low) {
+        this.highAddress = high;
+        this.lowAddress = low;
+    }
 
     /**
      * @return int
      */
-    int getPort();
+    public int getPort() {
+        return this.port;
+    }
+
+    /**
+     * sets port number.
+     * @param lport  port
+     */
+    public void setPort(final int lport) {
+        this.port = lport;
+    }
 
     /**
      * @return State
      */
-    State getState();
+    public State getState() {
+        return this.state;
+    }
 
     /**
-     * Sets the State of DHTNode.
-     * @param state  state
+     * Sets State.
+     * @param s State
      */
-    void setState(State state);
+    public void setState(final State s) {
+        this.state = s;
+    }
 
     /**
-     * Is the node an IPv6 node?
+     * Is IPv6 Node.
      * @return boolean
      */
-    boolean isIpv6();
+    public boolean isIpv6() {
+        return this.lowAddress != null;
+    }
 }

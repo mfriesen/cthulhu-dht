@@ -21,7 +21,6 @@ import static org.junit.Assert.assertEquals;
 import org.junit.Test;
 
 import ca.gobits.dht.DHTToken;
-import ca.gobits.dht.DHTTokenBasic;
 import ca.gobits.dht.comparator.DHTTokenComparator;
 
 /**
@@ -41,8 +40,8 @@ public final class DHTTokenComparatorUnitTest {
     @Test
     public void testCompare01() {
         // given
-        DHTToken node0 = new DHTTokenBasic(new byte[]{2}, this.addr, this.port);
-        DHTToken node1 = new DHTTokenBasic(new byte[]{2}, this.addr, this.port);
+        DHTToken node0 = new DHTToken(new byte[]{2}, this.addr, this.port);
+        DHTToken node1 = new DHTToken(new byte[]{2}, this.addr, this.port);
 
         // when
         int result = DHTTokenComparator.getInstance().compare(node0, node1);
@@ -57,8 +56,8 @@ public final class DHTTokenComparatorUnitTest {
     @Test
     public void testCompare02() {
         // given
-        DHTToken node0 = new DHTTokenBasic(new byte[]{2}, this.addr, this.port);
-        DHTToken node1 = new DHTTokenBasic(new byte[]{5}, this.addr, this.port);
+        DHTToken node0 = new DHTToken(new byte[]{2}, this.addr, this.port);
+        DHTToken node1 = new DHTToken(new byte[]{5}, this.addr, this.port);
 
         // when
         int result = DHTTokenComparator.getInstance().compare(node0, node1);
@@ -73,8 +72,8 @@ public final class DHTTokenComparatorUnitTest {
     @Test
     public void testCompare03() {
         // given
-        DHTToken node0 = new DHTTokenBasic(new byte[]{5}, this.addr, this.port);
-        DHTToken node1 = new DHTTokenBasic(new byte[]{2}, this.addr, this.port);
+        DHTToken node0 = new DHTToken(new byte[]{5}, this.addr, this.port);
+        DHTToken node1 = new DHTToken(new byte[]{2}, this.addr, this.port);
 
         // when
         int result = DHTTokenComparator.getInstance().compare(node0, node1);

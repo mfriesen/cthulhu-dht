@@ -32,13 +32,12 @@ import org.junit.Test;
 
 import ca.gobits.dht.DHTNode;
 import ca.gobits.dht.DHTNode.State;
-import ca.gobits.dht.DHTNodeBasic;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 
 /**
  * Unit Test for DHTNode.
  */
-public final class DHTNodeBasicUnitTest {
+public final class DHTNodeUnitTest {
 
     /**
      * testConstructor01().
@@ -75,7 +74,7 @@ public final class DHTNodeBasicUnitTest {
         int nodePort = 0;
 
         // when
-        DHTNodeBasic result = new DHTNodeBasic();
+        DHTNode result = new DHTNode();
         result.setInfoHash(nodeId);
         result.setAddress(address);
         result.setPort(nodePort);
@@ -99,7 +98,7 @@ public final class DHTNodeBasicUnitTest {
         int nodePort = 0;
 
         // when
-        DHTNodeBasic result = new DHTNodeBasic();
+        DHTNode result = new DHTNode();
         result.setInfoHash(nodeId);
         result.setAddress(address);
         result.setPort(nodePort);
