@@ -40,6 +40,10 @@ public class DHTQueueScheduler {
     @Autowired
     private DHTNodeStatusQueue nodeStatusQueue;
 
+    /** Reference to DHTBucketStatusQueue. */
+    @Autowired
+    private DHTBucketStatusQueue bucketStatusQueue;
+
     /** Reference to DHTTokenQueue. */
     @Autowired
     private DHTTokenQueue tokenQueue;
@@ -55,6 +59,8 @@ public class DHTQueueScheduler {
         this.pingQueue.processQueue();
 
         this.findNodeQueue.processQueue();
+
+        this.bucketStatusQueue.processQueue();
 
         this.nodeStatusQueue.processQueue();
 
