@@ -28,8 +28,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 /**
  * Abstract class for the implementation of sending
  * delayed DHT Requests.
+ * @param <T> type of DelayObject<T>
  */
-public abstract class DHTQueueAbstract {
+public abstract class DHTQueueAbstract<T> {
 
     /** DHTPingQueue Logger. */
     private static final Logger LOGGER = Logger
@@ -49,8 +50,8 @@ public abstract class DHTQueueAbstract {
     private long delayInMillis = 0;
 
     /** Queue of requests. */
-    private final BlockingQueue<DelayObject<byte[]>> queue =
-            new DelayQueue<DelayObject<byte[]>>();
+    private final BlockingQueue<DelayObject<T>> queue =
+            new DelayQueue<DelayObject<T>>();
 
     /**
      * Sends Request to Socket.
@@ -90,7 +91,7 @@ public abstract class DHTQueueAbstract {
     /**
      * @return BlockingQueue<DelayObject<byte[]>>
      */
-    public BlockingQueue<DelayObject<byte[]>> getQueue() {
+    public BlockingQueue<DelayObject<T>> getQueue() {
         return this.queue;
     }
 

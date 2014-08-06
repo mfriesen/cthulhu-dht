@@ -24,9 +24,17 @@ import java.net.InetAddress;
 public interface DHTPingQueue extends DHTQueue {
 
     /**
+     * Pings a node to determine status with a delay.
+     * @param addr  InetAddress
+     * @param port  port
+     */
+    void pingWithDelay(InetAddress addr, int port);
+
+    /**
      * Pings a node to determine status.
      * @param addr  InetAddress
      * @param port  port
      */
     void ping(InetAddress addr, int port);
+
 }

@@ -40,10 +40,22 @@ public final class DateHelper {
      */
     public static boolean isPastDateInMinutes(final Date now, final Date date,
             final int minutes) {
+
+        Date c = addMinutesToDate(date, minutes);
+        return now.after(c);
+    }
+
+    /**
+     * Added X minutes to a date.
+     * @param date Date
+     * @param minutes int
+     * @return Date
+     */
+    public static Date addMinutesToDate(final Date date,
+            final int minutes) {
         Calendar c = Calendar.getInstance();
         c.setTime(date);
         c.add(Calendar.MINUTE, minutes);
-
-        return now.after(c.getTime());
+        return c.getTime();
     }
 }

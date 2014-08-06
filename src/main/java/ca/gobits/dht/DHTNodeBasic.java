@@ -20,7 +20,6 @@ import static ca.gobits.dht.util.DHTConversion.toInetAddress;
 import static ca.gobits.dht.util.DHTConversion.toInetAddressAsString;
 
 import java.net.InetAddress;
-import java.net.UnknownHostException;
 import java.util.Date;
 
 import org.apache.commons.lang3.builder.EqualsBuilder;
@@ -67,8 +66,14 @@ public final class DHTNodeBasic implements DHTNode {
     public String toString() {
         ToStringBuilder builder = new ToStringBuilder(this);
         builder.append("infohash", this.infoHash);
-        builder.append("address",
+
+        if (this.highAddress != null) {
+            builder.append("address",
                 toInetAddressAsString(this.highAddress, this.lowAddress));
+        } else {
+            builder.append("address", "null");
+        }
+
         builder.append("port", this.port);
         builder.append("state", this.state);
         builder.append("lastUpdated", this.lastUpdated);
@@ -114,6 +119,7 @@ public final class DHTNodeBasic implements DHTNode {
      * Sets the Last Updated Date.
      * @param date sets Last Updated Date
      */
+    @Override
     public void setLastUpdated(final Date date) {
         this.lastUpdated = date;
     }
@@ -135,8 +141,12 @@ public final class DHTNodeBasic implements DHTNode {
     }
 
     @Override
-    public InetAddress getAddress() throws UnknownHostException {
-        return toInetAddress(this.highAddress, this.lowAddress);
+    public InetAddress getAddress() {
+        try {
+            return toInetAddress(this.highAddress, this.lowAddress);
+        } catch (Exception e) {
+            return null;
+        }
     }
 
     /**
@@ -146,6 +156,7 @@ public final class DHTNodeBasic implements DHTNode {
     public void setAddress(final InetAddress addr) {
         UnsignedLong[] ul = DHTConversion.toUnsignedLong(addr.getAddress());
         this.highAddress = ul[0];
+        this.lowAddress = null;
 
         if (ul.length > 1) {
             this.lowAddress = ul[1];
@@ -183,5 +194,10 @@ public final class DHTNodeBasic implements DHTNode {
     @Override
     public void setState(final State s) {
         this.state = s;
+    }
+
+    @Override
+    public boolean isIpv6() {
+        return this.lowAddress != null;
     }
 }

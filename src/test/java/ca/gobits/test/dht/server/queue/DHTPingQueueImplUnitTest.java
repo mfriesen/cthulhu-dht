@@ -86,7 +86,7 @@ public final class DHTPingQueueImplUnitTest extends EasyMockSupport {
         InetAddress addr = InetAddress.getByName("127.0.0.1");
 
         // when
-        this.pingQueue.ping(addr, port);
+        this.pingQueue.pingWithDelay(addr, port);
 
         // then
         assertEquals(1, this.pingQueue.size());

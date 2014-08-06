@@ -104,13 +104,13 @@ public final class DHTNodeBucketRoutingTable implements DHTNodeRoutingTable {
     }
 
     @Override
-    public void addNode(final byte[] infoHash, final InetAddress addr,
+    public DHTNode addNode(final byte[] infoHash, final InetAddress addr,
             final int port, final State state) {
 
         DHTNode node = DHTNodeFactory.create(infoHash, addr, port,
                 state);
 
-        addNode(node, addr, port, state);
+        return addNode(node, addr, port, state);
     }
 
     /**
@@ -119,9 +119,12 @@ public final class DHTNodeBucketRoutingTable implements DHTNodeRoutingTable {
      * @param addr  InetAddress
      * @param port  port
      * @param state  State
+     * @return DHTNode
      */
-    private void addNode(final DHTNode node, final InetAddress addr,
+    private DHTNode addNode(final DHTNode node, final InetAddress addr,
             final int port, final State state) {
+
+        DHTNode n = node;
 
         if (this.nodes.size() < MAX_NUMBER_OF_NODES) {
 
@@ -133,9 +136,14 @@ public final class DHTNodeBucketRoutingTable implements DHTNodeRoutingTable {
             addNode(bucket, node, ipv6);
 
         } else {
+
             LOGGER.warn("MAXIMUM number of noded reached "
                     + MAX_NUMBER_OF_NODES);
+
+            n = null;
         }
+
+        return n;
     }
 
     /**
@@ -463,5 +471,17 @@ public final class DHTNodeBucketRoutingTable implements DHTNodeRoutingTable {
      */
     public void setServerMode(final boolean useServerMode) {
         this.serverMode = useServerMode;
+    }
+
+    @Override
+    public boolean removeNode(final DHTNode node, final boolean ipv6) {
+
+        DHTBucket bucket = findBucket(node.getInfoHash(), ipv6);
+        bucket.decrementCount();
+
+        SortedCollection<DHTNode> nodeList = getNodes(ipv6);
+        boolean result = nodeList.remove(node);
+
+        return result;
     }
 }

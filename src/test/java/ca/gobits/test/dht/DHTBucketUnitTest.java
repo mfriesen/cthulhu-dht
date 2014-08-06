@@ -236,6 +236,22 @@ public class DHTBucketUnitTest {
     }
 
     /**
+     * test DecrementCount.
+     */
+    @Test
+    public void testDecrementCount01() {
+        // given
+        DHTBucket bucket = getBucket();
+        bucket.setNodeCount(10);
+
+        // when
+        bucket.decrementCount();
+
+        // then
+        assertEquals(9, bucket.getNodeCount());
+    }
+
+    /**
      * setMin01().
      */
     @Test

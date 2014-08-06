@@ -33,7 +33,8 @@ import ca.gobits.dht.server.DHTServerConfig;
  * DHT Ping Request queue.
  *
  */
-public class DHTPingQueueImpl extends DHTQueueAbstract implements DHTPingQueue {
+public class DHTPingQueueImpl extends DHTQueueAbstract<byte[]>
+        implements DHTPingQueue {
 
     /** DHTPingQueue Logger. */
     private static final Logger LOGGER = Logger
@@ -44,13 +45,15 @@ public class DHTPingQueueImpl extends DHTQueueAbstract implements DHTPingQueue {
     private DHTServerConfig config;
 
     @Override
-    public void ping(final InetAddress addr, final int port) {
+    public void pingWithDelay(final InetAddress addr, final int port) {
 
-        byte[] payload = compactAddress(addr.getAddress(), port);
-        DelayObject<byte[]> obj = new DelayObject<byte[]>(payload,
-                getDelayInMillis());
+        if (addr != null) {
+            byte[] payload = compactAddress(addr.getAddress(), port);
+            DelayObject<byte[]> obj = new DelayObject<byte[]>(payload,
+                    getDelayInMillis());
 
-        getQueue().offer(obj);
+            getQueue().offer(obj);
+        }
     }
 
     @Override
@@ -68,16 +71,12 @@ public class DHTPingQueueImpl extends DHTQueueAbstract implements DHTPingQueue {
 
             InetAddress addr = compactAddress(obj.getPayload());
             int port = compactAddressPort(obj.getPayload());
-            sendPing(addr, port);
+            ping(addr, port);
         }
     }
 
-    /**
-     * Sends Ping Request.
-     * @param addr  InetAddress
-     * @param port  int
-     */
-    private void sendPing(final InetAddress addr, final int port) {
+    @Override
+    public void ping(final InetAddress addr, final int port) {
 
         byte[] msg = DHTQueryProtocol.pingQuery(getTransactionId(),
                 this.config.getNodeId());

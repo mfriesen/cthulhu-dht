@@ -18,7 +18,6 @@ package ca.gobits.dht;
 
 import java.io.Serializable;
 import java.net.InetAddress;
-import java.net.UnknownHostException;
 import java.util.Date;
 
 /**
@@ -44,15 +43,20 @@ public interface DHTNode extends Serializable {
     Date getLastUpdated();
 
     /**
+     * Sets Last Updated Date.
+     * @param date Date
+     */
+    void setLastUpdated(Date date);
+
+    /**
      * @return byte[]
      */
     byte[] getInfoHash();
 
     /**
      * @return InetAddress
-     * @throws UnknownHostException  UnknownHostException
      */
-    InetAddress getAddress() throws UnknownHostException;
+    InetAddress getAddress();
 
     /**
      * @return int
@@ -69,4 +73,10 @@ public interface DHTNode extends Serializable {
      * @param state  state
      */
     void setState(State state);
+
+    /**
+     * Is the node an IPv6 node?
+     * @return boolean
+     */
+    boolean isIpv6();
 }

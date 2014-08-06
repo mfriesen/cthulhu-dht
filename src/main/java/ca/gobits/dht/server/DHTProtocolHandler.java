@@ -256,16 +256,8 @@ public class DHTProtocolHandler {
 
             int port = node.getPort();
 
-            try {
-
-                InetAddress address = node.getAddress();
-                this.pingQueue.ping(address, port);
-
-            } catch (UnknownHostException e) {
-
-                LOGGER.info("Cannot add " + node.toString()
-                        + " to discovery, unknown host");
-            }
+            InetAddress address = node.getAddress();
+            this.pingQueue.pingWithDelay(address, port);
         }
     }
 

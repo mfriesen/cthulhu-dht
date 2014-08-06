@@ -17,6 +17,7 @@
 package ca.gobits.test.dht.server;
 
 import static ca.gobits.test.dht.DHTTestHelper.assertNodesEquals;
+import static java.net.InetAddress.getByName;
 import static org.easymock.EasyMock.aryEq;
 import static org.easymock.EasyMock.eq;
 import static org.easymock.EasyMock.expect;
@@ -688,22 +689,22 @@ public final class DHTProtocolHandlerUnitTest extends EasyMockSupport {
         this.nodeStatusQueue.receivedFindNodeResponse(aryEq(id),
                 isA(InetAddress.class), eq(64568), eq(false));
 
-        this.pingQueue.ping(InetAddress.getByName("37.76.160.28"), 37518);
-        this.pingQueue.ping(InetAddress.getByName("182.59.176.199"), 11503);
-        this.pingQueue.ping(InetAddress.getByName("178.124.205.49"), 16911);
-        this.pingQueue.ping(InetAddress.getByName("5.13.218.214"), 56116);
-        this.pingQueue.ping(InetAddress.getByName("79.163.109.76"), 29037);
-        this.pingQueue.ping(InetAddress.getByName("2.190.222.79"), 58106);
-        this.pingQueue.ping(InetAddress.getByName("92.237.93.69"), 17271);
-        this.pingQueue.ping(InetAddress.getByName("5.129.229.16"), 21853);
-        this.pingQueue.ping(InetAddress.getByName("67.166.50.31"), 53162);
-        this.pingQueue.ping(InetAddress.getByName("178.222.162.23"), 18274);
-        this.pingQueue.ping(InetAddress.getByName("31.216.162.240"), 20383);
-        this.pingQueue.ping(InetAddress.getByName("31.181.56.194"), 59935);
-        this.pingQueue.ping(InetAddress.getByName("80.233.181.214"), 12230);
-        this.pingQueue.ping(InetAddress.getByName("79.22.67.76"), 38518);
-        this.pingQueue.ping(InetAddress.getByName("92.99.87.123"), 26120);
-        this.pingQueue.ping(InetAddress.getByName("176.12.59.50"), 61553);
+        this.pingQueue.pingWithDelay(getByName("37.76.160.28"), 37518);
+        this.pingQueue.pingWithDelay(getByName("182.59.176.199"), 11503);
+        this.pingQueue.pingWithDelay(getByName("178.124.205.49"), 16911);
+        this.pingQueue.pingWithDelay(getByName("5.13.218.214"), 56116);
+        this.pingQueue.pingWithDelay(getByName("79.163.109.76"), 29037);
+        this.pingQueue.pingWithDelay(getByName("2.190.222.79"), 58106);
+        this.pingQueue.pingWithDelay(getByName("92.237.93.69"), 17271);
+        this.pingQueue.pingWithDelay(getByName("5.129.229.16"), 21853);
+        this.pingQueue.pingWithDelay(getByName("67.166.50.31"), 53162);
+        this.pingQueue.pingWithDelay(getByName("178.222.162.23"), 18274);
+        this.pingQueue.pingWithDelay(getByName("31.216.162.240"), 20383);
+        this.pingQueue.pingWithDelay(getByName("31.181.56.194"), 59935);
+        this.pingQueue.pingWithDelay(getByName("80.233.181.214"), 12230);
+        this.pingQueue.pingWithDelay(getByName("79.22.67.76"), 38518);
+        this.pingQueue.pingWithDelay(getByName("92.99.87.123"), 26120);
+        this.pingQueue.pingWithDelay(getByName("176.12.59.50"), 61553);
 
         // when
         replayAll();
@@ -745,9 +746,9 @@ public final class DHTProtocolHandlerUnitTest extends EasyMockSupport {
                 isA(InetAddress.class), eq(64568), eq(false));
 
         // when
-        this.pingQueue.ping(InetAddress
+        this.pingQueue.pingWithDelay(InetAddress
                 .getByName("ffff:ffff:ffff:ffff:ffff:ffff:ffff:ffff"), 123);
-        this.pingQueue.ping(InetAddress
+        this.pingQueue.pingWithDelay(InetAddress
                 .getByName("805b:2d9d:dc28:0000:0000:fc57:d4c8:1fff"), 124);
 
         replayAll();

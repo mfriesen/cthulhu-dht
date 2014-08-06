@@ -16,10 +16,12 @@
 
 package ca.gobits.test.dht.server.queue;
 
+import static ca.gobits.dht.factory.DHTNodeFactory.create;
 import static org.easymock.EasyMock.expect;
 import static org.junit.Assert.assertEquals;
 
 import java.net.InetAddress;
+import java.util.Date;
 
 import org.easymock.EasyMockRunner;
 import org.easymock.EasyMockSupport;
@@ -35,11 +37,15 @@ import ca.gobits.dht.DHTNodeBasic;
 import ca.gobits.dht.DHTNodeRoutingTable;
 import ca.gobits.dht.server.queue.DHTBucketStatusQueue;
 import ca.gobits.dht.server.queue.DHTNodeStatusQueueImpl;
+import ca.gobits.dht.server.queue.DHTPingQueue;
+import ca.gobits.dht.server.queue.DelayObject;
+import ca.gobits.dht.util.DateHelper;
 
 /**
  * DHTNodeStatusQueueImpl Unit Tests.
  *
  */
+@SuppressWarnings("boxing")
 @RunWith(EasyMockRunner.class)
 public class DHTNodeStatusQueueImplUnitTest extends EasyMockSupport {
 
@@ -52,9 +58,13 @@ public class DHTNodeStatusQueueImplUnitTest extends EasyMockSupport {
     @Mock
     private DHTNodeRoutingTable rt;
 
-    /** Mock DHTBucketStatusQueue bucketStatusQueue. */
+    /** Mock DHTBucketStatusQueue. */
     @Mock
     private DHTBucketStatusQueue bucketStatusQueue;
+
+    /** Mock DHTPingQueue. */
+    @Mock
+    private DHTPingQueue pingQueue;
 
     /**
      * Update Status for Existing Node.
@@ -138,7 +148,7 @@ public class DHTNodeStatusQueueImplUnitTest extends EasyMockSupport {
 
         // when
         expect(this.rt.findExactNode(nodeId, ipv6)).andReturn(node);
-        this.rt.addNode(nodeId, addr, port, State.GOOD);
+        expect(this.rt.addNode(nodeId, addr, port, State.GOOD)).andReturn(null);
         this.bucketStatusQueue.updateBucketLastChanged(nodeId, ipv6);
 
         replayAll();
@@ -146,5 +156,153 @@ public class DHTNodeStatusQueueImplUnitTest extends EasyMockSupport {
 
         // then
         verifyAll();
+    }
+
+    /**
+     * testProcessQueue01() - test node in "Good" state.
+     * @throws Exception Exception
+     */
+    @Test
+    public void testProcessQueue01() throws Exception {
+        // given
+        int port = 8080;
+        State state = State.GOOD;
+        byte[] nodeId = DHTIdentifier.getRandomNodeId();
+        InetAddress addr = InetAddress.getByName("127.0.0.1");
+        DHTNode node = create(nodeId, addr, port, state);
+        node.setLastUpdated(DateHelper.addMinutesToDate(new Date(), -20));
+
+        DelayObject<DHTNode> obj = new DelayObject<DHTNode>(node, 0);
+        this.nodeStatusQueue.getQueue().add(obj);
+
+        // when
+        this.pingQueue.ping(addr, port);
+
+        replayAll();
+
+        this.nodeStatusQueue.processQueue();
+
+        // then
+        verifyAll();
+        assertEquals(State.QUESTIONABLE, node.getState());
+        assertEquals(1, this.nodeStatusQueue.getQueue().size());
+    }
+
+    /**
+     * testProcessQueue02() - test node in "Questable" state.
+     * @throws Exception Exception
+     */
+    @Test
+    public void testProcessQueue02() throws Exception {
+        // given
+        int port = 8080;
+        State state = State.QUESTIONABLE;
+        byte[] nodeId = DHTIdentifier.getRandomNodeId();
+        InetAddress addr = InetAddress.getByName("127.0.0.1");
+        DHTNode node = create(nodeId, addr, port, state);
+        node.setLastUpdated(DateHelper.addMinutesToDate(new Date(), -20));
+
+        DelayObject<DHTNode> obj = new DelayObject<DHTNode>(node, 0);
+        this.nodeStatusQueue.getQueue().add(obj);
+
+        // when
+        this.pingQueue.ping(addr, port);
+
+        replayAll();
+
+        this.nodeStatusQueue.processQueue();
+
+        // then
+        verifyAll();
+        assertEquals(State.UNKNOWN, node.getState());
+        assertEquals(1, this.nodeStatusQueue.getQueue().size());
+    }
+
+    /**
+     * testProcessQueue03() - test node in "UNKNOWN" state.
+     * @throws Exception Exception
+     */
+    @Test
+    public void testProcessQueue03() throws Exception {
+        // given
+        int port = 8080;
+        State state = State.UNKNOWN;
+        byte[] nodeId = DHTIdentifier.getRandomNodeId();
+        InetAddress addr = InetAddress.getByName("127.0.0.1");
+        DHTNode node = create(nodeId, addr, port, state);
+        node.setLastUpdated(DateHelper.addMinutesToDate(new Date(), -20));
+
+        DelayObject<DHTNode> obj = new DelayObject<DHTNode>(node, 0);
+        this.nodeStatusQueue.getQueue().add(obj);
+
+        // when
+        expect(this.rt.removeNode(node, false)).andReturn(true);
+
+        replayAll();
+
+        this.nodeStatusQueue.processQueue();
+
+        // then
+        verifyAll();
+        assertEquals(State.UNKNOWN, node.getState());
+        assertEquals(0, this.nodeStatusQueue.getQueue().size());
+    }
+
+    /**
+     * testProcessQueue04() - test NULL addr..
+     * @throws Exception Exception
+     */
+    @Test
+    public void testProcessQueue04() throws Exception {
+        // given
+        State state = State.UNKNOWN;
+        byte[] nodeId = DHTIdentifier.getRandomNodeId();
+        DHTNode node = create(nodeId, state);
+        node.setLastUpdated(DateHelper.addMinutesToDate(new Date(), -20));
+
+        DelayObject<DHTNode> obj = new DelayObject<DHTNode>(node, 0);
+        this.nodeStatusQueue.getQueue().add(obj);
+
+        // when
+        expect(this.rt.removeNode(node, false)).andReturn(true);
+
+        replayAll();
+
+        this.nodeStatusQueue.processQueue();
+
+        // then
+        verifyAll();
+        assertEquals(State.UNKNOWN, node.getState());
+        assertEquals(0, this.nodeStatusQueue.getQueue().size());
+    }
+
+    /**
+     * testProcessQueue05() - test node in "Good" state and
+     * has been heard from within the last 15 minutes.
+     * @throws Exception Exception
+     */
+    @Test
+    public void testProcessQueue05() throws Exception {
+        // given
+        int port = 8080;
+        State state = State.GOOD;
+        byte[] nodeId = DHTIdentifier.getRandomNodeId();
+        InetAddress addr = InetAddress.getByName("127.0.0.1");
+        DHTNode node = create(nodeId, addr, port, state);
+        node.setLastUpdated(new Date());
+
+        DelayObject<DHTNode> obj = new DelayObject<DHTNode>(node, 0);
+        this.nodeStatusQueue.getQueue().add(obj);
+
+        // when
+
+        replayAll();
+
+        this.nodeStatusQueue.processQueue();
+
+        // then
+        verifyAll();
+        assertEquals(State.GOOD, node.getState());
+        assertEquals(1, this.nodeStatusQueue.getQueue().size());
     }
 }

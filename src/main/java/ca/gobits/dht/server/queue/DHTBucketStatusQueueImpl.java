@@ -16,11 +16,9 @@
 
 package ca.gobits.dht.server.queue;
 
-import java.net.UnknownHostException;
 import java.util.Date;
 import java.util.List;
 
-import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import ca.gobits.dht.DHTBucket;
@@ -34,10 +32,6 @@ import ca.gobits.dht.util.DateHelper;
  *
  */
 public class DHTBucketStatusQueueImpl implements DHTBucketStatusQueue {
-
-    /** DHTBucketStatusQueue Logger. */
-    private static final Logger LOGGER = Logger
-            .getLogger(DHTBucketStatusQueue.class);
 
     /** Number of minutes until Bucket expires. */
     private static final int BUCKET_EXPIRY_IN_MINUTES = 15;
@@ -77,12 +71,8 @@ public class DHTBucketStatusQueueImpl implements DHTBucketStatusQueue {
 
                 for (DHTNode node : nodes) {
 
-                    try {
-                        this.findNodeQueue.findNodes(node.getAddress(),
-                            node.getPort(), randomId);
-                    } catch (UnknownHostException e) {
-                        LOGGER.trace(e, e);
-                    }
+                    this.findNodeQueue.findNodes(node.getAddress(),
+                        node.getPort(), randomId);
                 }
             }
         }

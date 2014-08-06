@@ -42,8 +42,8 @@ import org.junit.runner.RunWith;
 
 import ca.gobits.dht.DHTBucket;
 import ca.gobits.dht.DHTNode;
-import ca.gobits.dht.DHTNodeBucketRoutingTable;
 import ca.gobits.dht.DHTNode.State;
+import ca.gobits.dht.DHTNodeBucketRoutingTable;
 import ca.gobits.dht.util.SortedCollection;
 
 /**
@@ -113,8 +113,8 @@ public final class DHTNodeBucketRoutingTableUnitTest extends EasyMockSupport {
 
         // when
         replayAll();
-        this.rt.addNode(new BigInteger("1").toByteArray(), this.iaddr,
-                this.port, State.GOOD);
+        DHTNode result = this.rt.addNode(new BigInteger("1").toByteArray(),
+                this.iaddr, this.port, State.GOOD);
 
         // then
         verifyAll();
@@ -124,6 +124,7 @@ public final class DHTNodeBucketRoutingTableUnitTest extends EasyMockSupport {
         assertEquals(node, root.get(0));
 
         Logger.getLogger(DHTNodeBucketRoutingTable.class).setLevel(Level.INFO);
+        assertNotNull(result);
     }
 
     /**
@@ -147,13 +148,15 @@ public final class DHTNodeBucketRoutingTableUnitTest extends EasyMockSupport {
         // when
         replayAll();
 
+        DHTNode node = null;
         for (byte[] bb : infohashes) {
-            this.rt.addNode(bb, this.iaddr,
+            node = this.rt.addNode(bb, this.iaddr,
                     this.port, State.GOOD);
         }
 
         // then
         verifyAll();
+        assertNull(node);
         assertEquals(this.rt.getMaxNodeCount(),
                 this.rt.getTotalNodeCount(ipv6));
     }
@@ -170,14 +173,19 @@ public final class DHTNodeBucketRoutingTableUnitTest extends EasyMockSupport {
             this.iaddr, this.port, State.GOOD);
 
         // when
-        this.rt.addNode(id, this.iaddr, this.port, State.GOOD);
-        this.rt.addNode(id, this.iaddr, this.port, State.GOOD);
+        DHTNode result0 = this.rt
+                .addNode(id, this.iaddr, this.port, State.GOOD);
+        DHTNode result1 = this.rt
+                .addNode(id, this.iaddr, this.port, State.GOOD);
 
         // then
         assertEquals(1, this.rt.getTotalNodeCount(ipv6));
         SortedCollection<DHTNode> root = this.rt.getNodes();
         assertEquals(1, root.size());
         assertEquals(node, root.get(0));
+
+        assertNotNull(result0);
+        assertNotNull(result1);
     }
 
     /**
@@ -202,10 +210,14 @@ public final class DHTNodeBucketRoutingTableUnitTest extends EasyMockSupport {
         DHTNode node3 = create(bytes3, this.iaddr, this.port, State.GOOD);
 
         // when
-        this.rt.addNode(node0.getInfoHash(), this.iaddr, this.port, State.GOOD);
-        this.rt.addNode(node3.getInfoHash(), this.iaddr, this.port, State.GOOD);
-        this.rt.addNode(node2.getInfoHash(), this.iaddr, this.port, State.GOOD);
-        this.rt.addNode(node1.getInfoHash(), this.iaddr, this.port, State.GOOD);
+        DHTNode result0 = this.rt.addNode(node0.getInfoHash(), this.iaddr,
+                this.port, State.GOOD);
+        DHTNode result1 = this.rt.addNode(node3.getInfoHash(), this.iaddr,
+                this.port, State.GOOD);
+        DHTNode result2 = this.rt.addNode(node2.getInfoHash(), this.iaddr,
+                this.port, State.GOOD);
+        DHTNode result3 = this.rt.addNode(node1.getInfoHash(), this.iaddr,
+                this.port, State.GOOD);
 
         // then
         assertEquals(4, this.rt.getTotalNodeCount(ipv6));
@@ -215,6 +227,11 @@ public final class DHTNodeBucketRoutingTableUnitTest extends EasyMockSupport {
         assertEquals(node1, nodes.get(1));
         assertEquals(node2, nodes.get(2));
         assertEquals(node3, nodes.get(3));
+
+        assertNotNull(result0);
+        assertNotNull(result1);
+        assertNotNull(result2);
+        assertNotNull(result3);
     }
 
     /**
@@ -228,13 +245,15 @@ public final class DHTNodeBucketRoutingTableUnitTest extends EasyMockSupport {
         DHTNode node = create(new BigInteger("1").toByteArray(), State.GOOD);
 
         // when
-        this.rt.addNode(node.getInfoHash(), this.iaddr, this.port, State.GOOD);
+        DHTNode result = this.rt.addNode(node.getInfoHash(), this.iaddr,
+                this.port, State.GOOD);
 
         // then
         assertEquals(1, this.rt.getTotalNodeCount(ipv6));
         SortedCollection<DHTNode> root = this.rt.getNodes();
         assertEquals(1, root.size());
         assertEquals(node, root.get(0));
+        assertNotNull(result);
 
         Logger.getLogger(DHTNodeBucketRoutingTable.class).setLevel(Level.INFO);
     }
@@ -249,7 +268,8 @@ public final class DHTNodeBucketRoutingTableUnitTest extends EasyMockSupport {
         DHTNode node = create(new BigInteger("1").toByteArray(), State.GOOD);
 
         // when
-        this.rt.addNode(node.getInfoHash(), this.iaddr6, this.port, State.GOOD);
+        DHTNode result = this.rt.addNode(node.getInfoHash(), this.iaddr6,
+                this.port, State.GOOD);
 
         // then
         assertEquals(1, this.rt.getTotalNodeCount(true));
@@ -259,6 +279,8 @@ public final class DHTNodeBucketRoutingTableUnitTest extends EasyMockSupport {
 
         assertEquals(1, this.rt.getTotalNodeCount(true));
         assertEquals(0, this.rt.getTotalNodeCount(false));
+
+        assertNotNull(result);
         Logger.getLogger(DHTNodeBucketRoutingTable.class).setLevel(Level.INFO);
     }
 
@@ -1029,21 +1051,58 @@ public final class DHTNodeBucketRoutingTableUnitTest extends EasyMockSupport {
     }
 
     /**
-     * Add Nodes to routing table.
+     * testRemoveNode01() - remove node from routing table.
      */
-    private void addNodes() {
+    @Test
+    public void testRemoveNode01() {
+        // given
+        boolean ipv6 = false;
+
+        List<DHTNode> nodes = addNodes();
+        assertEquals(20, this.rt.getTotalNodeCount(ipv6));
+
+        SortedCollection<DHTBucket> buckets = this.rt.getBuckets(ipv6);
+        assertEquals(157, buckets.size());
+        assertEquals(8, buckets.get(0).getNodeCount());
+        assertEquals(8, buckets.get(1).getNodeCount());
+        assertEquals(4, buckets.get(2).getNodeCount());
+
+        // when
+        this.rt.removeNode(nodes.get(19), ipv6);
+
+        // then
+        assertEquals(19, this.rt.getTotalNodeCount(ipv6));
+        assertEquals(8, buckets.get(0).getNodeCount());
+        assertEquals(8, buckets.get(1).getNodeCount());
+        assertEquals(3, buckets.get(2).getNodeCount());
+    }
+
+    /**
+     * Add Nodes to routing table.
+     * @return List<DHTNode>
+     */
+    private List<DHTNode> addNodes() {
+
+        List<DHTNode> nodes = new ArrayList<DHTNode>();
+
         for (int i = 0; i < 40; i = i + 2) {
-            addNode(new BigInteger("" + i));
+            nodes.add(addNode(new BigInteger("" + i)));
         }
+
+        return nodes;
     }
 
     /**
      * Add Node to routing table.
      * @param i  BigInteger
+     * @return DHTNode
      */
-    private void addNode(final BigInteger i) {
+    private DHTNode addNode(final BigInteger i) {
+
         byte[] id = fitToSize(new BigInteger("" + i).toByteArray(),
                 NODE_ID_LENGTH);
-        this.rt.addNode(id, this.iaddr, this.port, State.GOOD);
+
+        DHTNode node = this.rt.addNode(id, this.iaddr, this.port, State.GOOD);
+        return node;
     }
 }

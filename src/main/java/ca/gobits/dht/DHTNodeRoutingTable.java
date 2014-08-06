@@ -37,8 +37,9 @@ public interface DHTNodeRoutingTable {
      * @param addr   address of node
      * @param port  port
      * @param state  State of Node
+     * @return DHTNode
      */
-    void addNode(byte[] infoHash, InetAddress addr, int port, State state);
+    DHTNode addNode(byte[] infoHash, InetAddress addr, int port, State state);
 
     /**
      * Find the node with matching ID or NULL.
@@ -64,6 +65,14 @@ public interface DHTNodeRoutingTable {
      * @return List<DHTNode>
      */
     List<DHTNode> findClosestNodes(byte[] nodeId, int max, boolean ipv6);
+
+    /**
+     * Remove node from Routing Table.
+     * @param node DHTNode
+     * @param ipv6  whether search ipv6 node list
+     * @return boolean
+     */
+    boolean removeNode(DHTNode node, boolean ipv6);
 
     /**
      * Finds Bucket Node belongs to.

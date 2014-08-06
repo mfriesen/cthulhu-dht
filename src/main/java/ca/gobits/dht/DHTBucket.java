@@ -89,6 +89,13 @@ public class DHTBucket {
     }
 
     /**
+     * Decrement Node count.
+     */
+    public void decrementCount() {
+        this.nodeCount--;
+    }
+
+    /**
      * @return byte[]
      */
     public byte[] getMin() {

@@ -36,8 +36,8 @@ import ca.gobits.dht.server.DHTServerConfig;
  * Implementation of DHT 'find_node' queue.
  *
  */
-public class DHTFindNodeQueueImpl extends DHTQueueAbstract implements
-        DHTFindNodeQueue {
+public class DHTFindNodeQueueImpl extends DHTQueueAbstract<byte[]>
+        implements DHTFindNodeQueue {
 
     /** DHTPingQueue Logger. */
     private static final Logger LOGGER = Logger
@@ -51,15 +51,18 @@ public class DHTFindNodeQueueImpl extends DHTQueueAbstract implements
     public void findNodesWithDelay(final InetAddress addr, final int port,
             final byte[] target) {
 
-        byte[] addrPayload = compactAddress(addr.getAddress(), port);
-        byte[] payload = new byte[addrPayload.length + target.length];
-        System.arraycopy(addrPayload, 0, payload, 0, addrPayload.length);
-        System.arraycopy(target, 0, payload, addrPayload.length, target.length);
+        if (addr != null) {
+            byte[] addrPayload = compactAddress(addr.getAddress(), port);
+            byte[] payload = new byte[addrPayload.length + target.length];
+            System.arraycopy(addrPayload, 0, payload, 0, addrPayload.length);
+            System.arraycopy(target, 0, payload, addrPayload.length,
+                    target.length);
 
-        DelayObject<byte[]> obj = new DelayObject<byte[]>(payload,
-                getDelayInMillis());
+            DelayObject<byte[]> obj = new DelayObject<byte[]>(payload,
+                    getDelayInMillis());
 
-        getQueue().offer(obj);
+            getQueue().offer(obj);
+        }
     }
 
     @Override
@@ -92,15 +95,17 @@ public class DHTFindNodeQueueImpl extends DHTQueueAbstract implements
     public void findNodes(final InetAddress addr, final int port,
             final byte[] target) {
 
-        List<byte[]> want = getWant();
-        byte[] nodeId = this.config.getNodeId();
-        byte[] msg = DHTQueryProtocol.findNodeQuery(getTransactionId(), nodeId,
-                target, want);
+        if (addr != null) {
+            List<byte[]> want = getWant();
+            byte[] nodeId = this.config.getNodeId();
+            byte[] msg = DHTQueryProtocol.findNodeQuery(getTransactionId(),
+                    nodeId, target, want);
 
-        LOGGER.info("sending 'find_node' to " + addr.getHostAddress() + ":"
-                + port);
+            LOGGER.info("sending 'find_node' to " + addr.getHostAddress() + ":"
+                    + port);
 
-        sendToSocket(addr, port, msg);
+            sendToSocket(addr, port, msg);
+        }
     }
 
     /**
