@@ -40,6 +40,7 @@ import ca.gobits.dht.server.queue.DHTPingQueue;
 import ca.gobits.dht.server.queue.DHTPingQueueImpl;
 import ca.gobits.dht.server.queue.DHTTokenQueue;
 import ca.gobits.dht.server.queue.DHTTokenQueueImpl;
+import ca.gobits.dht.server.scheduling.DHTRoutingTableThreadExecutor;
 
 /**
  * DHT Configuration class.
@@ -153,5 +154,14 @@ public class DHTConfiguration {
     @Bean
     public DHTBucketStatusQueue bucketStatusQueue() {
         return new DHTBucketStatusQueueImpl();
+    }
+
+    /**
+     * @return DHTRoutingTableThreadExecutor
+     */
+    @Bean
+    public DHTRoutingTableThreadExecutor routingTableThreadExecutor() {
+        DHTRoutingTableThreadExecutor rte = new DHTRoutingTableThreadExecutor();
+        return rte;
     }
 }

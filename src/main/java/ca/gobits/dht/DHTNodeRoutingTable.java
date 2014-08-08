@@ -69,10 +69,9 @@ public interface DHTNodeRoutingTable {
     /**
      * Remove node from Routing Table.
      * @param node DHTNode
-     * @param ipv6  whether search ipv6 node list
      * @return boolean
      */
-    boolean removeNode(DHTNode node, boolean ipv6);
+    boolean removeNode(DHTNode node);
 
     /**
      * Finds Bucket Node belongs to.

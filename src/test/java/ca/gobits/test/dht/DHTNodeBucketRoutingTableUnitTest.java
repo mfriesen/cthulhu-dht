@@ -1068,13 +1068,42 @@ public final class DHTNodeBucketRoutingTableUnitTest extends EasyMockSupport {
         assertEquals(4, buckets.get(2).getNodeCount());
 
         // when
-        this.rt.removeNode(nodes.get(19), ipv6);
+        this.rt.removeNode(nodes.get(19));
 
         // then
         assertEquals(19, this.rt.getTotalNodeCount(ipv6));
         assertEquals(8, buckets.get(0).getNodeCount());
         assertEquals(8, buckets.get(1).getNodeCount());
         assertEquals(3, buckets.get(2).getNodeCount());
+    }
+
+    /**
+     * testRemoveNode02() - remove NON-existing node from routing table.
+     */
+    @Test
+    public void testRemoveNode02() {
+        // given
+        boolean ipv6 = false;
+
+        DHTNode node = new DHTNode();
+
+        addNodes();
+        assertEquals(20, this.rt.getTotalNodeCount(ipv6));
+
+        SortedCollection<DHTBucket> buckets = this.rt.getBuckets(ipv6);
+        assertEquals(157, buckets.size());
+        assertEquals(8, buckets.get(0).getNodeCount());
+        assertEquals(8, buckets.get(1).getNodeCount());
+        assertEquals(4, buckets.get(2).getNodeCount());
+
+        // when
+        this.rt.removeNode(node);
+
+        // then
+        assertEquals(20, this.rt.getTotalNodeCount(ipv6));
+        assertEquals(8, buckets.get(0).getNodeCount());
+        assertEquals(8, buckets.get(1).getNodeCount());
+        assertEquals(4, buckets.get(2).getNodeCount());
     }
 
     /**

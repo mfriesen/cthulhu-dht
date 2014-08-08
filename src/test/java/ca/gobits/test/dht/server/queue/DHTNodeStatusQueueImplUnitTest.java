@@ -17,7 +17,6 @@
 package ca.gobits.test.dht.server.queue;
 
 import static ca.gobits.dht.factory.DHTNodeFactory.create;
-import static org.easymock.EasyMock.expect;
 import static org.junit.Assert.assertEquals;
 
 import java.net.InetAddress;
@@ -38,13 +37,13 @@ import ca.gobits.dht.server.queue.DHTBucketStatusQueue;
 import ca.gobits.dht.server.queue.DHTNodeStatusQueueImpl;
 import ca.gobits.dht.server.queue.DHTPingQueue;
 import ca.gobits.dht.server.queue.DelayObject;
+import ca.gobits.dht.server.scheduling.DHTRoutingTableThreadExecutor;
 import ca.gobits.dht.util.DateHelper;
 
 /**
  * DHTNodeStatusQueueImpl Unit Tests.
  *
  */
-@SuppressWarnings("boxing")
 @RunWith(EasyMockRunner.class)
 public class DHTNodeStatusQueueImplUnitTest extends EasyMockSupport {
 
@@ -65,97 +64,9 @@ public class DHTNodeStatusQueueImplUnitTest extends EasyMockSupport {
     @Mock
     private DHTPingQueue pingQueue;
 
-    /**
-     * Update Status for Existing Node.
-     */
-    @Test
-    public void testUpdateExistingNodeToGood01() {
-        // given
-        byte[] nodeId = DHTIdentifier.getRandomNodeId();
-        boolean ipv6 = false;
-        DHTNode node = new DHTNode();
-
-        // when
-        expect(this.rt.findExactNode(nodeId, ipv6)).andReturn(node);
-        this.bucketStatusQueue.updateBucketLastChanged(nodeId, ipv6);
-
-        replayAll();
-        this.nodeStatusQueue.updateExistingNodeToGood(nodeId, ipv6);
-
-        // then
-        verifyAll();
-        assertEquals(State.GOOD, node.getState());
-    }
-
-    /**
-     * Update Status for NON-Existing Node.
-     */
-    @Test
-    public void testUpdateExistingNodeToGood02() {
-        // given
-        byte[] nodeId = DHTIdentifier.getRandomNodeId();
-        boolean ipv6 = false;
-        DHTNode node = null;
-
-        // when
-        expect(this.rt.findExactNode(nodeId, ipv6)).andReturn(node);
-
-        replayAll();
-        this.nodeStatusQueue.updateExistingNodeToGood(nodeId, ipv6);
-
-        // then
-        verifyAll();
-    }
-
-    /**
-     * Update Status for Existing Node.
-     * @throws Exception Exception
-     */
-    @Test
-    public void testReceivedFindNodeResponse01() throws Exception {
-        // given
-        int port = 8080;
-        boolean ipv6 = false;
-        DHTNode node = new DHTNode();
-        byte[] nodeId = DHTIdentifier.getRandomNodeId();
-        InetAddress addr = InetAddress.getByName("127.0.0.1");
-
-        // when
-        expect(this.rt.findExactNode(nodeId, ipv6)).andReturn(node);
-        this.bucketStatusQueue.updateBucketLastChanged(nodeId, ipv6);
-
-        replayAll();
-        this.nodeStatusQueue.receivedFindNodeResponse(nodeId, addr, port, ipv6);
-
-        // then
-        verifyAll();
-        assertEquals(State.GOOD, node.getState());
-    }
-
-    /**
-     * Update Status for NON-Existing Node.
-     * @throws Exception Exception
-     */
-    @Test
-    public void testReceivedFindNodeResponse02() throws Exception {
-        // given
-        int port = 8080;
-        DHTNode node = null;
-        boolean ipv6 = false;
-        byte[] nodeId = DHTIdentifier.getRandomNodeId();
-        InetAddress addr = InetAddress.getByName("127.0.0.1");
-
-        // when
-        expect(this.rt.findExactNode(nodeId, ipv6)).andReturn(node);
-        expect(this.rt.addNode(nodeId, addr, port, State.GOOD)).andReturn(null);
-        this.bucketStatusQueue.updateBucketLastChanged(nodeId, ipv6);
-
-        replayAll();
-        this.nodeStatusQueue.receivedFindNodeResponse(nodeId, addr, port, ipv6);
-
-        // then
-        verifyAll();
-    }
+    /** Mock DHTRoutingTableThreadExecutor. */
+    @Mock
+    private DHTRoutingTableThreadExecutor te;
 
     /**
      * testProcessQueue01() - test node in "Good" state.
@@ -235,7 +146,7 @@ public class DHTNodeStatusQueueImplUnitTest extends EasyMockSupport {
         this.nodeStatusQueue.getQueue().add(obj);
 
         // when
-        expect(this.rt.removeNode(node, false)).andReturn(true);
+        this.te.removeNode(node);
 
         replayAll();
 
@@ -263,7 +174,7 @@ public class DHTNodeStatusQueueImplUnitTest extends EasyMockSupport {
         this.nodeStatusQueue.getQueue().add(obj);
 
         // when
-        expect(this.rt.removeNode(node, false)).andReturn(true);
+        this.te.removeNode(node);
 
         replayAll();
 
@@ -303,5 +214,20 @@ public class DHTNodeStatusQueueImplUnitTest extends EasyMockSupport {
         verifyAll();
         assertEquals(State.GOOD, node.getState());
         assertEquals(1, this.nodeStatusQueue.getQueue().size());
+    }
+
+    /**
+     * testAddToQueue01().
+     */
+    @Test
+    public void testAddToQueue01() {
+        // given
+        DHTNode node = new DHTNode();
+
+        // when
+        this.nodeStatusQueue.addToQueue(node);
+
+        // then
+        assertEquals(1, this.nodeStatusQueue.size());
     }
 }

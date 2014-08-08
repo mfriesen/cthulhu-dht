@@ -42,9 +42,9 @@ import ca.gobits.dht.DHTPeer;
 import ca.gobits.dht.bencoding.BDecoder;
 import ca.gobits.dht.bencoding.BEncoder;
 import ca.gobits.dht.server.DHTParameters.DHTQueryType;
-import ca.gobits.dht.server.queue.DHTNodeStatusQueue;
 import ca.gobits.dht.server.queue.DHTPingQueue;
 import ca.gobits.dht.server.queue.DHTTokenQueue;
+import ca.gobits.dht.server.scheduling.DHTRoutingTableThreadExecutor;
 
 /**
  * DHTProtocolHandler implementation of the BitTorrent protocol.
@@ -80,8 +80,12 @@ public class DHTProtocolHandler {
     private DHTPingQueue pingQueue;
 
     /** DHTNodeStatusQueue instance. */
+//    @Autowired
+//    private DHTNodeStatusQueue statusQueue;
+
+    /** DHTRoutingTableExecutor instance. */
     @Autowired
-    private DHTNodeStatusQueue statusQueue;
+    private DHTRoutingTableThreadExecutor rtExecutor;
 
     /**
      * Read DatagramPacket.
@@ -217,13 +221,13 @@ public class DHTProtocolHandler {
     private void queryResponseHandler(final DatagramPacket packet,
             final DHTParameters params) {
 
+        boolean addIfMissing = false;
         byte[] id = params.getId();
         boolean ipv6 = params.isIpv6();
 
         if (params.getNodes() != null || params.getNodes6() != null) {
 
-            this.statusQueue.receivedFindNodeResponse(id,
-                    packet.getAddress(), packet.getPort(), ipv6);
+            addIfMissing = true;
 
             // find_nodes ipv4
             if (params.getNodes() != null) {
@@ -239,10 +243,10 @@ public class DHTProtocolHandler {
                 addToDiscovery(nodes);
             }
 
-        } else {
-
-            this.statusQueue.updateExistingNodeToGood(id, ipv6);
         }
+
+        this.rtExecutor.updateNodeStatus(id,
+                packet.getAddress(), packet.getPort(), ipv6, addIfMissing);
     }
 
     /**
@@ -283,8 +287,8 @@ public class DHTProtocolHandler {
         response.put("t", params.getT());
         response.put("ip", compactAddress(addr.getAddress(), port));
 
-        this.statusQueue.updateExistingNodeToGood(params.getId(),
-                params.isIpv6());
+        this.rtExecutor.updateNodeStatus(params.getId(),
+                packet.getAddress(), packet.getPort(), params.isIpv6(), false);
 
         if (DHTQueryType.PING == qt) {
 

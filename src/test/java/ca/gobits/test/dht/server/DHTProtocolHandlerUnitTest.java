@@ -61,9 +61,9 @@ import ca.gobits.dht.factory.DHTNodeFactory;
 import ca.gobits.dht.server.DHTProtocolHandler;
 import ca.gobits.dht.server.DHTQueryProtocol;
 import ca.gobits.dht.server.DHTServerConfig;
-import ca.gobits.dht.server.queue.DHTNodeStatusQueue;
 import ca.gobits.dht.server.queue.DHTPingQueue;
 import ca.gobits.dht.server.queue.DHTTokenQueue;
+import ca.gobits.dht.server.scheduling.DHTRoutingTableThreadExecutor;
 import ca.gobits.dht.util.DHTConversion;
 
 /**
@@ -97,9 +97,9 @@ public final class DHTProtocolHandlerUnitTest extends EasyMockSupport {
     @Mock
     private DHTPingQueue pingQueue;
 
-    /** Mock DHTNodeStatusQueue. */
+    /** Mock DHTRoutingTableThreadExecutor. */
     @Mock
-    private DHTNodeStatusQueue nodeStatusQueue;
+    private DHTRoutingTableThreadExecutor rtExecutor;
 
     /** InetSocketAddress. */
     private InetAddress iaddr;
@@ -145,7 +145,10 @@ public final class DHTProtocolHandlerUnitTest extends EasyMockSupport {
                 this.port);
 
         // when
-        this.nodeStatusQueue.updateExistingNodeToGood(aryEq(id), eq(isIPv6));
+        this.rtExecutor.updateNodeStatus(aryEq(id),
+                isA(InetAddress.class), eq(64568), eq(isIPv6), eq(false));
+
+//        this.nodeStatusQueue.updateExistingNodeToGood(aryEq(id), eq(isIPv6));
 
         expect(this.config.getNodeId()).andReturn(
                 "ABCDEFGHIJKLMNOPQRST".getBytes());
@@ -192,7 +195,10 @@ public final class DHTProtocolHandlerUnitTest extends EasyMockSupport {
         expect(this.routingTable.findClosestNodes(aryEq(target), eq(isIPv6)))
             .andReturn(getFindNodes());
 
-        this.nodeStatusQueue.updateExistingNodeToGood(aryEq(id), eq(isIPv6));
+//        this.nodeStatusQueue.updateExistingNodeToGood(aryEq(id), eq(isIPv6));
+        this.rtExecutor.updateNodeStatus(aryEq(id),
+                isA(InetAddress.class), eq(this.port), eq(isIPv6), eq(false));
+
 
         replayAll();
         byte[] bytes = this.handler.handle(packet);
@@ -261,7 +267,10 @@ public final class DHTProtocolHandlerUnitTest extends EasyMockSupport {
                 this.port);
 
         // when
-        this.nodeStatusQueue.updateExistingNodeToGood(aryEq(id), eq(isIPv6));
+//        this.nodeStatusQueue.updateExistingNodeToGood(aryEq(id), eq(isIPv6));
+        this.rtExecutor.updateNodeStatus(aryEq(id),
+                isA(InetAddress.class), eq(this.port), eq(isIPv6), eq(false));
+
 
         expect(this.routingTable.findClosestNodes(aryEq(target), eq(isIPv6)))
             .andReturn(getFindNodes6());
@@ -685,8 +694,8 @@ public final class DHTProtocolHandlerUnitTest extends EasyMockSupport {
         DatagramPacket packet = new DatagramPacket(bb, bb.length, this.iaddr,
                 this.port);
 
-        this.nodeStatusQueue.receivedFindNodeResponse(aryEq(id),
-                isA(InetAddress.class), eq(64568), eq(false));
+        this.rtExecutor.updateNodeStatus(aryEq(id),
+                isA(InetAddress.class), eq(64568), eq(false), eq(true));
 
         this.pingQueue.pingWithDelay(getByName("37.76.160.28"), 37518);
         this.pingQueue.pingWithDelay(getByName("182.59.176.199"), 11503);
@@ -741,8 +750,8 @@ public final class DHTProtocolHandlerUnitTest extends EasyMockSupport {
         DatagramPacket packet = new DatagramPacket(bb, bb.length, this.iaddr,
                 this.port);
 
-        this.nodeStatusQueue.receivedFindNodeResponse(aryEq(id),
-                isA(InetAddress.class), eq(64568), eq(false));
+        this.rtExecutor.updateNodeStatus(aryEq(id),
+                isA(InetAddress.class), eq(64568), eq(false), eq(true));
 
         // when
         this.pingQueue.pingWithDelay(InetAddress
@@ -944,12 +953,15 @@ public final class DHTProtocolHandlerUnitTest extends EasyMockSupport {
                 "555966236078696110491139251576793858856027895865")
                 .toByteArray();
 
-        if (isIPv6) {
-            this.nodeStatusQueue.updateExistingNodeToGood(aryEq(bytes),
-                    eq(isIPv6));
-        } else {
-            this.nodeStatusQueue.updateExistingNodeToGood(aryEq(bytes),
-                    eq(isIPv6));
-        }
+//        if (isIPv6) {
+            this.rtExecutor.updateNodeStatus(aryEq(bytes),
+                    isA(InetAddress.class), eq(64568), eq(isIPv6), eq(false));
+
+//            this.nodeStatusQueue.updateExistingNodeToGood(aryEq(bytes),
+//                    eq(isIPv6));
+//        } else {
+//            this.nodeStatusQueue.updateExistingNodeToGood(aryEq(bytes),
+//                    eq(isIPv6));
+//        }
     }
 }

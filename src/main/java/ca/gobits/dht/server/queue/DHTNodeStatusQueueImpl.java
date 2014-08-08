@@ -26,7 +26,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import ca.gobits.dht.DHTNode;
 import ca.gobits.dht.DHTNode.State;
-import ca.gobits.dht.DHTNodeRoutingTable;
+import ca.gobits.dht.server.scheduling.DHTRoutingTableThreadExecutor;
 import ca.gobits.dht.util.DateHelper;
 
 /**
@@ -46,10 +46,6 @@ public class DHTNodeStatusQueueImpl extends DHTQueueAbstract<DHTNode>
     /** Default Delay in millis. */
     private static final int DEFAULT_QUEUE_DELAY_IN_MILLIS = 15 * 60 * 1000;
 
-    /** Reference to Node Routing Table. */
-    @Autowired
-    private DHTNodeRoutingTable rt;
-
     /** Reference to DHTBucketStatusQueue. */
     @Autowired
     private DHTBucketStatusQueue bucketStatusQueue;
@@ -57,6 +53,10 @@ public class DHTNodeStatusQueueImpl extends DHTQueueAbstract<DHTNode>
     /** Reference to DHTPingQueue. */
     @Autowired
     private DHTPingQueue pingQueue;
+
+    /** Reference to DHTRoutingTableThreadExecutor. */
+    @Autowired
+    private DHTRoutingTableThreadExecutor te;
 
     /**
      * constuctor.
@@ -98,7 +98,7 @@ public class DHTNodeStatusQueueImpl extends DHTQueueAbstract<DHTNode>
 
                 } else {
 
-                    this.rt.removeNode(node, node.isIpv6());
+                    this.te.removeNode(node);
                 }
             } else {
                 addToQueue(node);
@@ -119,59 +119,11 @@ public class DHTNodeStatusQueueImpl extends DHTQueueAbstract<DHTNode>
         addToQueue(node);
     }
 
-    /**
-     * Adds node to Queue for checking status.
-     * @param node DHTNode
-     */
-    private void addToQueue(final DHTNode node) {
+    @Override
+    public void addToQueue(final DHTNode node) {
         DelayObject<DHTNode> obj = new DelayObject<DHTNode>(node,
                 getDelayInMillis());
 
         getQueue().offer(obj);
-    }
-
-    @Override
-    public void updateExistingNodeToGood(final byte[] nodeId,
-            final boolean ipv6) {
-
-        updateStatusExistingNode(nodeId, ipv6);
-    }
-
-    @Override
-    public void receivedFindNodeResponse(final byte[] nodeId,
-            final InetAddress addr, final int port, final boolean ipv6) {
-
-        if (!updateStatusExistingNode(nodeId, ipv6)) {
-
-            DHTNode node = this.rt.addNode(nodeId, addr, port, State.GOOD);
-
-            this.bucketStatusQueue.updateBucketLastChanged(nodeId, ipv6);
-
-            addToQueue(node);
-        }
-    }
-
-    /**
-     * Update Status of Existing Node.
-     * @param nodeId  node identifier
-     * @param ipv6  whether ipv6 request
-     * @return boolean whether successfully updated or not
-     */
-    private boolean updateStatusExistingNode(final byte[] nodeId,
-            final boolean ipv6) {
-
-        boolean updated = false;
-        DHTNode node = this.rt.findExactNode(nodeId, ipv6);
-
-        if (node != null) {
-
-            node.setState(State.GOOD);
-
-            this.bucketStatusQueue.updateBucketLastChanged(nodeId, ipv6);
-
-            updated = true;
-        }
-
-        return updated;
     }
 }

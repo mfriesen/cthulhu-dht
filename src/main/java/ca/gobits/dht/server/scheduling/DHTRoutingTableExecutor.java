@@ -14,19 +14,15 @@
 // limitations under the License.
 //
 
-package ca.gobits.dht.server.queue;
+package ca.gobits.dht.server.scheduling;
 
-import ca.gobits.dht.DHTNode;
 
 /**
- * DHT Node Status Queue.
+ * Interface for DHTRoutingTable tasks.
  *
  */
-public interface DHTNodeStatusQueue extends DHTQueue {
-
-    /**
-     * Adds object to process queue.
-     * @param node DHTNode
+public interface DHTRoutingTableExecutor extends Runnable {
+    /*
+     * empty
      */
-    void addToQueue(DHTNode node);
 }

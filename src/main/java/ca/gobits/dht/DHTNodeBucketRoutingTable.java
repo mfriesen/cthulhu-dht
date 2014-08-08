@@ -244,17 +244,8 @@ public final class DHTNodeBucketRoutingTable implements DHTNodeRoutingTable {
 
         if (LOGGER.isDebugEnabled()) {
 
-            String host = "unknown";
-
-            try {
-
-                InetAddress addr = node.getAddress();
-                host = addr.getHostAddress();
-
-            } catch (Exception e) {
-
-                LOGGER.info(e, e);
-            }
+            InetAddress addr = node.getAddress();
+            String host = addr != null ? addr.getHostAddress() : "unknown";
 
             LOGGER.debug("adding node " + " " + host + ":" + node.getPort());
         }
@@ -474,13 +465,16 @@ public final class DHTNodeBucketRoutingTable implements DHTNodeRoutingTable {
     }
 
     @Override
-    public boolean removeNode(final DHTNode node, final boolean ipv6) {
+    public boolean removeNode(final DHTNode node) {
 
-        DHTBucket bucket = findBucket(node.getInfoHash(), ipv6);
-        bucket.decrementCount();
-
-        SortedCollection<DHTNode> nodeList = getNodes(ipv6);
+        SortedCollection<DHTNode> nodeList = getNodes(node.isIpv6());
         boolean result = nodeList.remove(node);
+
+        if (result) {
+
+            DHTBucket bucket = findBucket(node.getInfoHash(), node.isIpv6());
+            bucket.decrementCount();
+        }
 
         return result;
     }
