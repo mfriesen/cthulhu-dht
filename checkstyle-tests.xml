@@ -32,7 +32,7 @@
         <property name="ignorePattern" value="^import.*$"/>
     </module>
     <module name="ImportControl">
-        <property name="file" value="${basedir}/import-control-tests.xml"/>
+        <property name="file" value="${config_loc}import-control-tests.xml"/>
     </module>
     <module name="MethodLength"/>
     <module name="ParameterNumber"/>
